@@ -1,7 +1,9 @@
 # Run `make help` to see everything.
 VENV     ?= backend/.venv
 PY       ?= $(VENV)/bin/python
-API_HOST ?= http://localhost:8000
+ENV      ?= dev
+# ENV selects frontend/env/$(ENV).json: dev | staging | prod
+FLUTTER  ?= $(HOME)/development/flutter/bin/flutter
 
 help:            ## Show this list
 	@grep -E '^[a-z-]+:.*##' Makefile | sed 's/:.*##/\t/'
@@ -28,10 +30,19 @@ hls:             ## Make a local HLS ladder: make hls SRC=video.mp4
 flutter-init:    ## One-time: generate Flutter android/web folders and add hls.js
 	bash tools/setup_flutter.sh
 
-web:             ## Serve the Flutter web app on :8080 (open it in Windows Chrome)
-	cd frontend && flutter run -d web-server --web-port 8080 --dart-define=API_HOST=$(API_HOST)
+web:             ## Serve the Flutter web app on :8080 (ENV=dev|staging|prod; open in Windows Chrome)
+	cd frontend && $(FLUTTER) run -d web-server --web-port 8080 --dart-define-from-file=env/$(ENV).json
 
-apk:             ## Build the Android APK (set API_HOST=https://<cloud-run-url> for the real backend)
-	cd frontend && flutter build apk --dart-define=API_HOST=$(API_HOST)
+apk:             ## Build the Android APK (ENV=prod for the deployed backend)
+	cd frontend && $(FLUTTER) build apk --release --dart-define-from-file=env/$(ENV).json
 
-.PHONY: help setup gen test lint api hls flutter-init web apk
+web-build:       ## Build the web app for hosting (ENV=prod)
+	cd frontend && $(FLUTTER) build web --release --dart-define-from-file=env/$(ENV).json
+
+flutter-test:    ## Flutter analyze + tests
+	cd frontend && $(FLUTTER) analyze && $(FLUTTER) test
+
+flutter-gen:     ## Regenerate Dart schema code (json_serializable)
+	cd frontend && $(FLUTTER) pub run build_runner build --delete-conflicting-outputs
+
+.PHONY: help setup gen test lint api hls flutter-init web apk web-build flutter-test flutter-gen

@@ -1,0 +1,8 @@
+{
+  "APP_ENV": "dev",
+  "API_HOST": "http://localhost:8000",
+  "THEME_PALETTE": "saffron",
+  "THEME_MODE": "system",
+  "DEV_TOOLS": true,
+  "LOG_LEVEL": "debug"
+}

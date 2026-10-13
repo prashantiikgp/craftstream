@@ -91,13 +91,17 @@ Upload limits (15 min, file types) are **not** a frontend YAML. The app reads th
 ## 5. Phases and tasks
 
 ### F1: Setup
-- [ ] Install the Linux Flutter SDK in WSL (the current PATH points to the Windows SDK, which breaks with `bash\r`); JDK 17 + Android SDK
-- [ ] `flutter create --platforms=android,web` inside `frontend/`; add packages: riverpod, go_router, yaml, video_player, file_picker, http
-- [ ] Folder skeleton + `core/yaml_loader.dart` + config bootstrap + error screen for bad YAML
+- [x] Install the Linux Flutter SDK in WSL (the current PATH points to the Windows SDK, which breaks with `bash\r`); JDK 17 + Android SDK
+- [x] `flutter create --platforms=android,web` inside `frontend/`; add packages: riverpod, go_router, yaml, json_serializable, video_player, file_picker, http
+- [x] Folder skeleton + `core/yaml_loader.dart` + config bootstrap + error screen for bad YAML
+- [x] Environments: `env/{dev,staging,prod}.json` validated by `core/env.dart` (https outside dev, no dev tools/debug logs in prod, no secrets: test-enforced)
+- [x] Fonts bundled + subset (Poppins/Inter, Latin + ₹, ~170 KB)
 - [ ] Done when `make web` opens the app in Chrome and `make apk` builds
 
 ### F2: Rule files (the pattern, ×5)
-- [ ] For `theme`, `layout`, `strings`, `player` and `filters`: YAML + `_schema` + `_loader` + `_engine` + tests
+- [x] `theme` (design tokens, 3 palettes, WCAG-tested) and `layout` (size classes, grid): YAML + `_schema` + `_loader` + `_engine` + tests
+- [x] Design system components (`lib/shared/widgets/`) + `/catalog` live gallery with palette and light/dark switcher
+- [ ] For `strings`, `player` and `filters`: YAML + `_schema` + `_loader` + `_engine` + tests
 - [ ] Done when the app shell (home with Buyer/Artisan switch) is fully driven by YAML
 
 ### F3: Data layer

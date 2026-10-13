@@ -1,0 +1,46 @@
+# How screens adapt to the device. Read by layout_engine; screens ask it for a size class, never measure widths.
+#
+# Size classes by available width (logical px), smallest first. A width belongs to the last class whose
+# min_width it reaches. Phones are compact; tablets are medium (portrait) or expanded (landscape); desktop
+# Chrome is expanded or large.
+
+size_classes:
+  - name: compact
+    min_width: 0
+    grid_columns: 2        # product cards per row
+    gutter: 12             # gap between cards
+    page_padding: 16
+    navigation: bottom_bar
+    product_layout: stacked        # video above the details
+  - name: medium
+    min_width: 600
+    grid_columns: 3
+    gutter: 16
+    page_padding: 24
+    navigation: bottom_bar
+    product_layout: stacked
+  - name: expanded
+    min_width: 880
+    grid_columns: 4
+    gutter: 20
+    page_padding: 28
+    navigation: rail
+    product_layout: side_by_side   # video left, details right
+  - name: large
+    min_width: 1180
+    grid_columns: 5
+    gutter: 24
+    page_padding: 32
+    navigation: rail
+    product_layout: side_by_side
+
+# Content never grows wider than this on big screens (it centres instead).
+max_content_width: 1180
+
+# Product cards: image shape and the smallest width a card may shrink to before a class drops a column.
+product_card:
+  aspect_ratio: 1.0
+  min_width: 150
+
+# Side-by-side product screen: share of the width the video takes.
+side_by_side_video_fraction: 0.58

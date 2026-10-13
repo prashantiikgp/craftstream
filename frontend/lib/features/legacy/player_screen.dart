@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-import '../data/generated/models.dart';
+import '../../data/generated/models.dart';
 
 class PlayerScreen extends StatefulWidget {
   final Product product;

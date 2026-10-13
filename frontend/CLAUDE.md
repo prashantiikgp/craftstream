@@ -25,11 +25,33 @@ Read with the root `CLAUDE.md`. Full plan: `docs/FRONTEND_PLAN.md`.
 
 Upload limits are **not** frontend YAML: read them from `GET /api/v1/upload-policy`.
 
+## Design system
+
+- Tokens: `assets/config/ui/theme.yml` (palettes with brand + secondary ramps, surfaces, status quartets, type scale,
+  spacing, radius, elevation, motion). Built on the Fluno client system (same names, same orange `#FE5722`).
+- In widgets: `final t = context.tokens;` for colours/space/radius/shadows, `context.type.h1` etc. for text.
+  Components live in `lib/shared/widgets/` (import `shared/widgets/ds.dart`): `AppButton`, `AppCard`, `StatusBadge`,
+  `TagChip`, `AppTextField`, `Notice`, `PriceText` (₹1,20,000), `SectionHeader`, `EmptyState`, `Skeleton`.
+- Colour names: `brand` = fills only; `brand_ink` = orange **text**; `brand_l/ll` = tints; `on_brand` = text on a brand
+  fill. Status colours come as `fill / border / ink / wash`. Never use a raw `Color(0x…)` in a screen.
+- New palette: add it under `palettes:` in theme.yml. `theme_engine_test` fails if any text pair drops below WCAG AA.
+- `/catalog` (DEV_TOOLS only) shows every token and component and switches palette + light/dark live.
+- Fonts are bundled and subset (`tools/subset_fonts.sh`, ~170 KB). Never add `google_fonts` runtime fetching.
+
+## Environments (security)
+
+- `env/dev.json`, `env/staging.json`, `env/prod.json` → `--dart-define-from-file`; `make web ENV=dev`, `make apk ENV=prod`.
+- **Everything in an env file ships inside the app.** Public settings only; secrets stay on the backend.
+- `core/env.dart` validates at startup (https outside dev, no credentials in API_HOST, no DEV_TOOLS or debug logs in
+  prod, APP_ENV required in release). `test/core/env_files_test.dart` rejects unknown or secret-looking keys.
+- New key: add it to `AppEnv`, all three env files, `env/README.md` and the test's allow-list.
+
 ## Recipe: add a rule file
 
 1. Create `assets/config/<domain>/<xyz>.yml` and list it in `pubspec.yaml` assets.
-2. Write `lib/schemas/<domain>/<xyz>_schema.dart`: `@JsonSerializable(disallowUnrecognizedKeys: true)`, all fields `final`.
-3. Write `lib/domain/<domain>/<xyz>_loader.dart`, which calls the shared YAML helper and is registered in the startup bootstrap.
+2. Write `lib/schemas/<domain>/<xyz>_schema.dart`: `@JsonSerializable()` classes, all fields `final` (`build.yaml` turns on
+   unknown-key rejection and snake_case keys for everything in `lib/schemas/`), then `make flutter-gen`.
+3. Write `lib/domain/<domain>/<xyz>_loader.dart`, which calls `loadYamlAsset`, and load it in `core/config.dart::loadAppConfig`.
 4. Write `lib/domain/<domain>/<xyz>_engine.dart`. It takes the schema object in its constructor.
 5. Add `test/domain/<domain>/<xyz>_engine_test.dart`.
 
@@ -59,9 +81,9 @@ If any YAML fails to load, the app shows an error screen at startup. It never ru
 ## Running from WSL
 
 - Use the Linux Flutter SDK (`~/development/flutter`), never the Windows one under `/mnt/d`.
-- **Web:** `flutter run -d web-server --web-port 8080`, then open it in Windows Chrome.
-- **Android emulator:** the API host is `http://10.0.2.2:8000`.
-- Pass the API host with `--dart-define=API_HOST=...`; it is read in `core/env.dart`.
+- **Web:** `make web ENV=dev` (web-server on :8080), then open it in Windows Chrome.
+- **Android emulator:** use the same `env/dev.json`; `AppEnv.apiHostFor` maps `localhost` to `10.0.2.2` in dev.
+- Schemas changed? `make flutter-gen` (json_serializable). Tests: `make flutter-test`.
 - **Throttled demo:** load the app first, then switch on the 45 kbps throttle. The web shell is about 2 MB.
 
 ## Style
