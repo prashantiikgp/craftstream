@@ -1,0 +1,45 @@
+{
+  "mcpServers": {
+    "dart": {
+      "command": "dart",
+      "args": [
+        "mcp-server"
+      ]
+    },
+    "gcloud": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@google-cloud/gcloud-mcp@0.5.3"
+      ]
+    },
+    "cloud-run": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@google-cloud/cloud-run-mcp@1.11.0"
+      ]
+    },
+    "firebase": {
+      "command": "firebase",
+      "args": [
+        "mcp"
+      ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@0.0.83",
+        "--headless"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@4.3.0"
+      ]
+    }
+  }
+}

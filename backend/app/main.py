@@ -1,14 +1,14 @@
-"""CraftStream API. Routes must match specs/api/endpoints.yaml (enforced by tests)."""
+"""CraftStream API. Routes must match models/endpoints.yml (enforced by tests)."""
 
 from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from .config import settings
-from .generated.models import Order, OrderCreate, Product, ProductCreate, UploadTicket
-from .repository import FirestoreRepo, InMemoryRepo, Repo, new_id, now, search_tokens
-from .storage import create_resumable_upload_url, hls_url
+from app.core.settings import settings
+from app.db.repositories.repository import FirestoreRepo, InMemoryRepo, Repo, new_id, now, search_tokens
+from app.generated.models import Order, OrderCreate, Product, ProductCreate, UploadTicket
+from app.infra.gcp.gcs import create_resumable_upload_url, hls_url
 
 API = "/api/v1"
 
@@ -29,7 +29,7 @@ def start_transcoding(product: Product) -> None:
     Local mode marks the video ready immediately so the UI flow can be tested end to end.
     """
     if settings.mode == "gcp":
-        from transcoder.gcp_job import submit_job  # noqa: PLC0415
+        from app.infra.gcp.transcoder import submit_job
 
         submit_job(product.id)
         product.video_status = "processing"

@@ -5,8 +5,13 @@
     "ms-python.vscode-pylance",
     "charliermarsh.ruff",
     "redhat.vscode-yaml",
+    "tamasfe.even-better-toml",
     "Dart-Code.flutter",
     "Dart-Code.dart-code",
-    "googlecloudtools.cloudcode"
+    "googlecloudtools.cloudcode",
+    "ms-azuretools.vscode-containers",
+    "usernamehw.errorlens",
+    "humao.rest-client",
+    "eamodio.gitlens"
   ]
 }

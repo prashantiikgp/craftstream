@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "enabledMcpjsonServers": ["dart", "gcloud", "cloud-run", "firebase", "playwright", "context7"],
+  "permissions": {
+    "allow": [
+      "Bash(make:*)",
+      "Bash(flutter:*)",
+      "Bash(dart:*)",
+      "mcp__dart__*",
+      "mcp__context7__*",
+      "mcp__playwright__*"
+    ],
+    "ask": [
+      "mcp__gcloud__*",
+      "mcp__cloud-run__*",
+      "mcp__firebase__*",
+      "Bash(gcloud:*)",
+      "Bash(firebase:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./backend/.env)",
+      "Bash(gcloud projects delete:*)",
+      "Bash(gcloud storage rm:*)",
+      "Bash(gcloud firestore databases delete:*)"
+    ]
+  }
+}

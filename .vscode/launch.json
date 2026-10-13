@@ -6,15 +6,15 @@
       "type": "debugpy",
       "request": "launch",
       "module": "uvicorn",
-      "args": ["backend.app.main:app", "--reload", "--port", "8000"],
+      "args": ["app.main:app", "--reload", "--port", "8000"],
       "env": { "CRAFTSTREAM_MODE": "local" },
-      "cwd": "${workspaceFolder}"
+      "cwd": "${workspaceFolder}/backend"
     },
     {
       "name": "Flutter: Chrome",
       "type": "dart",
       "request": "launch",
-      "cwd": "app",
+      "cwd": "frontend",
       "program": "lib/main.dart",
       "deviceId": "chrome",
       "args": ["--dart-define=API_HOST=http://localhost:8000"]
@@ -23,7 +23,7 @@
       "name": "Flutter: Android (emulator)",
       "type": "dart",
       "request": "launch",
-      "cwd": "app",
+      "cwd": "frontend",
       "program": "lib/main.dart",
       "args": ["--dart-define=API_HOST=http://10.0.2.2:8000"]
     }

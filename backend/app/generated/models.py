@@ -1,4 +1,4 @@
-"""GENERATED FROM specs/ BY tools/codegen.py. DO NOT EDIT BY HAND."""
+"""GENERATED FROM models/ BY tools/codegen.py. DO NOT EDIT BY HAND."""
 
 from __future__ import annotations
 

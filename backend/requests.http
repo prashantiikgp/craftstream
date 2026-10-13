@@ -1,0 +1,43 @@
+# Exercise the API from VS Code (REST Client extension: click "Send Request").
+# Start the API first: `make api` (local mode, in-memory).
+
+@host = http://localhost:8000
+@api = {{host}}/api/v1
+
+### Health
+GET {{host}}/healthz
+
+### Artisan: create a listing (returns an UploadTicket)
+# @name create
+POST {{api}}/products
+Content-Type: application/json
+
+{
+  "title": "Hand-thrown clay mug",
+  "description": "Wheel-thrown and glazed by hand.",
+  "price": 450,
+  "tags": ["pottery", "kitchen"],
+  "artisan_name": "Meera"
+}
+
+### Local mode: pretend the upload finished (marks the video ready)
+POST {{api}}/products/{{create.response.body.product.id}}/upload-complete
+
+### Buyer: search by keyword
+GET {{api}}/products?q=clay
+
+### Buyer: filter by tag
+GET {{api}}/products?tag=pottery
+
+### Buyer: product details
+GET {{api}}/products/{{create.response.body.product.id}}
+
+### Buyer: place an order
+POST {{api}}/orders
+Content-Type: application/json
+
+{
+  "product_id": "{{create.response.body.product.id}}",
+  "buyer_name": "Ravi",
+  "quantity": 2
+}

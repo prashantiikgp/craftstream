@@ -10,27 +10,30 @@ An artisan marketplace where each product comes with a "how it was made" video t
 ## How the repo is organized
 
 ```
-specs/                 ← the source of truth (human-readable YAML)
-  models/              product.yaml, order.yaml: fields and validation rules
-  api/endpoints.yaml   the API contract
-  media/ladder.yaml    the bitrate ladder (144p @ 40 kbps up to 720p)
-tools/codegen.py       YAML → Pydantic models, Dart models, Dart API client
-backend/               FastAPI app (+ tests, Dockerfile for Cloud Run)
-transcoder/            ladder → Transcoder API job; local FFmpeg version for testing
-app/                   Flutter app
+models/          shared data models + API endpoints (YAML) → `make gen` → code for both sides
+backend/         FastAPI service (Cloud Run)
+  config/        rule files (YAML), e.g. media/ladder.yml: the bitrate ladder (144p @ 40 kbps → 720p)
+  app/           schemas/ · domain/ (loaders + engines) · db/ · infra/gcp/ · generated/
+  tests/         unit, API and contract tests
+frontend/        Flutter app (Android phone, Android tablet, Chrome)
+infra/gcp/       gcloud scripts (coming in phase B4)
+tools/           codegen.py, local_hls.py (FFmpeg ladder for local testing), setup_flutter.sh
+docs/            intent, plans, architecture
 ```
 
-**Workflow:** edit a YAML file → `make gen` → both the backend and the app pick up the change. Never edit files in a `generated/` folder; VS Code marks them read-only.
+**Pattern:** every rule file `config/<domain>/<xyz>.yml` has a schema (`schemas/<domain>/<xyz>_schema`), a loader and an engine (`domain/<domain>/<xyz>_loader`, `<xyz>_engine`).
+
+**Workflow:** edit a YAML file in `models/` → `make gen` → both the backend and the app pick up the change. Never edit files in a `generated/` folder; VS Code marks them read-only.
 
 ## First-time setup (in WSL)
 
 ```bash
 cd ~/projects/craftstream
-make setup          # Python venv + dependencies
-make test           # 5 tests: API flow, contract vs. YAML, 50 kbps budget
+make setup          # backend/.venv + dependencies
+make test           # API flow, contract vs. models/endpoints.yml, 50 kbps budget
 make api            # API at http://localhost:8000/docs (in-memory, no GCP needed)
 make flutter-init   # once Flutter is installed: creates android/ and web/, adds hls.js
-make web            # app in Chrome against the local API
+make web            # app on http://localhost:8080 against the local API
 code .              # open in VS Code
 ```
 
@@ -47,7 +50,8 @@ At these bitrates, the TS container alone added about 14 kbps of overhead, so th
 
 ## Status
 
-- [x] YAML specs + code generator
+- [x] YAML data models + code generator
+- [x] Repo restructured into models/ · backend/ · frontend/ with the YAML → schema → loader → engine pattern
 - [x] API: create listing, search/filter, product detail, upload-complete, order
 - [x] Transcoder API job config built from the ladder
 - [x] Flutter: search screen + HLS player

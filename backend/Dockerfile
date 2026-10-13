@@ -1,10 +1,9 @@
-# Cloud Run image. Build from the repo root:  docker build -f backend/Dockerfile -t craftstream-api .
+# Cloud Run image. Build context is backend/:  gcloud run deploy craftstream-api --source backend
 FROM python:3.12-slim
 WORKDIR /srv
-COPY backend/requirements.txt backend/requirements.txt
-RUN pip install --no-cache-dir -r backend/requirements.txt
-COPY specs specs
-COPY transcoder transcoder
-COPY backend backend
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY config config
+COPY app app
 ENV CRAFTSTREAM_MODE=gcp PORT=8080
-CMD exec uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT}
+CMD exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT}

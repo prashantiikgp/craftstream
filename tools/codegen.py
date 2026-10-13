@@ -1,10 +1,10 @@
-"""Turn the human-readable YAML specs into code for both sides.
+"""Turn the human-readable data models into code for both sides.
 
-    specs/models/*.yaml + specs/api/endpoints.yaml
-        -> specs/build/schema.json            (JSON Schema, single source of truth)
-        -> backend/app/generated/models.py    (Pydantic models for FastAPI)
-        -> app/lib/generated/models.dart      (Dart models for Flutter)
-        -> app/lib/generated/api_client.dart  (Dart HTTP client)
+    models/*.yml + models/endpoints.yml
+        -> models/build/schema.json                     (JSON Schema)
+        -> backend/app/generated/models.py              (Pydantic models for FastAPI)
+        -> frontend/lib/data/generated/models.dart      (Dart models for Flutter)
+        -> frontend/lib/data/generated/api_client.dart  (Dart HTTP client)
 
 Run with:  python tools/codegen.py   (or `make gen`)
 Never edit the generated files by hand; edit the YAML and regenerate.
@@ -18,22 +18,26 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-SPECS = ROOT / "specs"
-HEADER = "GENERATED FROM specs/ BY tools/codegen.py. DO NOT EDIT BY HAND."
+MODELS = ROOT / "models"
+ENDPOINTS = MODELS / "endpoints.yml"
+DART_OUT = ROOT / "frontend" / "lib" / "data" / "generated"
+HEADER = "GENERATED FROM models/ BY tools/codegen.py. DO NOT EDIT BY HAND."
 
 
 # ---------------------------------------------------------------- loading
 
 def load_models() -> dict[str, dict]:
     models = {}
-    for path in sorted((SPECS / "models").glob("*.yaml")):
+    for path in sorted(MODELS.glob("*.yml")):
+        if path == ENDPOINTS:
+            continue
         spec = yaml.safe_load(path.read_text())
         models[spec["model"]] = spec
     return models
 
 
 def load_api() -> dict:
-    return yaml.safe_load((SPECS / "api" / "endpoints.yaml").read_text())
+    return yaml.safe_load(ENDPOINTS.read_text())
 
 
 def create_fields(spec: dict) -> dict:
@@ -221,7 +225,7 @@ def build_dart_client(api: dict) -> str:
            "  ApiException(this.statusCode, this.body);",
            "  @override", "  String toString() => 'ApiException($statusCode): $body';", "}", "",
            "class ApiClient {", "  final String baseUrl;", "  final http.Client _http;", "",
-           f"  ApiClient(String host, {{http.Client? client}})",
+           "  ApiClient(String host, {http.Client? client})",
            f"      : baseUrl = '$host{api['base_path']}',",
            "        _http = client ?? http.Client();", "",
            "  dynamic _decode(http.Response r) {",
@@ -275,12 +279,12 @@ def write(path: Path, text: str) -> None:
 
 def main() -> None:
     models, api = load_models(), load_api()
-    print("Generating code from specs/ ...")
-    write(SPECS / "build" / "schema.json", json.dumps(build_schema(models), indent=2) + "\n")
+    print("Generating code from models/ ...")
+    write(MODELS / "build" / "schema.json", json.dumps(build_schema(models), indent=2) + "\n")
     write(ROOT / "backend" / "app" / "generated" / "models.py", build_python(models, api))
     write(ROOT / "backend" / "app" / "generated" / "__init__.py", "")
-    write(ROOT / "app" / "lib" / "generated" / "models.dart", build_dart_models(models, api))
-    write(ROOT / "app" / "lib" / "generated" / "api_client.dart", build_dart_client(api))
+    write(DART_OUT / "models.dart", build_dart_models(models, api))
+    write(DART_OUT / "api_client.dart", build_dart_client(api))
     print("Done.")
 
 
