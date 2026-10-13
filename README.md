@@ -39,14 +39,14 @@ code .              # open in VS Code
 
 ## The 50 kbps rung (measured)
 
-`make hls SRC=your_video.mp4` builds the ladder locally with FFmpeg. On a 60-second 1080p test pattern (harder to compress than real footage), the 144p rung came out to:
+`make hls SRC=your_video.mp4` builds the ladder locally with FFmpeg, using the same settings as the GCP Transcoder job, and reports what a player downloads per rung. The 144p rung measures **42.8 kbps on the wire** (playlists + init + segments + HTTP headers), even on a deliberately grainy worst-case clip; no 6-second segment exceeds 43 kbps. Details: [docs/ARCHITECTURE.md §6](docs/ARCHITECTURE.md).
 
-| Container | On-the-wire average |
+| Container | 144p rung on the wire |
 |---|---|
 | MPEG-TS segments | 56.7 kbps ❌ |
-| **fMP4 segments** | **42.0 kbps ✅** |
+| **fMP4 segments** | **42.8 kbps ✅** |
 
-At these bitrates, the TS container alone added about 14 kbps of overhead, so the project uses fMP4.
+At these bitrates the TS container alone added about 14 kbps of overhead, so the project uses fMP4. `make test` re-checks the budget on every run.
 
 ## Status
 

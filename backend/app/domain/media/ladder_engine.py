@@ -1,8 +1,11 @@
-"""Turn the ladder rules into a Transcoder API JobConfig. Pure logic: no GCP calls here.
+"""Turn the ladder rules into encoder settings. Pure logic: builds configs, never runs anything.
 
-Input:  gs://$UPLOAD_BUCKET/raw/<product_id>/source
-Output: gs://$MEDIA_BUCKET/hls/<product_id>/manifest.m3u8 (+ one playlist and chunks per rung)
-Submitting the job lives in app/infra/gcp/transcoder.py.
+Two outputs from the same rules, so local measurements predict what GCP produces:
+  build_job_config(...)  -> Transcoder API JobConfig (submitted by app/infra/gcp/transcoder.py)
+  ffmpeg_args(...)       -> FFmpeg command for one rung (run by tools/local_hls.py)
+
+GCP input:  gs://$UPLOAD_BUCKET/raw/<product_id>/source
+GCP output: gs://$MEDIA_BUCKET/hls/<product_id>/manifest.m3u8 (+ one playlist and chunks per rung)
 """
 
 from __future__ import annotations
@@ -23,7 +26,11 @@ def lowest_rung_within_budget(rules: LadderRules | None = None) -> bool:
 
 
 def build_job_config(
-    rules: LadderRules | None = None, *, input_uri: str | None = None, max_duration_seconds: int | None = None
+    rules: LadderRules | None = None,
+    *,
+    input_uri: str | None = None,
+    max_duration_seconds: int | None = None,
+    pubsub_topic: str | None = None,
 ) -> dict:
     """Return the Transcoder API JobConfig as a plain dict (easy to inspect and test).
 
@@ -45,7 +52,7 @@ def build_job_config(
                 "frameRate": r.fps,
                 "bitrateBps": r.video_kbps * 1000,
                 "gopDuration": f"{rules.keyframe_seconds}s",
-                "profile": "baseline" if r.height <= 240 else "main",
+                "profile": h264_profile(r),
                 "rateControlMode": "vbr",
             }},
         })
@@ -75,7 +82,60 @@ def build_job_config(
         "spriteSheets": [{"filePrefix": "thumb", "spriteWidthPixels": 320, "spriteHeightPixels": 180,
                           "columnCount": 1, "rowCount": 1, "totalCount": 1}],
     }
+    if pubsub_topic:
+        config["pubsubDestination"] = {"topic": pubsub_topic}  # job result -> /internal/media/transcoded
     if max_duration_seconds is not None:
         config["inputs"] = [{"key": "input0", "uri": input_uri}]
         config["editList"] = [{"key": "atom0", "inputs": ["input0"], "endTimeOffset": f"{max_duration_seconds}s"}]
     return config
+
+
+def h264_profile(rung: Rung) -> str:
+    return "baseline" if rung.height <= 240 else "main"
+
+
+def ffmpeg_args(
+    rung: Rung,
+    src: str,
+    out_dir: str,
+    rules: LadderRules | None = None,
+    *,
+    he_aac_available: bool = False,
+    max_duration_seconds: int | None = None,
+) -> list[str]:
+    """FFmpeg command producing one rung as fMP4 HLS (init.mp4 + seg_NNNN.m4s + index.m3u8) in `out_dir`.
+
+    Matches the Transcoder job: same size, fps, bitrates, GOP, profile, audio and segment length.
+    Without libfdk_aac, HE-AAC rungs fall back to AAC-LC at the same bitrate (same size, lower quality).
+    """
+    rules = rules or load_ladder_rules()
+    gop = rung.fps * rules.keyframe_seconds
+    if rung.audio_profile == "he-aac" and he_aac_available:
+        audio = ["-c:a", "libfdk_aac", "-profile:a", "aac_he"]
+    else:
+        audio = ["-c:a", "aac"]
+    cap = ["-t", str(max_duration_seconds)] if max_duration_seconds else []
+    return [
+        "ffmpeg", "-y", "-loglevel", "error", "-i", src, *cap,
+        "-vf", (f"scale={rung.width}:{rung.height}:force_original_aspect_ratio=decrease,"
+                f"pad={rung.width}:{rung.height}:(ow-iw)/2:(oh-ih)/2,fps={rung.fps}"),
+        "-c:v", "libx264", "-preset", "veryslow", "-profile:v", h264_profile(rung),
+        "-b:v", f"{rung.video_kbps}k", "-maxrate", f"{int(rung.video_kbps * 1.2)}k",
+        "-bufsize", f"{rung.video_kbps * 2}k",
+        "-g", str(gop), "-keyint_min", str(gop), "-sc_threshold", "0",
+        *audio, "-b:a", f"{rung.audio_kbps}k", "-ac", str(rules.audio.channels),
+        "-ar", str(rules.audio.sample_rate),
+        "-f", "hls", "-hls_time", str(rules.segment_seconds), "-hls_playlist_type", "vod",
+        "-hls_segment_type", "fmp4", "-hls_fmp4_init_filename", "init.mp4",
+        "-hls_segment_filename", f"{out_dir}/seg_%04d.m4s",
+        f"{out_dir}/index.m3u8",
+    ]
+
+
+def master_playlist(rungs: list[Rung], headroom: float = 1.1) -> str:
+    """HLS master playlist listing each rung's folder, lowest first (players try the first entry first)."""
+    lines = ["#EXTM3U", "#EXT-X-VERSION:7"]
+    for r in rungs:
+        bw = int(r.total_kbps * 1000 * headroom)
+        lines += [f"#EXT-X-STREAM-INF:BANDWIDTH={bw},RESOLUTION={r.width}x{r.height}", f"{r.name}/index.m3u8"]
+    return "\n".join(lines) + "\n"

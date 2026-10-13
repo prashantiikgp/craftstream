@@ -46,3 +46,9 @@ def test_duration_cap_adds_edit_list():
 def test_duration_cap_needs_input_uri():
     with pytest.raises(ValueError):
         build_job_config(max_duration_seconds=900)
+
+
+def test_job_reports_to_pubsub_topic():
+    cfg = build_job_config(pubsub_topic="projects/p/topics/transcode-done")
+    assert cfg["pubsubDestination"] == {"topic": "projects/p/topics/transcode-done"}
+    assert "pubsubDestination" not in build_job_config()

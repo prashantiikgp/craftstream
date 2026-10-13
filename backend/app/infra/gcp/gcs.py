@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import re
 
+# HLS output never changes once written, so players and Google's edge may cache it for a year.
+IMMUTABLE = "public, max-age=31536000, immutable"
 _RAW_OBJECT = re.compile(r"^raw/(?P<product_id>[A-Za-z0-9_-]+)/source$")
 
 
@@ -35,6 +37,16 @@ class GcsStorage:
 
     def hls_url(self, product_id: str) -> str:
         return f"https://storage.googleapis.com/{self._media_bucket}/hls/{product_id}/manifest.m3u8"
+
+    def finalize_media(self, product_id: str) -> None:
+        """Mark the finished HLS files as cacheable (the Transcoder writes them with default headers)."""
+        from google.cloud import storage
+
+        bucket = storage.Client(project=self._project).bucket(self._media_bucket)
+        for blob in bucket.list_blobs(prefix=f"hls/{product_id}/"):
+            if blob.cache_control != IMMUTABLE:
+                blob.cache_control = IMMUTABLE
+                blob.patch()
 
     def thumbnail_url(self, product_id: str) -> str | None:
         # The Transcoder sprite sheet with totalCount=1 writes one image named <prefix>0000000000.jpeg.

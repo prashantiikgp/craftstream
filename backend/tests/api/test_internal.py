@@ -10,6 +10,8 @@ from fastapi.testclient import TestClient
 
 from app.api.deps import Container
 from app.core.settings import Settings
+from app.infra.gcp.auth import CallerRejected
+from app.infra.local.local_auth import AllowAllCallers
 from app.infra.local.local_storage import LocalStorage
 from app.main import API, create_app
 
@@ -38,11 +40,30 @@ class CdnStorage(LocalStorage):
         return f"https://cdn.test/hls/{product_id}/thumb.jpeg"
 
 
+class OnlyToken:
+    def verify(self, authorization: str | None) -> str:
+        if authorization != "Bearer good":
+            raise CallerRejected("nope")
+        return "sa@test"
+
+
 @pytest.fixture
 def gcp_like(settings: Settings, container: Container) -> TestClient:
     c = Container(settings=settings, products=container.products, orders=container.orders,
-                  storage=CdnStorage(), transcoder=AsyncTranscoder())
+                  storage=CdnStorage(), transcoder=AsyncTranscoder(), callers=AllowAllCallers())
     return TestClient(create_app(settings, c))
+
+
+def test_internal_calls_need_a_valid_caller(settings: Settings, container: Container):
+    c = Container(settings=settings, products=container.products, orders=container.orders,
+                  storage=CdnStorage(), transcoder=AsyncTranscoder(), callers=OnlyToken())
+    client = TestClient(create_app(settings, c))
+    body = {"bucket": "b", "name": "raw/x/source"}
+    for headers in ({}, {"Authorization": "Bearer bad"}):
+        resp = client.post("/internal/media/uploaded", json=body, headers=headers)
+        assert resp.status_code == 401 and resp.json()["code"] == "unauthorized"
+    assert client.post("/internal/media/uploaded", json=body, headers={"Authorization": "Bearer good"}).status_code == 204
+    assert client.get(f"{API}/tags").status_code == 200  # public routes need no token
 
 
 def _create(client: TestClient) -> str:

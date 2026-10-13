@@ -138,23 +138,27 @@ gs://<proj>-media/hls/<id>/manifest.m3u8 ◄── Transcoder ──done──�
 - [x] Done when the full artisan → buyer → order flow works in local mode (`backend/requests.http`, API tests; 75 tests)
 
 ### B3: Prove the 50 kbps budget locally
-- [ ] Install FFmpeg; `tools/local_hls.py` builds the ladder **using `ladder_engine`** (same rules as GCP)
-- [ ] Test: encode a sample clip and assert that the lowest rung's on-the-wire bitrate (segments + playlists) stays ≤ 50 kbps
-- [ ] Done when the number is measured and recorded in `docs/ARCHITECTURE.md`
+- [x] Install FFmpeg; `tools/local_hls.py` builds the ladder **using `ladder_engine`** (same rules as GCP)
+- [x] Test: encode a sample clip and assert that the lowest rung's on-the-wire bitrate (segments + playlists) stays ≤ 50 kbps
+- [x] Done when the number is measured and recorded in `docs/ARCHITECTURE.md` (**42.8 kbps** on the wire, worst case)
 
 ### B4: GCP
 - [ ] New project `craftstream-<suffix>`; enable APIs: Run, Storage, Firestore, Transcoder, Eventarc, Pub/Sub, Cloud Build, Artifact Registry
 - [ ] Check that the Transcoder API is available in `asia-south1` (fall back to `asia-southeast1`)
 - [ ] Buckets: `uploads` (private, CORS `PUT` from the web origin, lifecycle: delete raw files after N days) and `media` (public read, CORS `GET`)
 - [ ] Firestore (Native) + `FirestoreRepo`
-- [ ] Service accounts: the API (Storage, Firestore, Transcoder); Eventarc/Pub/Sub invoker; **verify OIDC tokens** on `/internal/*`
-- [ ] Wire `infra/gcp/transcoder.py`, the Eventarc trigger and the Pub/Sub push subscription
+- [ ] Service accounts: the API (Storage, Firestore, Transcoder); Eventarc/Pub/Sub invoker (`infra/gcp/04_iam.sh`)
+- [x] **Verify OIDC tokens** on `/internal/*` (`infra/gcp/auth.py`; audience + allowed service accounts from settings)
+- [x] Code: `infra/gcp/transcoder.py` publishes job results to Pub/Sub (`pubsubDestination`); HLS marked cacheable when ready
+- [x] Scripts written (not yet run): `infra/gcp/setup.sh` → `01_project` … `06_events` (Eventarc trigger, Pub/Sub push with OIDC)
+- [x] Cloud Run image builds and serves locally (`docker build backend`, 227 MB); `.gcloudignore` keeps `.venv` out of the upload
 - [ ] Deploy to Cloud Run with `gcloud run deploy --source` (scripts in `infra/gcp/`, idempotent)
 - [ ] Done when a real 15-min upload goes uploads bucket → transcode → `ready` → HLS plays from the media bucket
 
 ### B5: Hardening + evidence
-- [ ] gzip responses, small payloads (no description in list results), `Cache-Control` on HLS objects
+- [x] gzip responses, small payloads (no description in list results), `Cache-Control: immutable` on HLS objects
 - [x] Errors: one `ErrorResponse` shape everywhere (`core/errors.py`, done in S1)
+- [x] `tools/smoke_test.py <url>`: whole flow incl. real resumable upload (passes locally)
 - [ ] Smoke test against the deployed URL
 - [ ] GCP evidence checklist for the video: Cloud Run revisions + logs, the Transcoder job list, bucket contents, Firestore docs
 

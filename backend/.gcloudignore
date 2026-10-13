@@ -1,0 +1,11 @@
+# What `gcloud run deploy --source backend` must NOT upload to Cloud Build.
+.gcloudignore
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.env
+tests/
+requests.http
+CLAUDE.md

@@ -37,7 +37,11 @@ class Conflict(DomainError):
     code = "conflict"
 
 
-_STATUS_FOR = {NotFound: 404, Conflict: 409, DomainError: 400}
+class Unauthorized(DomainError):
+    code = "unauthorized"
+
+
+_STATUS_FOR = {NotFound: 404, Conflict: 409, Unauthorized: 401, DomainError: 400}
 
 _CODE_FOR_STATUS = {
     400: "bad_request", 401: "unauthorized", 403: "forbidden", 404: "not_found", 405: "method_not_allowed",

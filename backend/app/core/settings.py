@@ -26,14 +26,25 @@ class Settings(BaseSettings):
     media_bucket: str = ""    # HLS output (public read)
     cors_origins: str = "*"
     log_level: str = "INFO"
+    # /internal/* callers (gcp mode): the OIDC audience (our Cloud Run URL) and the service account(s)
+    # Eventarc and Pub/Sub sign their tokens as, comma-separated.
+    internal_audience: str = ""
+    internal_invokers: str = ""
+    transcode_topic: str = ""   # Pub/Sub topic id the Transcoder publishes job results to
 
     @model_validator(mode="after")
     def _gcp_needs_resources(self) -> Settings:
         if self.mode == "gcp":
-            missing = [k for k in ("gcp_project", "upload_bucket", "media_bucket") if not getattr(self, k)]
+            needed = ("gcp_project", "upload_bucket", "media_bucket", "internal_audience", "internal_invokers",
+                      "transcode_topic")
+            missing = [k for k in needed if not getattr(self, k)]
             if missing:
                 raise ValueError(f"CRAFTSTREAM_MODE=gcp needs {', '.join(m.upper() for m in missing)}")
         return self
+
+    @property
+    def internal_invoker_set(self) -> set[str]:
+        return {e.strip() for e in self.internal_invokers.split(",") if e.strip()}
 
     @property
     def cors_origin_list(self) -> list[str]:

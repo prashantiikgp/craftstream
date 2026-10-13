@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 from app.api.deps import Container, build_container
 from app.api.routers import health, internal, orders, products, uploads
@@ -31,6 +32,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         allow_headers=["*"],
         expose_headers=["Range"],  # the resumable uploader reads it from 308 responses
     )
+    app.add_middleware(GZipMiddleware, minimum_size=500)  # search pages shrink ~4x; tiny bodies aren't worth it
     install_error_handlers(app)
 
     for router in (products.router, orders.router, uploads.router):

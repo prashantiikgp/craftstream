@@ -43,7 +43,7 @@ def _unique_tag() -> str:
 
 @pytest.mark.parametrize("mode", ["local", "gcp"])
 def test_routes_match_spec_exactly(mode):
-    settings = Settings(mode=mode, gcp_project="p", upload_bucket="u", media_bucket="m", _env_file=None)
+    settings = Settings(mode=mode, gcp_project="p", upload_bucket="u", media_bucket="m", internal_audience="https://api.test", internal_invokers="sa@p.iam.gserviceaccount.com", transcode_topic="t", _env_file=None)
     app = create_app(settings, container=object())  # routes only; nothing is called
     served = {(m, r.path, r.status_code or 200) for r in app.routes if isinstance(r, APIRoute) for m in r.methods}
     expected = {(e["method"], SPEC["base_path"] + e["path"], e["status"]) for e in SPEC["endpoints"]}
@@ -150,3 +150,11 @@ def test_order_total_uses_decimal_rounding(client):
     order = client.post(f"{API}/orders", json={"product_id": ticket["product"]["id"], "buyer_name": "Ravi",
                                                 "quantity": 3}).json()
     assert order["total"] == 0.3
+
+
+def test_large_responses_are_gzipped(client):
+    tag = _unique_tag()
+    for _ in range(5):
+        _upload(client, _new_product(client, tag), size=10)
+    resp = client.get(f"{API}/products", params={"tag": tag}, headers={"Accept-Encoding": "gzip"})
+    assert resp.headers.get("content-encoding") == "gzip"

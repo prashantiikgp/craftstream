@@ -40,6 +40,9 @@ class LocalStorage:
     def thumbnail_url(self, product_id: str) -> str | None:
         return None
 
+    def finalize_media(self, product_id: str) -> None:
+        pass  # the sample stream is not ours
+
     def receive(self, product_id: str, content_range: str | None, nbytes: int) -> UploadProgress:
         m = _CONTENT_RANGE.fullmatch(content_range or "")
         if m is None:  # single PUT with the whole file

@@ -9,9 +9,10 @@ from app.infra.gcp.gcs import raw_object_name
 class GcpTranscoder:
     completes_immediately = False  # completion arrives later via Pub/Sub -> /internal/media/transcoded
 
-    def __init__(self, project: str, region: str, upload_bucket: str, media_bucket: str) -> None:
+    def __init__(self, project: str, region: str, upload_bucket: str, media_bucket: str, topic: str) -> None:
         self._parent = f"projects/{project}/locations/{region}"
         self._upload_bucket, self._media_bucket = upload_bucket, media_bucket
+        self._topic = f"projects/{project}/topics/{topic}"
 
     def submit(self, product_id: str, max_duration_seconds: int) -> str:
         """Start transcoding the product's raw upload; returns the job name. Completion arrives via Pub/Sub."""
@@ -20,13 +21,13 @@ class GcpTranscoder:
         config = build_job_config(
             input_uri=f"gs://{self._upload_bucket}/{raw_object_name(product_id)}",
             max_duration_seconds=max_duration_seconds,
+            pubsub_topic=self._topic,
         )
         job = transcoder_v1.Job(
             output_uri=f"gs://{self._media_bucket}/hls/{product_id}/",
             config=transcoder_v1.JobConfig(config),
             labels={"product_id": product_id},
         )
-        # TODO(B4): set config.pubsub_destination so /internal/media/transcoded is called when done.
         return transcoder_v1.TranscoderServiceClient().create_job(parent=self._parent, job=job).name
 
     def product_id_for_job(self, job_name: str) -> str | None:

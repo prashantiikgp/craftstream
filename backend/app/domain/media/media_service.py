@@ -21,6 +21,7 @@ class Storage(Protocol):
     def upload_url(self, product_id: str, origin: str | None, api_base_url: str) -> str: ...
     def hls_url(self, product_id: str) -> str: ...
     def thumbnail_url(self, product_id: str) -> str | None: ...
+    def finalize_media(self, product_id: str) -> None: ...
 
 
 class Transcoder(Protocol):
@@ -78,6 +79,7 @@ class MediaService:
 
     def _finish(self, product_id: str, succeeded: bool) -> None:
         if succeeded:
+            self._storage.finalize_media(product_id)
             self._products.update_video(product_id, "ready", self._storage.hls_url(product_id),
                                         self._storage.thumbnail_url(product_id))
         else:
