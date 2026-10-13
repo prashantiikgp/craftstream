@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "Order": {
+      "type": "object",
+      "description": "A buyer's order for one product.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "product_id": {
+          "type": "string"
+        },
+        "buyer_name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20,
+          "default": 1
+        },
+        "total": {
+          "type": "number",
+          "readOnly": true
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "placed"
+          ],
+          "default": "placed",
+          "readOnly": true
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      },
+      "required": [
+        "id",
+        "product_id",
+        "buyer_name",
+        "quantity",
+        "total",
+        "status",
+        "created_at"
+      ]
+    },
+    "OrderCreate": {
+      "type": "object",
+      "properties": {
+        "product_id": {
+          "type": "string"
+        },
+        "buyer_name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20,
+          "default": 1
+        }
+      },
+      "required": [
+        "product_id",
+        "buyer_name"
+      ]
+    },
+    "Product": {
+      "type": "object",
+      "description": "A handmade product listed by an artisan, with a process video.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "title": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "price": {
+          "type": "number",
+          "minimum": 0.01
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "INR",
+            "USD"
+          ],
+          "default": "INR"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "default": []
+        },
+        "artisan_name": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "video_status": {
+          "type": "string",
+          "enum": [
+            "awaiting_upload",
+            "processing",
+            "ready",
+            "failed"
+          ],
+          "default": "awaiting_upload",
+          "readOnly": true
+        },
+        "hls_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "readOnly": true
+        },
+        "thumbnail_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "readOnly": true
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description",
+        "price",
+        "currency",
+        "tags",
+        "artisan_name",
+        "video_status",
+        "hls_url",
+        "thumbnail_url",
+        "created_at"
+      ]
+    },
+    "ProductCreate": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "price": {
+          "type": "number",
+          "minimum": 0.01
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "INR",
+            "USD"
+          ],
+          "default": "INR"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "default": []
+        },
+        "artisan_name": {
+          "type": "string",
+          "maxLength": 80
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "price",
+        "artisan_name"
+      ]
+    }
+  }
+}

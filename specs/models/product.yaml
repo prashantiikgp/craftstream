@@ -1,0 +1,59 @@
+# Product: one handmade item, with its "how it was made" video.
+# Edit this file, then run `make gen` to update the Python and Flutter models.
+#
+# Field options:
+#   type: string | integer | number | boolean | datetime | array | enum
+#   required: true        -> must be sent when creating
+#   readonly: true        -> set by the server, never sent by the client
+#   nullable: true        -> may be null
+#   min_length / max_length / minimum / maximum / max_items / default / values (for enum)
+
+model: Product
+description: A handmade product listed by an artisan, with a process video.
+
+fields:
+  id:
+    type: string
+    readonly: true
+  title:
+    type: string
+    required: true
+    min_length: 3
+    max_length: 120
+  description:
+    type: string
+    required: true
+    max_length: 5000
+  price:
+    type: number
+    required: true
+    minimum: 0.01
+  currency:
+    type: enum
+    values: [INR, USD]
+    default: INR
+  tags:
+    type: array
+    items: string
+    max_items: 10
+    default: []
+  artisan_name:
+    type: string
+    required: true
+    max_length: 80
+  video_status:
+    type: enum
+    values: [awaiting_upload, processing, ready, failed]
+    default: awaiting_upload
+    readonly: true
+  hls_url:
+    type: string
+    nullable: true
+    readonly: true
+  thumbnail_url:
+    type: string
+    nullable: true
+    readonly: true
+  created_at:
+    type: datetime
+    readonly: true

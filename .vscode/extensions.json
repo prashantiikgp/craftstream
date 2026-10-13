@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "ms-vscode-remote.remote-wsl",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+    "redhat.vscode-yaml",
+    "Dart-Code.flutter",
+    "Dart-Code.dart-code",
+    "googlecloudtools.cloudcode"
+  ]
+}

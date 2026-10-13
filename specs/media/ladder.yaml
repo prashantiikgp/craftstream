@@ -1,0 +1,48 @@
+# Bitrate ladder: the versions of every video we create after upload.
+# The player picks the best rung the network can sustain.
+# The `ultra_low` rung is what makes playback work under 50 kbps:
+#   video 28 kbps + audio 12 kbps = 40 kbps, leaving ~10 kbps for HLS overhead.
+
+segment_seconds: 6        # length of each HLS chunk
+keyframe_seconds: 6       # one keyframe per chunk, so the player can switch rungs cleanly
+video_codec: h264
+audio:
+  codec: aac              # HE-AAC is set per rung via `audio_profile`
+  sample_rate: 22050
+  channels: 1
+
+rungs:
+  - name: ultra_low
+    width: 256
+    height: 144
+    fps: 12
+    video_kbps: 28
+    audio_kbps: 12
+    audio_profile: he-aac
+
+  - name: low
+    width: 426
+    height: 240
+    fps: 15
+    video_kbps: 120
+    audio_kbps: 32
+    audio_profile: aac-lc
+
+  - name: medium
+    width: 640
+    height: 360
+    fps: 24
+    video_kbps: 400
+    audio_kbps: 64
+    audio_profile: aac-lc
+
+  - name: high
+    width: 1280
+    height: 720
+    fps: 30
+    video_kbps: 1500
+    audio_kbps: 96
+    audio_profile: aac-lc
+
+# Hard budget the test suite enforces for the lowest rung.
+max_lowest_rung_total_kbps: 50

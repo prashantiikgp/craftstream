@@ -1,0 +1,8 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "gen: specs -> code", "type": "shell", "command": "make gen", "problemMatcher": [] },
+    { "label": "test", "type": "shell", "command": "make test", "group": { "kind": "test", "isDefault": true } },
+    { "label": "api: run locally", "type": "shell", "command": "make api", "isBackground": true, "problemMatcher": [] }
+  ]
+}

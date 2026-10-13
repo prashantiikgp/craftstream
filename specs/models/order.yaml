@@ -1,0 +1,33 @@
+# Order: the buyer flow ends at "order placed" (no shipping or tracking, per the assignment).
+
+model: Order
+description: A buyer's order for one product.
+
+fields:
+  id:
+    type: string
+    readonly: true
+  product_id:
+    type: string
+    required: true
+  buyer_name:
+    type: string
+    required: true
+    min_length: 2
+    max_length: 80
+  quantity:
+    type: integer
+    minimum: 1
+    maximum: 20
+    default: 1
+  total:
+    type: number
+    readonly: true
+  status:
+    type: enum
+    values: [placed]
+    default: placed
+    readonly: true
+  created_at:
+    type: datetime
+    readonly: true

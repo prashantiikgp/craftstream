@@ -1,0 +1,47 @@
+# The API contract. The backend test suite checks that FastAPI serves exactly these routes,
+# and `make gen` turns this file into the Flutter API client.
+
+base_path: /api/v1
+
+endpoints:
+  - name: createProduct
+    method: POST
+    path: /products
+    body: ProductCreate
+    returns: UploadTicket
+    summary: Create a listing and get a resumable upload URL for its video.
+
+  - name: listProducts
+    method: GET
+    path: /products
+    query:
+      q: string      # keyword search over title, description, tags
+      tag: string    # exact tag filter
+    returns: Product[]
+    summary: Search and filter products (only ones whose video is ready).
+
+  - name: getProduct
+    method: GET
+    path: /products/{product_id}
+    returns: Product
+    summary: Product details, including the HLS playback URL.
+
+  - name: markUploadComplete
+    method: POST
+    path: /products/{product_id}/upload-complete
+    returns: Product
+    summary: Called by the app after the upload finishes; starts transcoding.
+
+  - name: createOrder
+    method: POST
+    path: /orders
+    body: OrderCreate
+    returns: Order
+    summary: Place an order. The flow ends here.
+
+# Small helper types that aren't stored in the database.
+types:
+  UploadTicket:
+    product: Product
+    upload_url: string       # GCS resumable-upload session URL
+    upload_method: string    # always "PUT" for resumable sessions
