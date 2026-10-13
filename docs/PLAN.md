@@ -162,7 +162,7 @@ S0 Restructure + tooling ─► S1 Data models ─┬─► B1 core ─► B2 ru
 ### Backend B1–B5 → [BACKEND_PLAN.md §6](BACKEND_PLAN.md) · Frontend F1–F6 → [FRONTEND_PLAN.md §5](FRONTEND_PLAN.md)
 
 ### S2: Deliver (shared)
-- [ ] README for reviewers: architecture diagram, how to run, live URLs
+- [x] README for reviewers: architecture diagram, how to run, live URLs (`README.md`, hosted app + API URLs)
 - [ ] Recording 1: architecture + live GCP evidence (Cloud Run, Transcoder jobs, buckets, Firestore)
 - [ ] Recording 2: Android app flow, throttled < 50 kbps
 - [ ] Recording 3: Chrome flow, throttled < 50 kbps

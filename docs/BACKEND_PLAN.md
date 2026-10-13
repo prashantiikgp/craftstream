@@ -167,7 +167,7 @@ Lessons from the first deploy (all fixed and tested):
 - [x] Errors: one `ErrorResponse` shape everywhere (`core/errors.py`, done in S1)
 - [x] `tools/smoke_test.py <url>`: whole flow incl. real resumable upload (passes locally)
 - [x] Smoke test against the deployed URL (upload → ready → search → order: PASS)
-- [ ] GCP evidence checklist for the video: Cloud Run revisions + logs, the Transcoder job list, bucket contents, Firestore docs
+- [x] GCP evidence checklist for the video: `docs/EVIDENCE.md` (Cloud Run revisions + logs, the Transcoder job list, bucket contents, Firestore docs)
 
 ---
 

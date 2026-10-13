@@ -96,7 +96,7 @@ Upload limits (15 min, file types) are **not** a frontend YAML. The app reads th
 - [x] Folder skeleton + `core/yaml_loader.dart` + config bootstrap + error screen for bad YAML
 - [x] Environments: `env/{dev,staging,prod}.json` validated by `core/env.dart` (https outside dev, no dev tools/debug logs in prod, no secrets: test-enforced)
 - [x] Fonts bundled + subset (Poppins/Inter, Latin + ₹, ~170 KB)
-- [ ] Done when `make web` opens the app in Chrome and `make apk` builds
+- [x] Done when `make web` opens the app in Chrome and `make apk` builds (release APK 55.6 MB, debug-signed)
 
 ### F2: Rule files (the pattern, ×5)
 - [x] `theme` (design tokens, 3 palettes, WCAG-tested) and `layout` (size classes, grid): YAML + `_schema` + `_loader` + `_engine` + tests
@@ -120,13 +120,14 @@ Upload limits (15 min, file types) are **not** a frontend YAML. The app reads th
 - [x] `player_engine` start-low settings on web (hls.js) and Android (ExoPlayer)
   - Web: our own `<video>` + bundled hls.js (`web/vendor/`), every setting from `player.yml` (`startLevel: 0`, 40 kbps first guess, 30 s buffer cap); rung pill shows e.g. "144p · 47 kbps".
   - Android: video_player has no track-selection API, so the bitrate cap cannot be set from Dart. ExoPlayer starts on the first variant of the master playlist, which our ladder lists lowest first. Confirmed on real GCP output: the 256x144 variant (31 kbps video) is listed first and its 12 kbps HE-AAC audio is the default track (44.9 kbps on the wire in total).
-- [ ] Test under a 45 kbps throttle: Chrome DevTools custom profile; Android emulator `-netspeed` / GPRS
-- [ ] Fallback low-band manifest if needed
+- [x] Chrome under a 45 kbps / 300 ms throttle against the live backend: starts on 256×144, 0 mid-playback stalls over 2 minutes, buffer grows ahead of playback, 13.6 s tap-to-first-frame
+- [ ] Android emulator under `-netspeed 45:45`
+- [x] Fallback low-band manifest: not needed (the real ladder's lowest rung plays without stalling at 45 kbps)
 - [ ] Done when a video plays without stalling under throttle on both platforms
 
 ### F6: Builds + demo
 - [x] Point at the Cloud Run URL (`env/prod.json`); web build → Firebase Hosting: https://craftstream-qi0tvg.web.app (upload → live → search verified on the hosted build against GCP)
-- [ ] Release APK
+- [x] Release APK (`make apk ENV=prod`; plugins forced to compileSdk 36 in `android/build.gradle.kts`, Gradle heap capped at 2 GB)
 - [ ] Check layouts on phone, tablet (portrait + landscape) and desktop Chrome
 - [ ] Record video 1 (Android) and video 2 (Chrome): upload → search → throttled playback → order
 

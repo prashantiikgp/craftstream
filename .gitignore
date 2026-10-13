@@ -19,3 +19,4 @@ docs/Technical_Assignment.pdf
 .claude/settings.local.json
 infra/gcp/config.env
 .playwright-mcp/
+frontend/.firebase/
