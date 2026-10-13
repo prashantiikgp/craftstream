@@ -125,7 +125,8 @@ Upload limits (15 min, file types) are **not** a frontend YAML. The app reads th
 - [ ] Done when a video plays without stalling under throttle on both platforms
 
 ### F6: Builds + demo
-- [ ] Point at the Cloud Run URL; web build → Firebase Hosting; release APK
+- [x] Point at the Cloud Run URL (`env/prod.json`); web build → Firebase Hosting: https://craftstream-qi0tvg.web.app (upload → live → search verified on the hosted build against GCP)
+- [ ] Release APK
 - [ ] Check layouts on phone, tablet (portrait + landscape) and desktop Chrome
 - [ ] Record video 1 (Android) and video 2 (Chrome): upload → search → throttled playback → order
 

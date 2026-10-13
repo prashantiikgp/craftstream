@@ -90,7 +90,7 @@ If any YAML fails to load, the app shows an error screen at startup. It never ru
 - **Web:** `make web ENV=dev` (web-server on :8080), then open it in Windows Chrome.
 - **Android emulator:** use the same `env/dev.json`; `AppEnv.apiHostFor` maps `localhost` to `10.0.2.2` in dev.
 - Schemas changed? `make flutter-gen` (json_serializable). Tests: `make flutter-test`.
-- **Throttled demo:** load the app first, then switch on the 45 kbps throttle. The web shell is about 2 MB.
+- **Throttled demo:** load the app first, then switch on the 45 kbps throttle. The hosted web shell is about 3.2 MB compressed (CanvasKit).
 
 ## Style
 
