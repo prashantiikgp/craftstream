@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=../.schemas/orders/order_rules.schema.json
+# Rules for placing an order. The buyer flow ends at "order placed" (no shipping, no payment).
+
+# Only products whose process video is ready can be ordered (the buyer must be able to watch it first).
+require_ready_video: true
+
+# total = unit price x quantity, rounded like this. Computed with Decimal, never float.
+total_rounding:
+  decimals: 2
+  mode: half_up      # half_up | half_even

@@ -1,0 +1,46 @@
+{
+  "$defs": {
+    "TotalRounding": {
+      "additionalProperties": false,
+      "properties": {
+        "decimals": {
+          "maximum": 4,
+          "minimum": 0,
+          "title": "Decimals",
+          "type": "integer"
+        },
+        "mode": {
+          "enum": [
+            "half_up",
+            "half_even"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decimals",
+        "mode"
+      ],
+      "title": "TotalRounding",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "require_ready_video": {
+      "title": "Require Ready Video",
+      "type": "boolean"
+    },
+    "total_rounding": {
+      "$ref": "#/$defs/TotalRounding"
+    }
+  },
+  "required": [
+    "require_ready_video",
+    "total_rounding"
+  ],
+  "title": "OrderRules",
+  "type": "object",
+  "$comment": "GENERATED from the Pydantic schema by tools/export_rule_schemas.py for order_rules.yml."
+}

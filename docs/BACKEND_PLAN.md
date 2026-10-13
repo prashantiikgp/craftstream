@@ -69,10 +69,10 @@ backend/
 
 | YAML | Engine's job | Example rules inside |
 |---|---|---|
-| `catalog/search.yml` | `search_engine`: build keyword tokens for a product; match a query + tag | searchable fields, stopwords, min token length, prefix match on/off |
+| `catalog/search.yml` | `search_engine`: build the keyword index for a product (words, prefixes, `tag:<tag>`); clean a query; match; page size | searchable fields, stopwords, min token / prefix length, max query terms, page size |
 | `media/ladder.yml` | `ladder_engine`: turn the rungs into a Transcoder `JobConfig` (and FFmpeg args for local runs); check the lowest rung's bitrate budget | rungs (size, fps, kbps), segment length, codec, `max_lowest_rung_total_kbps: 50` |
 | `media/upload_policy.yml` | `upload_policy_engine`: check mime types; produce the 15:00 `editList` cap; set the chunk size sent to the app | `max_duration_seconds: 900`, allowed mime types, `chunk_size_mb` |
-| `orders/order_rules.yml` | `order_rules_engine`: validate quantity; compute the total with rounding | qty min/max, currency, rounding mode |
+| `orders/order_rules.yml` | `order_rules_engine`: may this product be ordered; compute the total with Decimal rounding | `require_ready_video`, rounding decimals + mode (quantity limits are wire validation in `models/order.yml`) |
 
 Every loader looks the same:
 ```python
@@ -130,12 +130,12 @@ gs://<proj>-media/hls/<id>/manifest.m3u8 ◄── Transcoder ──done──�
 ### B2: Rule files (the pattern, ×4)
 - [x] `ladder`: YAML + `_schema` + `_loader` + `_engine` (done in S0, with `core/yaml_loader.py`)
 - [x] `upload_policy`: YAML + `_schema` + `_loader` + `_engine` (done in S1; the 15:00 cap is an `editList` in the Transcoder job)
-- [ ] For `search` and `order_rules`: YAML + `_schema` + `_loader` + `_engine` (moves page size and total rounding out of `main.py`)
-- [ ] Unit tests per engine (`tests/unit/<domain>/`)
-- [ ] Export JSON Schema from each `<xyz>_schema` and map it in `.vscode/settings.json` (`yaml.schemas`) so rule YAML gets autocomplete
-- [ ] `config_validation`: every YAML loads; **convention test**: each `xyz.yml` has `xyz_schema` + `xyz_loader`
+- [x] For `search` and `order_rules`: YAML + `_schema` + `_loader` + `_engine` (page size, prefix index, stopwords, Decimal rounding)
+- [x] Unit tests per engine (`tests/unit/<domain>/`)
+- [x] Export JSON Schema from each `<xyz>_schema` (`tools/export_rule_schemas.py`, part of `make gen`) → `config/.schemas/`; each YAML's first line points at it, so VS Code autocompletes and validates
+- [x] `config_validation`: every YAML loads; **convention test**: each `xyz.yml` has `xyz_schema` + `xyz_loader` + `xyz_engine`, and nothing exists without its YAML
 - [x] New endpoints: `/tags`, `/upload-policy`; pagination on the list endpoint (done in S1)
-- [ ] Done when the full artisan → buyer → order flow works in `/docs` in local mode
+- [x] Done when the full artisan → buyer → order flow works in local mode (`backend/requests.http`, API tests; 75 tests)
 
 ### B3: Prove the 50 kbps budget locally
 - [ ] Install FFmpeg; `tools/local_hls.py` builds the ladder **using `ladder_engine`** (same rules as GCP)

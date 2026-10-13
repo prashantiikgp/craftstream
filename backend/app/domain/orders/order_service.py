@@ -1,6 +1,6 @@
 """Orders: validate, compute the total, store. The buyer flow ends here (no shipping or payment).
 
-Total rounding moves to config/orders/order_rules.yml + order_rules_engine in B2.
+Rules (who can order, how the total rounds) come from order_rules_engine.
 """
 
 from __future__ import annotations
@@ -11,6 +11,7 @@ from app.core.errors import Conflict, NotFound
 from app.core.ids import new_id, now
 from app.db.repositories.order_repo import OrderRepo
 from app.db.repositories.product_repo import ProductRepo
+from app.domain.orders import order_rules_engine
 from app.generated.models import Order, OrderCreate
 
 log = logging.getLogger(__name__)
@@ -24,9 +25,9 @@ class OrderService:
         product = self._products.get(body.product_id)
         if product is None:
             raise NotFound(f"Product {body.product_id} not found")
-        if product.video_status != "ready":
+        if not order_rules_engine.can_order(product.video_status):
             raise Conflict("This product is not available to order yet.", code="product_not_ready")
-        order = Order(id=new_id(), created_at=now(), total=round(product.price * body.quantity, 2),
+        order = Order(id=new_id(), created_at=now(), total=order_rules_engine.total(product.price, body.quantity),
                       currency=product.currency, **body.model_dump())
         self._orders.save(order)
         log.info("order placed", extra={"order_id": order.id, "product_id": product.id})

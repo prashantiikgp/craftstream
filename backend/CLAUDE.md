@@ -43,6 +43,9 @@ Read with the root `CLAUDE.md`. Full plan: `docs/BACKEND_PLAN.md`.
    ```
 4. `app/domain/<domain>/<xyz>_engine.py`: takes `XyzRules` as an argument (defaulting to the loader), so tests can pass their own rules.
 5. `tests/unit/<domain>/test_<xyz>_engine.py`. The config-validation and convention tests pick the YAML up automatically.
+6. `make gen`: writes `config/.schemas/<domain>/<xyz>.schema.json` and adds the `# yaml-language-server: $schema=...` first line, so VS Code validates the YAML as you type.
+
+YAML gotcha: bare `on`, `off`, `yes`, `no` are booleans. Quote them in string lists.
 
 ## Recipe: add an endpoint
 

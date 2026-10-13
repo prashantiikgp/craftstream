@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/media/ladder.schema.json
 # Bitrate ladder: the versions of every video we create after upload.
 # The player picks the best rung the network can sustain.
 # The `ultra_low` rung is what makes playback work under 50 kbps:

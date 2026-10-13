@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=../.schemas/catalog/search.schema.json
+# How buyers find products. Used by catalog search_engine for both matching and the stored keyword index.
+
+# Text the search looks at, in the order listed.
+searchable_fields: [title, description, tags, artisan_name]
+
+# Words shorter than this, or in the stopword list, are ignored (in products and in queries).
+min_token_length: 2
+# Quoted on purpose: YAML reads a bare `on` / `off` / `yes` / `no` as true/false.
+stopwords: ["a", "an", "and", "by", "for", "from", "in", "of", "on", "or", "the", "to", "with", "handmade", "made"]
+
+# "pot" finds "pottery". Prefixes of each word down to this length go into the keyword index,
+# so Firestore can match them with a single array-contains query.
+prefix_match: true
+min_prefix_length: 3
+
+# A query keeps at most this many words (the rest are dropped).
+max_query_terms: 6
+
+# Results per page: used when the app doesn't say, and the most it may ask for.
+page_size:
+  default: 20
+  max: 50

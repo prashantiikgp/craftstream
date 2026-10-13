@@ -1,14 +1,25 @@
 {
   "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
   "python.testing.pytestEnabled": true,
-  "python.testing.pytestArgs": ["backend/tests", "--rootdir", "backend"],
-  "[python]": { "editor.defaultFormatter": "charliermarsh.ruff", "editor.formatOnSave": true },
+  "python.testing.pytestArgs": [
+    "backend/tests",
+    "--rootdir",
+    "backend"
+  ],
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true
+  },
   "dart.flutterProjectRoot": "frontend",
   "files.readonlyInclude": {
     "backend/app/generated/**": true,
     "frontend/lib/data/generated/**": true,
-    "models/build/**": true
+    "models/build/**": true,
+    "backend/config/.schemas/**": true
   },
-  "files.exclude": { "**/__pycache__": true, "**/.pytest_cache": true },
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true
+  },
   "yaml.validate": true
 }

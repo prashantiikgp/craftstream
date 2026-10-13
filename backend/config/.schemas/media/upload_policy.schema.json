@@ -1,0 +1,31 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "max_duration_seconds": {
+      "exclusiveMinimum": 0,
+      "title": "Max Duration Seconds",
+      "type": "integer"
+    },
+    "allowed_mime_types": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Allowed Mime Types",
+      "type": "array"
+    },
+    "chunk_size_kib": {
+      "exclusiveMinimum": 0,
+      "title": "Chunk Size Kib",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "max_duration_seconds",
+    "allowed_mime_types",
+    "chunk_size_kib"
+  ],
+  "title": "UploadPolicyRules",
+  "type": "object",
+  "$comment": "GENERATED from the Pydantic schema by tools/export_rule_schemas.py for upload_policy.yml."
+}

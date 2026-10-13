@@ -125,3 +125,28 @@ def test_cannot_order_before_video_is_ready(client):
     ticket = _new_product(client, _unique_tag())
     resp = client.post(f"{API}/orders", json={"product_id": ticket["product"]["id"], "buyer_name": "Ravi"})
     assert resp.status_code == 409 and resp.json()["code"] == "product_not_ready"
+
+
+def test_search_rules_from_yaml(client):
+    tag = _unique_tag()
+    ticket = _new_product(client, tag, title="Terracotta planter", tags=["  Garden  Decor ", tag], artisan_name="Kiran")
+    _upload(client, ticket, size=10)
+    pid = ticket["product"]["id"]
+
+    def ids(**params):
+        return [p["id"] for p in client.get(f"{API}/products", params=params).json()["items"]]
+
+    assert ticket["product"]["tags"] == ["garden decor", tag]   # tags are normalised on create
+    assert ids(q="terra plant", tag=tag) == [pid]              # prefixes
+    assert ids(q="kiran", tag=tag) == [pid]                    # artisan name is searchable
+    assert ids(q="the handmade", tag=tag) == [pid]             # stopwords only = no filter
+    assert ids(tag="GARDEN decor") == [pid]                    # tag filter ignores case and spacing
+    assert ids(q="te", tag=tag) == []                          # too short to be a prefix
+
+
+def test_order_total_uses_decimal_rounding(client):
+    ticket = _new_product(client, _unique_tag(), price=0.1)
+    _upload(client, ticket, size=10)
+    order = client.post(f"{API}/orders", json={"product_id": ticket["product"]["id"], "buyer_name": "Ravi",
+                                                "quantity": 3}).json()
+    assert order["total"] == 0.3

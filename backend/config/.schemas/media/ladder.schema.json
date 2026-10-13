@@ -1,0 +1,130 @@
+{
+  "$defs": {
+    "AudioSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "codec": {
+          "const": "aac",
+          "title": "Codec",
+          "type": "string"
+        },
+        "sample_rate": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Rate",
+          "type": "integer"
+        },
+        "channels": {
+          "maximum": 2,
+          "minimum": 1,
+          "title": "Channels",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "codec",
+        "sample_rate",
+        "channels"
+      ],
+      "title": "AudioSettings",
+      "type": "object"
+    },
+    "Rung": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "width": {
+          "exclusiveMinimum": 0,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "exclusiveMinimum": 0,
+          "title": "Height",
+          "type": "integer"
+        },
+        "fps": {
+          "exclusiveMinimum": 0,
+          "title": "Fps",
+          "type": "integer"
+        },
+        "video_kbps": {
+          "exclusiveMinimum": 0,
+          "title": "Video Kbps",
+          "type": "integer"
+        },
+        "audio_kbps": {
+          "exclusiveMinimum": 0,
+          "title": "Audio Kbps",
+          "type": "integer"
+        },
+        "audio_profile": {
+          "enum": [
+            "he-aac",
+            "aac-lc"
+          ],
+          "title": "Audio Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "width",
+        "height",
+        "fps",
+        "video_kbps",
+        "audio_kbps",
+        "audio_profile"
+      ],
+      "title": "Rung",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "segment_seconds": {
+      "exclusiveMinimum": 0,
+      "title": "Segment Seconds",
+      "type": "integer"
+    },
+    "keyframe_seconds": {
+      "exclusiveMinimum": 0,
+      "title": "Keyframe Seconds",
+      "type": "integer"
+    },
+    "video_codec": {
+      "const": "h264",
+      "title": "Video Codec",
+      "type": "string"
+    },
+    "audio": {
+      "$ref": "#/$defs/AudioSettings"
+    },
+    "rungs": {
+      "items": {
+        "$ref": "#/$defs/Rung"
+      },
+      "minItems": 1,
+      "title": "Rungs",
+      "type": "array"
+    },
+    "max_lowest_rung_total_kbps": {
+      "exclusiveMinimum": 0,
+      "title": "Max Lowest Rung Total Kbps",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "segment_seconds",
+    "keyframe_seconds",
+    "video_codec",
+    "audio",
+    "rungs",
+    "max_lowest_rung_total_kbps"
+  ],
+  "title": "LadderRules",
+  "type": "object",
+  "$comment": "GENERATED from the Pydantic schema by tools/export_rule_schemas.py for ladder.yml."
+}

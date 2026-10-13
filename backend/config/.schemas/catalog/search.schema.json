@@ -1,0 +1,82 @@
+{
+  "$defs": {
+    "PageSize": {
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "title": "Default"
+        },
+        "max": {
+          "exclusiveMinimum": 0,
+          "title": "Max",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "default",
+        "max"
+      ],
+      "title": "PageSize",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "searchable_fields": {
+      "items": {
+        "enum": [
+          "title",
+          "description",
+          "tags",
+          "artisan_name"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Searchable Fields",
+      "type": "array"
+    },
+    "min_token_length": {
+      "minimum": 1,
+      "title": "Min Token Length",
+      "type": "integer"
+    },
+    "stopwords": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Stopwords",
+      "type": "array"
+    },
+    "prefix_match": {
+      "title": "Prefix Match",
+      "type": "boolean"
+    },
+    "min_prefix_length": {
+      "minimum": 1,
+      "title": "Min Prefix Length",
+      "type": "integer"
+    },
+    "max_query_terms": {
+      "minimum": 1,
+      "title": "Max Query Terms",
+      "type": "integer"
+    },
+    "page_size": {
+      "$ref": "#/$defs/PageSize"
+    }
+  },
+  "required": [
+    "searchable_fields",
+    "min_token_length",
+    "prefix_match",
+    "min_prefix_length",
+    "max_query_terms",
+    "page_size"
+  ],
+  "title": "SearchRules",
+  "type": "object",
+  "$comment": "GENERATED from the Pydantic schema by tools/export_rule_schemas.py for search.yml."
+}

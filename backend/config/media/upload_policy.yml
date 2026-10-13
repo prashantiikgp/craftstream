@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/media/upload_policy.schema.json
 # What an artisan may upload. Served to the app at GET /api/v1/upload-policy (checked on the device
 # before uploading) and enforced on the server by capping the Transcoder job at max_duration_seconds.
 
