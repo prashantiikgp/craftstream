@@ -6,6 +6,7 @@ Tests pass their own Container to `create_app` to swap any part.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Annotated, Protocol
 
@@ -18,6 +19,8 @@ from app.db.repositories.product_repo import FirestoreProductRepo, InMemoryProdu
 from app.domain.catalog.catalog_service import CatalogService
 from app.domain.media.media_service import MediaService, Storage, Transcoder
 from app.domain.orders.order_service import OrderService
+
+log = logging.getLogger(__name__)
 
 
 class CallerVerifier(Protocol):
@@ -52,7 +55,7 @@ def build_container(settings: Settings) -> Container:
             storage=GcsStorage(settings.gcp_project, settings.upload_bucket, settings.media_bucket),
             transcoder=GcpTranscoder(settings.gcp_project, settings.gcp_region,
                                      settings.upload_bucket, settings.media_bucket, settings.transcode_topic),
-            callers=OidcCallerVerifier(settings.internal_audience, settings.internal_invoker_set),
+            callers=OidcCallerVerifier(settings.internal_audience_list, settings.internal_invoker_set),
         )
     from app.infra.local.local_auth import AllowAllCallers
     from app.infra.local.local_storage import LocalStorage
@@ -86,6 +89,7 @@ def verify_internal_caller(c: Annotated[Container, Depends(get_container)],
     try:
         return c.callers.verify(authorization)
     except CallerRejected as e:
+        log.warning("internal call rejected: %s", e)
         raise Unauthorized(str(e)) from e
 
 

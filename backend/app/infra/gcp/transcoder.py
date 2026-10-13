@@ -2,8 +2,17 @@
 
 from __future__ import annotations
 
+import json
+
 from app.domain.media.ladder_engine import build_job_config
 from app.infra.gcp.gcs import raw_object_name
+
+
+def job_config_proto(config: dict):
+    """build_job_config returns REST JSON (camelCase); proto-plus constructors only take snake_case fields."""
+    from google.cloud.video import transcoder_v1
+
+    return transcoder_v1.JobConfig.from_json(json.dumps(config))
 
 
 class GcpTranscoder:
@@ -14,7 +23,7 @@ class GcpTranscoder:
         self._upload_bucket, self._media_bucket = upload_bucket, media_bucket
         self._topic = f"projects/{project}/topics/{topic}"
 
-    def submit(self, product_id: str, max_duration_seconds: int) -> str:
+    def submit(self, product_id: str, max_duration_seconds: int | None) -> str:
         """Start transcoding the product's raw upload; returns the job name. Completion arrives via Pub/Sub."""
         from google.cloud.video import transcoder_v1  # imported lazily so local mode needs no GCP libs
 
@@ -25,7 +34,7 @@ class GcpTranscoder:
         )
         job = transcoder_v1.Job(
             output_uri=f"gs://{self._media_bucket}/hls/{product_id}/",
-            config=transcoder_v1.JobConfig(config),
+            config=job_config_proto(config),
             labels={"product_id": product_id},
         )
         return transcoder_v1.TranscoderServiceClient().create_job(parent=self._parent, job=job).name

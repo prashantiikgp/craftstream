@@ -9,7 +9,7 @@ class LocalTranscoder:
     def __init__(self) -> None:
         self._jobs: dict[str, str] = {}
 
-    def submit(self, product_id: str, max_duration_seconds: int) -> str:
+    def submit(self, product_id: str, max_duration_seconds: int | None) -> str:
         name = f"local/jobs/{product_id}"
         self._jobs[name] = product_id
         return name

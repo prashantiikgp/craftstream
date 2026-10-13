@@ -96,7 +96,7 @@ def load_search_rules() -> SearchRules:
 | POST | `/api/v1/orders` | Place an order → `Order(status=placed)` |
 | POST | `/internal/media/uploaded` | Eventarc: an upload finished → start transcoding *(not public)* |
 | POST | `/internal/media/transcoded` | Pub/Sub: a transcode finished → mark ready or failed *(not public)* |
-| GET | `/healthz` | Liveness |
+| GET | `/health` | Liveness |
 | PUT | `/local-upload/{id}` | **Local mode only.** Fake GCS resumable target (Content-Range chunks → 308 + `Range` until the last) |
 
 Every error is an `ErrorResponse` (`code`, `message`, `details`). The route test checks method, path **and** success status against `models/endpoints.yml` (public `endpoints` + `internal`), both ways.

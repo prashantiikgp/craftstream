@@ -62,6 +62,8 @@ def build_job_config(
                 "codec": "aac-he" if r.audio_profile == "he-aac" else "aac",
                 "bitrateBps": r.audio_kbps * 1000,
                 "channelCount": rules.audio.channels,
+                # The API defaults to a stereo layout and rejects a count that doesn't match it.
+                "channelLayout": ["fc"] if rules.audio.channels == 1 else ["fl", "fr"],
                 "sampleRateHertz": rules.audio.sample_rate,
             },
         })

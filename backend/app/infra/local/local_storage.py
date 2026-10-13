@@ -34,6 +34,9 @@ class LocalStorage:
     def upload_url(self, product_id: str, origin: str | None, api_base_url: str) -> str:
         return f"{api_base_url.rstrip('/')}/local-upload/{product_id}"
 
+    def duration_seconds(self, product_id: str) -> float | None:
+        return None  # bytes are counted, not kept, so the length is unknown
+
     def hls_url(self, product_id: str) -> str:
         return SAMPLE_HLS
 

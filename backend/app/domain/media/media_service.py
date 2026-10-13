@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 from typing import Protocol
 
+from app.core.errors import UnreadableVideo
 from app.db.repositories.product_repo import ProductRepo
 from app.domain.media import upload_policy_engine
 from app.generated.models import Product, UploadPolicy, UploadTicket
@@ -21,13 +22,14 @@ class Storage(Protocol):
     def upload_url(self, product_id: str, origin: str | None, api_base_url: str) -> str: ...
     def hls_url(self, product_id: str) -> str: ...
     def thumbnail_url(self, product_id: str) -> str | None: ...
+    def duration_seconds(self, product_id: str) -> float | None: ...  # None: unknown; raises UnreadableVideo
     def finalize_media(self, product_id: str) -> None: ...
 
 
 class Transcoder(Protocol):
     completes_immediately: bool  # True for the local fake: no completion callback will come
 
-    def submit(self, product_id: str, max_duration_seconds: int) -> str: ...
+    def submit(self, product_id: str, max_duration_seconds: int | None) -> str: ...  # None: keep it all
     def product_id_for_job(self, job_name: str) -> str | None: ...
 
 
@@ -61,7 +63,13 @@ class MediaService:
         if product is None or product.video_status != "awaiting_upload":
             log.info("upload event ignored", extra={"product_id": product_id})
             return
-        job = self._transcoder.submit(product_id, upload_policy_engine.max_duration_seconds())
+        try:
+            duration = self._storage.duration_seconds(product_id)
+        except UnreadableVideo as e:
+            self._products.update_video(product_id, "failed")
+            log.warning("upload is not a readable video", extra={"product_id": product_id, "reason": str(e)})
+            return
+        job = self._transcoder.submit(product_id, upload_policy_engine.transcode_cap(duration))
         self._products.update_video(product_id, "processing")
         log.info("transcode submitted", extra={"product_id": product_id, "job": job})
         if self._transcoder.completes_immediately:

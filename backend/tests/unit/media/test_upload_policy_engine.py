@@ -8,6 +8,7 @@ from app.domain.media.upload_policy_engine import (
     is_allowed_duration,
     is_allowed_mime_type,
     max_duration_seconds,
+    transcode_cap,
 )
 from app.schemas.media.upload_policy_schema import UploadPolicyRules
 
@@ -35,3 +36,10 @@ def test_chunk_size_must_be_multiple_of_256_kib():
 def test_only_video_types_allowed():
     with pytest.raises(ValidationError):
         UploadPolicyRules(max_duration_seconds=900, allowed_mime_types=["application/pdf"], chunk_size_kib=256)
+
+
+def test_transcode_cap_only_for_long_or_unmeasured_videos():
+    assert transcode_cap(12.0) is None          # the Transcoder rejects an edit list past the input's end
+    assert transcode_cap(900.0) is None
+    assert transcode_cap(1085.5) == 900
+    assert transcode_cap(None) == 900

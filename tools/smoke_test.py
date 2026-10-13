@@ -68,8 +68,8 @@ def main() -> None:
     tag = f"smoke{uuid.uuid4().hex[:6]}"
 
     print(f"Smoke test against {base}")
-    health = httpx.get(f"{base}/healthz", timeout=30).json()
-    ok(f"healthz: mode={health['mode']}")
+    health = httpx.get(f"{base}/health", timeout=30).json()
+    ok(f"health: mode={health['mode']}")
 
     policy = api.get("/upload-policy").json()
     ok(f"upload policy: max {policy['max_duration_seconds']} s, chunk {policy['chunk_size_bytes']:,} bytes")

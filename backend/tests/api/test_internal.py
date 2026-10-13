@@ -9,6 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.api.deps import Container
+from app.core.errors import UnreadableVideo
 from app.core.settings import Settings
 from app.infra.gcp.auth import CallerRejected
 from app.infra.local.local_auth import AllowAllCallers
@@ -23,9 +24,11 @@ class AsyncTranscoder:
 
     def __init__(self) -> None:
         self.jobs: dict[str, str] = {}
+        self.caps: dict[str, int | None] = {}
 
-    def submit(self, product_id: str, max_duration_seconds: int) -> str:
+    def submit(self, product_id: str, max_duration_seconds: int | None) -> str:
         self.jobs[f"jobs/{product_id}"] = product_id
+        self.caps[product_id] = max_duration_seconds
         return f"jobs/{product_id}"
 
     def product_id_for_job(self, job_name: str) -> str | None:
@@ -33,6 +36,15 @@ class AsyncTranscoder:
 
 
 class CdnStorage(LocalStorage):
+    """Uploads measure `duration` seconds; `UnreadableVideo` instead makes them unreadable."""
+
+    duration: float | type[UnreadableVideo] = 12.0
+
+    def duration_seconds(self, product_id: str) -> float | None:
+        if self.duration is UnreadableVideo:
+            raise UnreadableVideo("not a video")
+        return self.duration
+
     def hls_url(self, product_id: str) -> str:
         return f"https://cdn.test/hls/{product_id}/manifest.m3u8"
 
@@ -124,3 +136,26 @@ def test_local_mode_finishes_instantly(client):
     pid = _create(client)
     client.post("/internal/media/uploaded", json={"bucket": "b", "name": f"raw/{pid}/source"})
     assert _status(client, pid)["video_status"] == "ready"
+
+
+@pytest.mark.parametrize(("duration", "cap"), [(12.0, None), (900.0, None), (1085.5, 900)])
+def test_only_videos_over_the_limit_are_capped(settings: Settings, container: Container, duration, cap):
+    storage, transcoder = CdnStorage(), AsyncTranscoder()
+    storage.duration = duration
+    client = TestClient(create_app(settings, Container(settings=settings, products=container.products,
+                                                       orders=container.orders, storage=storage,
+                                                       transcoder=transcoder, callers=AllowAllCallers())))
+    pid = _create(client)
+    client.post("/internal/media/uploaded", json={"bucket": "b", "name": f"raw/{pid}/source"})
+    assert transcoder.caps[pid] == cap
+
+
+def test_an_unreadable_upload_fails_without_a_job(settings: Settings, container: Container):
+    storage, transcoder = CdnStorage(), AsyncTranscoder()
+    storage.duration = UnreadableVideo
+    client = TestClient(create_app(settings, Container(settings=settings, products=container.products,
+                                                       orders=container.orders, storage=storage,
+                                                       transcoder=transcoder, callers=AllowAllCallers())))
+    pid = _create(client)
+    assert client.post("/internal/media/uploaded", json={"bucket": "b", "name": f"raw/{pid}/source"}).status_code == 204
+    assert _status(client, pid)["video_status"] == "failed" and not transcoder.jobs

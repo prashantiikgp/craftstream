@@ -4,7 +4,14 @@ source "$(dirname "$0")/_common.sh"
 num=$(project_number)
 TRANSCODER_AGENT="service-${num}@gcp-sa-transcoder.iam.gserviceaccount.com"
 PUBSUB_AGENT="service-${num}@gcp-sa-pubsub.iam.gserviceaccount.com"
-GCS_AGENT=$(gc storage service-agent)
+GCS_AGENT="service-${num}@gs-project-accounts.iam.gserviceaccount.com"
+
+# Google creates these service agents lazily; IAM bindings fail with "does not exist" until they are provisioned.
+step "Google service agents (Storage, Pub/Sub, Transcoder, Eventarc)"
+for svc in storage.googleapis.com pubsub.googleapis.com transcoder.googleapis.com eventarc.googleapis.com; do
+  gc beta services identity create --service "$svc" >/dev/null
+done
+gc storage service-agent >/dev/null   # also provisions the GCS agent on older projects
 
 ensure_sa() { gc iam service-accounts describe "$1@${PROJECT_ID}.iam.gserviceaccount.com" >/dev/null 2>&1 || \
   gc iam service-accounts create "$1" --display-name "$2"; }
@@ -14,12 +21,12 @@ bucket_role() { gc storage buckets add-iam-policy-binding "gs://$1" --member "$2
 step "Service accounts"
 ensure_sa craftstream-api "CraftStream API (Cloud Run)"
 ensure_sa craftstream-events "CraftStream Eventarc + Pub/Sub invoker"
-gc beta services identity create --service transcoder.googleapis.com >/dev/null 2>&1 || true
 
-step "API: Firestore, start/read Transcoder jobs, create upload sessions"
+step "API: Firestore, start/read Transcoder jobs, create upload sessions, measure uploads"
 project_role "serviceAccount:$API_SA" roles/datastore.user
 project_role "serviceAccount:$API_SA" roles/transcoder.admin
 bucket_role "$UPLOAD_BUCKET" "serviceAccount:$API_SA" roles/storage.objectCreator
+bucket_role "$UPLOAD_BUCKET" "serviceAccount:$API_SA" roles/storage.objectViewer   # ffprobe reads the headers
 
 step "Transcoder service agent: read raw uploads, write HLS, publish results"
 bucket_role "$UPLOAD_BUCKET" "serviceAccount:$TRANSCODER_AGENT" roles/storage.objectViewer

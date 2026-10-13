@@ -35,6 +35,18 @@ class GcsStorage:
         # `origin` is required for browser (Flutter web) uploads so GCS sends CORS headers.
         return blob.create_resumable_upload_session(origin=origin)
 
+    def duration_seconds(self, product_id: str) -> float | None:
+        """Measure the raw upload in place: ffprobe reads its headers over HTTPS with our own access token."""
+        import google.auth  # imported lazily so local mode needs no GCP libs
+        from google.auth.transport.requests import Request
+
+        from app.infra.ffprobe import probe_duration
+
+        creds, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/devstorage.read_only"])
+        creds.refresh(Request())
+        url = f"https://storage.googleapis.com/{self._upload_bucket}/{raw_object_name(product_id)}"
+        return probe_duration(url, headers=f"Authorization: Bearer {creds.token}\r\n")
+
     def hls_url(self, product_id: str) -> str:
         return f"https://storage.googleapis.com/{self._media_bucket}/hls/{product_id}/manifest.m3u8"
 

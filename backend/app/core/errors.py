@@ -27,6 +27,10 @@ class DomainError(Exception):
         self.details = details or []
 
 
+class UnreadableVideo(Exception):
+    """The uploaded file is not a video we can measure (wrong format, corrupt or empty)."""
+
+
 class NotFound(DomainError):
     code = "not_found"
 

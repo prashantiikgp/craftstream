@@ -59,9 +59,9 @@ endpoints:
 internal:
   - name: health
     method: GET
-    path: /healthz
+    path: /health
     status: 200
-    summary: Liveness check for Cloud Run.
+    summary: Liveness check for Cloud Run (not /healthz, which Google's front end reserves).
 
   - name: localUpload
     method: PUT

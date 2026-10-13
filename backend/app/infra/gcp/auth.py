@@ -1,7 +1,8 @@
 """Verify that a call to /internal/* really comes from our Eventarc trigger or Pub/Sub subscription.
 
 Both send `Authorization: Bearer <Google-signed OIDC ID token>` minted for a service account we choose.
-We check the signature, the audience (our service URL) and that the token belongs to that service account.
+We check the signature, the audience (one of our service URLs, or one plus a path: Eventarc uses the full
+destination URL) and that the token belongs to that service account.
 """
 
 from __future__ import annotations
@@ -12,8 +13,8 @@ class CallerRejected(Exception):
 
 
 class OidcCallerVerifier:
-    def __init__(self, audience: str, allowed_emails: set[str]) -> None:
-        self._audience, self._allowed = audience, allowed_emails
+    def __init__(self, audiences: list[str], allowed_emails: set[str]) -> None:
+        self._audiences, self._allowed = audiences, allowed_emails
 
     def verify(self, authorization: str | None) -> str:
         """Return the caller's email, or raise CallerRejected."""
@@ -23,10 +24,14 @@ class OidcCallerVerifier:
         from google.oauth2 import id_token
 
         try:
+            # audience=None: Google checks signature, expiry and issuer; we check the audience below.
             claims = id_token.verify_oauth2_token(authorization.removeprefix("Bearer "), google_requests.Request(),
-                                                  audience=self._audience)
+                                                  audience=None)
         except ValueError as e:
             raise CallerRejected(f"invalid token: {e}") from e
+        aud = claims.get("aud", "")
+        if not any(aud == base or aud.startswith(base.rstrip("/") + "/") for base in self._audiences):
+            raise CallerRejected(f"token is for {aud or '?'}, not this service")
         email = claims.get("email", "")
         if not claims.get("email_verified") or email not in self._allowed:
             raise CallerRejected(f"caller {email or '?'} is not allowed")

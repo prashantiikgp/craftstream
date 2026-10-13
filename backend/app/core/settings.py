@@ -26,8 +26,9 @@ class Settings(BaseSettings):
     media_bucket: str = ""    # HLS output (public read)
     cors_origins: str = "*"
     log_level: str = "INFO"
-    # /internal/* callers (gcp mode): the OIDC audience (our Cloud Run URL) and the service account(s)
-    # Eventarc and Pub/Sub sign their tokens as, comma-separated.
+    # /internal/* callers (gcp mode): the OIDC audiences and the service account(s) Eventarc and Pub/Sub sign
+    # their tokens as, both comma-separated. Audiences are our Cloud Run URLs: Eventarc mints tokens for the
+    # service's hash URL (…-<hash>-el.a.run.app), our Pub/Sub push for the deterministic one.
     internal_audience: str = ""
     internal_invokers: str = ""
     transcode_topic: str = ""   # Pub/Sub topic id the Transcoder publishes job results to
@@ -41,6 +42,10 @@ class Settings(BaseSettings):
             if missing:
                 raise ValueError(f"CRAFTSTREAM_MODE=gcp needs {', '.join(m.upper() for m in missing)}")
         return self
+
+    @property
+    def internal_audience_list(self) -> list[str]:
+        return [a.strip() for a in self.internal_audience.split(",") if a.strip()]
 
     @property
     def internal_invoker_set(self) -> set[str]:

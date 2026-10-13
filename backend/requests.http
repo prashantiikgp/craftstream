@@ -5,7 +5,7 @@
 @api = {{host}}/api/v1
 
 ### Health
-GET {{host}}/healthz
+GET {{host}}/health
 
 ### Artisan: create a listing (returns an UploadTicket)
 # @name create
