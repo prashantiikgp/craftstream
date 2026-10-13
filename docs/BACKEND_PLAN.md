@@ -34,6 +34,7 @@ backend/
 │   ├── main.py                          app factory: create FastAPI, add middleware, include routers
 │   ├── core/                            plumbing
 │   │   ├── settings.py                  env vars (pydantic-settings): mode, project, buckets, region
+│   │   ├── ids.py                       new ids + UTC timestamps
 │   │   ├── yaml_loader.py               shared helper: read YAML → validate with schema → cache
 │   │   ├── errors.py                    domain errors → HTTP errors
 │   │   └── logging.py                   structured JSON logs (readable in Cloud Logging)
@@ -52,6 +53,7 @@ backend/
 │   ├── db/repositories/                 ⑤ storage: product_repo.py, order_repo.py
 │   │                                    (Protocol + InMemory for local/tests + Firestore for GCP)
 │   ├── infra/gcp/                       ⑥ thin Google SDK wrappers: gcs.py, transcoder.py
+│   ├── infra/local/                     ⑥ local fakes with the same methods: local_storage.py (resumable), local_transcoder.py
 │   └── generated/models.py              ⑦ from /models (never edit by hand)
 └── tests/
     ├── unit/<domain>/test_<xyz>_engine.py
@@ -118,11 +120,12 @@ gs://<proj>-media/hls/<id>/manifest.m3u8 ◄── Transcoder ──done──�
 
 ### B1: Core skeleton (local, no GCP)
 - [x] `core/settings.py`, `core/yaml_loader.py`, `core/errors.py` (S0/S1)
-- [ ] `core/logging.py`
-- [ ] `main.py` as an app factory; split the current all-in-one `main.py` into `api/routers/*`
-- [ ] `db/repositories/`: `ProductRepo`/`OrderRepo` Protocols + InMemory versions
-- [ ] Services: `catalog_service`, `media_service`, `order_service`
-- [ ] Done when the existing API tests pass on the new structure
+- [x] `core/logging.py` (JSON lines with `severity` on GCP, plain text locally), `core/ids.py`
+- [x] `main.py` as an app factory (`create_app(settings, container)`); routes split into `api/routers/*`; wiring in `api/deps.py`
+- [x] `db/repositories/`: `ProductRepo`/`OrderRepo` Protocols + InMemory + Firestore versions
+- [x] Services: `catalog_service`, `media_service` (Storage/Transcoder ports; GCP in `infra/gcp/`, fakes in `infra/local/`), `order_service`
+- [x] Architecture test: layer import rules + Google SDKs imported lazily
+- [x] Done when the existing API tests pass on the new structure (44 tests)
 
 ### B2: Rule files (the pattern, ×4)
 - [x] `ladder`: YAML + `_schema` + `_loader` + `_engine` (done in S0, with `core/yaml_loader.py`)

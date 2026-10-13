@@ -1,19 +1,45 @@
-"""Settings, read from environment variables (see .env.example)."""
+"""Settings, read from environment variables (see .env.example). Validated at startup."""
 
-import os
-from dataclasses import dataclass
+from __future__ import annotations
+
+from functools import lru_cache
+from pathlib import Path
+from typing import Literal
+
+from pydantic import Field, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_BACKEND = Path(__file__).resolve().parents[2]
 
 
-@dataclass(frozen=True)
-class Settings:
-    # "local" = in-memory database + no real GCS calls (for development and tests).
+class Settings(BaseSettings):
+    # Real environment variables win over .env files; .env at the repo root or in backend/ (both gitignored).
+    model_config = SettingsConfigDict(env_file=(_BACKEND.parent / ".env", _BACKEND / ".env"), extra="ignore",
+                                      frozen=True, populate_by_name=True)
+
+    # "local" = in-memory database + fake upload/transcode (for development and tests).
     # "gcp"   = Firestore + Cloud Storage + Transcoder API.
-    mode: str = os.getenv("CRAFTSTREAM_MODE", "local")
-    gcp_project: str = os.getenv("GCP_PROJECT", "")
-    gcp_region: str = os.getenv("GCP_REGION", "asia-south1")
-    upload_bucket: str = os.getenv("UPLOAD_BUCKET", "")    # raw artisan uploads
-    media_bucket: str = os.getenv("MEDIA_BUCKET", "")      # HLS output, publicly readable
-    cors_origins: str = os.getenv("CORS_ORIGINS", "*")
+    mode: Literal["local", "gcp"] = Field("local", validation_alias="CRAFTSTREAM_MODE")
+    gcp_project: str = ""
+    gcp_region: str = "asia-south1"
+    upload_bucket: str = ""   # raw artisan uploads (private)
+    media_bucket: str = ""    # HLS output (public read)
+    cors_origins: str = "*"
+    log_level: str = "INFO"
+
+    @model_validator(mode="after")
+    def _gcp_needs_resources(self) -> Settings:
+        if self.mode == "gcp":
+            missing = [k for k in ("gcp_project", "upload_bucket", "media_bucket") if not getattr(self, k)]
+            if missing:
+                raise ValueError(f"CRAFTSTREAM_MODE=gcp needs {', '.join(m.upper() for m in missing)}")
+        return self
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
 
-settings = Settings()
+@lru_cache(maxsize=1)
+def get_settings() -> Settings:
+    return Settings()

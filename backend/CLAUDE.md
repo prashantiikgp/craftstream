@@ -13,15 +13,18 @@ Read with the root `CLAUDE.md`. Full plan: `docs/BACKEND_PLAN.md`.
 | Services | `app/domain/<domain>/<domain>_service.py` | wire engines + repositories + `infra/gcp` | know about HTTP (no `Request`, no `HTTPException`) |
 | Routers | `app/api/routers/*.py` | parse request, call one service, return a generated model | contain business rules |
 | Repositories | `app/db/repositories/` | Protocol + InMemory + Firestore implementations | contain business rules |
-| GCP wrappers | `app/infra/gcp/` | thin wrappers over Google SDKs | be imported by engines |
+| GCP wrappers | `app/infra/gcp/` | thin wrappers over Google SDKs (lazy imports) | be imported by engines |
+| Local fakes | `app/infra/local/` | same methods as the GCP wrappers, no network | be used in gcp mode |
+| Wiring | `app/api/deps.py` | `build_container(settings)` picks GCP or local parts; `*Dep` types for routers | hold logic |
 | Generated | `app/generated/models.py` | be imported everywhere | be edited by hand |
 
-**Dependency direction:** `routers → services → engines`; services also use `repositories` and `infra/gcp`. Never the other way.
+**Dependency direction:** `routers → services → engines`; services also use `repositories` and `infra/`. Never the other way. `tests/config_validation/test_architecture.py` enforces this by reading imports.
 
 ## Modes
 
-- `CRAFTSTREAM_MODE=local`: InMemory repositories; the uploads router exposes a fake upload target that calls `media_service.on_uploaded()`, and transcoding is simulated. No GCP credentials needed.
+- `CRAFTSTREAM_MODE=local`: InMemory repositories, `LocalStorage` (fake resumable upload target at `/local-upload/{id}`) and `LocalTranscoder` (finishes instantly). No GCP credentials needed.
 - `CRAFTSTREAM_MODE=gcp`: Firestore, GCS, Transcoder. Import Google SDKs **inside** the functions that use them so local mode and tests never need them.
+- Only `build_container` looks at the mode. Services never branch on it; they call the ports (`Storage`, `Transcoder`).
 
 ## Recipe: add a rule file
 
@@ -52,7 +55,7 @@ Read with the root `CLAUDE.md`. Full plan: `docs/BACKEND_PLAN.md`.
 ## Tests
 
 - `tests/unit/<domain>/`: engines, pure and fast, no fixtures beyond rules
-- `tests/api/`: FastAPI `TestClient` in local mode, full flows
+- `tests/api/`: `client` fixture (`tests/conftest.py`) = fresh app + fresh in-memory data per test; build a custom `Container` to swap a part (see `test_internal.py`)
 - `tests/config_validation/`: every YAML loads; naming convention; routes == `endpoints.yml`
 - Bitrate budget test (needs FFmpeg; skipped with a clear reason if it's missing)
 - Run: `make test` from the repo root
@@ -66,4 +69,4 @@ Read with the root `CLAUDE.md`. Full plan: `docs/BACKEND_PLAN.md`.
 
 ## Style
 
-Python 3.12, type hints everywhere, ruff (line length 120), one `ErrorResponse` shape for every error, domain errors mapped to HTTP in `core/errors.py` only.
+Python 3.12, type hints everywhere, ruff (line length 120), one `ErrorResponse` shape for every error. Services raise `NotFound` / `Conflict` / `DomainError` from `core/errors.py`; the HTTP status mapping lives there only. Log with `logging.getLogger(__name__)` and `extra={...}` fields.
