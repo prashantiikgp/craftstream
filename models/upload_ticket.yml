@@ -1,0 +1,19 @@
+# UploadTicket: returned when an artisan creates a listing.
+# The app uploads the video bytes straight to `upload_url` (a GCS resumable session), never to our API.
+
+model: UploadTicket
+description: A new listing plus where and how to upload its video.
+
+fields:
+  product:
+    type: Product
+  upload_url:
+    type: string
+    description: GCS resumable-upload session URL (a local fake in local mode)
+  upload_method:
+    type: enum
+    values: [PUT]
+  chunk_size_bytes:
+    type: integer
+    minimum: 262144
+    description: send the file in chunks of this size (a multiple of 256 KiB, as GCS requires)

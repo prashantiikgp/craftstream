@@ -1,0 +1,14 @@
+# ProductPage: one page of search results. Pass `next_cursor` back as `cursor` for the next page.
+
+model: ProductPage
+description: One page of search results.
+
+fields:
+  items:
+    type: array
+    items: ProductSummary
+    default: []
+  next_cursor:
+    type: string
+    nullable: true
+    description: opaque; null when there are no more results

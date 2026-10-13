@@ -52,7 +52,8 @@ At these bitrates, the TS container alone added about 14 kbps of overhead, so th
 
 - [x] YAML data models + code generator
 - [x] Repo restructured into models/ · backend/ · frontend/ with the YAML → schema → loader → engine pattern
-- [x] API: create listing, search/filter, product detail, upload-complete, order
+- [x] API contract v0.2: create listing, paged search/filter, tags, upload policy, order, one error shape
+- [x] Local mode: fake resumable upload target (same protocol as GCS)
 - [x] Transcoder API job config built from the ladder
 - [x] Flutter: search screen + HLS player
 - [ ] GCP project, buckets, Firestore, Cloud Run deploy

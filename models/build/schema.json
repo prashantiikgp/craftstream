@@ -1,6 +1,34 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$defs": {
+    "ErrorResponse": {
+      "type": "object",
+      "description": "The body of every error response.",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "machine-readable, e.g. not_found, validation_error, unsupported_media_type"
+        },
+        "message": {
+          "type": "string",
+          "description": "human-readable summary"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "one entry per problem, e.g. \"body.price - Input should be greater than or equal to 0.01\""
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "details"
+      ],
+      "additionalProperties": false
+    },
     "Order": {
       "type": "object",
       "description": "A buyer's order for one product.",
@@ -25,6 +53,16 @@
         },
         "total": {
           "type": "number",
+          "description": "unit price x quantity, rounded per orders/order_rules.yml",
+          "readOnly": true
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "INR",
+            "USD"
+          ],
+          "description": "copied from the product",
           "readOnly": true
         },
         "status": {
@@ -47,12 +85,15 @@
         "buyer_name",
         "quantity",
         "total",
+        "currency",
         "status",
         "created_at"
-      ]
+      ],
+      "additionalProperties": false
     },
     "OrderCreate": {
       "type": "object",
+      "description": "Request body to create a new Order (server-set fields excluded).",
       "properties": {
         "product_id": {
           "type": "string"
@@ -72,7 +113,8 @@
       "required": [
         "product_id",
         "buyer_name"
-      ]
+      ],
+      "additionalProperties": false
     },
     "Product": {
       "type": "object",
@@ -127,16 +169,24 @@
           "readOnly": true
         },
         "hls_url": {
-          "type": [
-            "string",
-            "null"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
           "readOnly": true
         },
         "thumbnail_url": {
-          "type": [
-            "string",
-            "null"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
           "readOnly": true
         },
@@ -158,10 +208,12 @@
         "hls_url",
         "thumbnail_url",
         "created_at"
-      ]
+      ],
+      "additionalProperties": false
     },
     "ProductCreate": {
       "type": "object",
+      "description": "Request body to create a new Product (server-set fields excluded).",
       "properties": {
         "title": {
           "type": "string",
@@ -202,7 +254,164 @@
         "description",
         "price",
         "artisan_name"
-      ]
+      ],
+      "additionalProperties": false
+    },
+    "ProductSummary": {
+      "type": "object",
+      "description": "A product as shown in search results (no description, no video URL).",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number"
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "INR",
+            "USD"
+          ]
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "artisan_name": {
+          "type": "string"
+        },
+        "thumbnail_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "price",
+        "currency",
+        "tags",
+        "artisan_name",
+        "thumbnail_url"
+      ],
+      "additionalProperties": false
+    },
+    "ProductPage": {
+      "type": "object",
+      "description": "One page of search results.",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProductSummary"
+          },
+          "default": []
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "opaque; null when there are no more results"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "next_cursor"
+      ],
+      "additionalProperties": false
+    },
+    "TagList": {
+      "type": "object",
+      "description": "Tags that currently have at least one ready product, most used first.",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      },
+      "required": [
+        "tags"
+      ],
+      "additionalProperties": false
+    },
+    "UploadPolicy": {
+      "type": "object",
+      "description": "What the app must check before it starts an upload.",
+      "properties": {
+        "max_duration_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "allowed_mime_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "chunk_size_bytes": {
+          "type": "integer",
+          "minimum": 262144
+        }
+      },
+      "required": [
+        "max_duration_seconds",
+        "allowed_mime_types",
+        "chunk_size_bytes"
+      ],
+      "additionalProperties": false
+    },
+    "UploadTicket": {
+      "type": "object",
+      "description": "A new listing plus where and how to upload its video.",
+      "properties": {
+        "product": {
+          "$ref": "#/$defs/Product"
+        },
+        "upload_url": {
+          "type": "string",
+          "description": "GCS resumable-upload session URL (a local fake in local mode)"
+        },
+        "upload_method": {
+          "type": "string",
+          "enum": [
+            "PUT"
+          ]
+        },
+        "chunk_size_bytes": {
+          "type": "integer",
+          "minimum": 262144,
+          "description": "send the file in chunks of this size (a multiple of 256 KiB, as GCS requires)"
+        }
+      },
+      "required": [
+        "product",
+        "upload_url",
+        "upload_method",
+        "chunk_size_bytes"
+      ],
+      "additionalProperties": false
     }
   }
 }

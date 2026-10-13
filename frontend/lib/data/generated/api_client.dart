@@ -10,7 +10,9 @@ import 'models.dart';
 class ApiException implements Exception {
   final int statusCode;
   final String body;
-  ApiException(this.statusCode, this.body);
+  /// Parsed error body, when the server sent the standard ErrorResponse shape.
+  final ErrorResponse? error;
+  ApiException(this.statusCode, this.body, this.error);
   @override
   String toString() => 'ApiException($statusCode): $body';
 }
@@ -24,8 +26,15 @@ class ApiClient {
         _http = client ?? http.Client();
 
   dynamic _decode(http.Response r) {
-    if (r.statusCode >= 400) throw ApiException(r.statusCode, r.body);
-    return jsonDecode(utf8.decode(r.bodyBytes));
+    final text = utf8.decode(r.bodyBytes);
+    if (r.statusCode >= 400) {
+      ErrorResponse? error;
+      try {
+        error = ErrorResponse.fromJson(jsonDecode(text) as Map<String, dynamic>);
+      } catch (_) {}
+      throw ApiException(r.statusCode, text, error);
+    }
+    return jsonDecode(text);
   }
 
   /// Create a listing and get a resumable upload URL for its video.
@@ -35,25 +44,32 @@ class ApiClient {
     return UploadTicket.fromJson(_decode(r) as Map<String, dynamic>);
   }
 
-  /// Search and filter products (only ones whose video is ready).
-  Future<List<Product>> listProducts({String? q, String? tag}) async {
-    final uri = Uri.parse('$baseUrl/products').replace(queryParameters: {if (q != null) 'q': q, if (tag != null) 'tag': tag});
+  /// Search and filter products whose video is ready, one page at a time.
+  Future<ProductPage> listProducts({String? q, String? tag, String? cursor, int? limit}) async {
+    final uri = Uri.parse('$baseUrl/products').replace(queryParameters: {if (q != null) 'q': q, if (tag != null) 'tag': tag, if (cursor != null) 'cursor': cursor, if (limit != null) 'limit': limit.toString()});
     final r = await _http.get(uri);
-    return (_decode(r) as List).map((e) => Product.fromJson(e as Map<String, dynamic>)).toList();
+    return ProductPage.fromJson(_decode(r) as Map<String, dynamic>);
   }
 
-  /// Product details, including the HLS playback URL.
+  /// Product details with video status and HLS URL (poll this while the video processes).
   Future<Product> getProduct(String productId) async {
     final uri = Uri.parse('$baseUrl/products/$productId');
     final r = await _http.get(uri);
     return Product.fromJson(_decode(r) as Map<String, dynamic>);
   }
 
-  /// Called by the app after the upload finishes; starts transcoding.
-  Future<Product> markUploadComplete(String productId) async {
-    final uri = Uri.parse('$baseUrl/products/$productId/upload-complete');
-    final r = await _http.post(uri);
-    return Product.fromJson(_decode(r) as Map<String, dynamic>);
+  /// Tags for the filter chips.
+  Future<TagList> listTags() async {
+    final uri = Uri.parse('$baseUrl/tags');
+    final r = await _http.get(uri);
+    return TagList.fromJson(_decode(r) as Map<String, dynamic>);
+  }
+
+  /// Limits to check on the device before uploading (15-min cap, file types, chunk size).
+  Future<UploadPolicy> getUploadPolicy() async {
+    final uri = Uri.parse('$baseUrl/upload-policy');
+    final r = await _http.get(uri);
+    return UploadPolicy.fromJson(_decode(r) as Map<String, dynamic>);
   }
 
   /// Place an order. The flow ends here.

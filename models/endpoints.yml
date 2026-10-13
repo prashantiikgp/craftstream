@@ -1,47 +1,83 @@
-# The API contract. The backend test suite checks that FastAPI serves exactly these routes,
-# and `make gen` turns this file into the Flutter API client.
+# The API contract. The backend test suite checks that FastAPI serves exactly these routes
+# (method, path and success status), and `make gen` turns `endpoints` into the Flutter API client.
+# Every error response uses the ErrorResponse model.
 
 base_path: /api/v1
 
+# Public endpoints: called by the app. Paths are relative to base_path.
 endpoints:
   - name: createProduct
     method: POST
     path: /products
     body: ProductCreate
     returns: UploadTicket
+    status: 201
     summary: Create a listing and get a resumable upload URL for its video.
 
   - name: listProducts
     method: GET
     path: /products
     query:
-      q: string      # keyword search over title, description, tags
-      tag: string    # exact tag filter
-    returns: Product[]
-    summary: Search and filter products (only ones whose video is ready).
+      q: string        # keywords over title, description, tags (rules in catalog/search.yml)
+      tag: string      # exact tag filter
+      cursor: string   # next_cursor from the previous page
+      limit: integer   # page size (capped by the server)
+    returns: ProductPage
+    status: 200
+    summary: Search and filter products whose video is ready, one page at a time.
 
   - name: getProduct
     method: GET
     path: /products/{product_id}
     returns: Product
-    summary: Product details, including the HLS playback URL.
+    status: 200
+    summary: Product details with video status and HLS URL (poll this while the video processes).
 
-  - name: markUploadComplete
-    method: POST
-    path: /products/{product_id}/upload-complete
-    returns: Product
-    summary: Called by the app after the upload finishes; starts transcoding.
+  - name: listTags
+    method: GET
+    path: /tags
+    returns: TagList
+    status: 200
+    summary: Tags for the filter chips.
+
+  - name: getUploadPolicy
+    method: GET
+    path: /upload-policy
+    returns: UploadPolicy
+    status: 200
+    summary: Limits to check on the device before uploading (15-min cap, file types, chunk size).
 
   - name: createOrder
     method: POST
     path: /orders
     body: OrderCreate
     returns: Order
+    status: 201
     summary: Place an order. The flow ends here.
 
-# Small helper types that aren't stored in the database.
-types:
-  UploadTicket:
-    product: Product
-    upload_url: string       # GCS resumable-upload session URL
-    upload_method: string    # always "PUT" for resumable sessions
+# Not called by the app, so not in the Dart client. Full paths (no base_path).
+internal:
+  - name: health
+    method: GET
+    path: /healthz
+    status: 200
+    summary: Liveness check for Cloud Run.
+
+  - name: localUpload
+    method: PUT
+    path: /local-upload/{product_id}
+    status: 200
+    mode: local
+    summary: Local mode only. Fake GCS resumable upload target (Content-Range chunks, 308 until complete).
+
+  - name: mediaUploaded
+    method: POST
+    path: /internal/media/uploaded
+    status: 204
+    summary: Eventarc (GCS object finalized) -> start transcoding. OIDC-authenticated.
+
+  - name: mediaTranscoded
+    method: POST
+    path: /internal/media/transcoded
+    status: 204
+    summary: Pub/Sub push (Transcoder job finished) -> mark the video ready or failed. OIDC-authenticated.

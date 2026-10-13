@@ -1,6 +1,6 @@
 # CraftStream: Master Plan
 
-Status: **S0 restructure done** (2026-10-13). Next: S0 tooling, then S1 data models.
+Status: **S0 + S1 done** (2026-10-13). Next: B1 (backend core) and F1 (Flutter setup) in parallel.
 
 | Plan | Covers |
 |---|---|
@@ -155,9 +155,9 @@ S0 Restructure + tooling ─► S1 Data models ─┬─► B1 core ─► B2 ru
 - [x] Linux Flutter SDK, JDK 17, Android SDK, FFmpeg, Firebase CLI installed in WSL (`flutter doctor`: no issues)
 
 ### S1: Data models (shared)
-- [ ] `models/`: Product, Order, UploadTicket, UploadPolicy, ErrorResponse, paged product list
-- [ ] `models/endpoints.yml`: the API table in BACKEND_PLAN §4
-- [ ] `make gen` updates both sides; test: FastAPI routes == `endpoints.yml`
+- [x] `models/`: Product, Order, UploadTicket, UploadPolicy, ErrorResponse, paged product list
+- [x] `models/endpoints.yml`: the API table in BACKEND_PLAN §4
+- [x] `make gen` updates both sides; test: FastAPI routes == `endpoints.yml`
 
 ### Backend B1–B5 → [BACKEND_PLAN.md §6](BACKEND_PLAN.md) · Frontend F1–F6 → [FRONTEND_PLAN.md §5](FRONTEND_PLAN.md)
 

@@ -1,0 +1,17 @@
+# UploadPolicy: the rules the app checks before uploading.
+# Served from backend/config/media/upload_policy.yml, so the limit is defined in one place only.
+
+model: UploadPolicy
+description: What the app must check before it starts an upload.
+
+fields:
+  max_duration_seconds:
+    type: integer
+    minimum: 1
+  allowed_mime_types:
+    type: array
+    items: string
+    default: []
+  chunk_size_bytes:
+    type: integer
+    minimum: 262144

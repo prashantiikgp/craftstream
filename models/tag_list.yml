@@ -1,0 +1,10 @@
+# TagList: tags used by ready products, most used first (drives the filter chips).
+
+model: TagList
+description: Tags that currently have at least one ready product, most used first.
+
+fields:
+  tags:
+    type: array
+    items: string
+    default: []

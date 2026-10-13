@@ -1,0 +1,16 @@
+# What an artisan may upload. Served to the app at GET /api/v1/upload-policy (checked on the device
+# before uploading) and enforced on the server by capping the Transcoder job at max_duration_seconds.
+
+max_duration_seconds: 900     # 15:00, from the assignment
+
+# Containers the app may pick. Phones record mp4/3gp; Chrome may offer webm/mkv/mov.
+allowed_mime_types:
+  - video/mp4
+  - video/quicktime
+  - video/webm
+  - video/x-matroska
+  - video/3gpp
+
+# Resumable upload chunk. GCS requires a multiple of 256 KiB; smaller chunks lose less on a drop,
+# larger ones need fewer round trips. 8 MiB is a good middle on mobile networks.
+chunk_size_kib: 8192

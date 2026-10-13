@@ -1,15 +1,19 @@
 # Product: one handmade item, with its "how it was made" video.
 # Edit this file, then run `make gen` to update the Python and Flutter models.
 #
+# File options:
+#   create: true          -> also generate `<Model>Create` (the request body for creating one)
 # Field options:
-#   type: string | integer | number | boolean | datetime | array | enum
+#   type: string | integer | number | boolean | datetime | array | enum | <OtherModel>
+#   items: <scalar type> | <OtherModel>   (for arrays)
 #   required: true        -> must be sent when creating
 #   readonly: true        -> set by the server, never sent by the client
 #   nullable: true        -> may be null
-#   min_length / max_length / minimum / maximum / max_items / default / values (for enum)
+#   min_length / max_length / minimum / maximum / max_items / default / values (for enum) / description
 
 model: Product
 description: A handmade product listed by an artisan, with a process video.
+create: true
 
 fields:
   id:

@@ -34,3 +34,15 @@ def test_unknown_yaml_key_is_rejected():
     data["segment_secs"] = 4  # typo
     with pytest.raises(ValueError):
         type(load_ladder_rules()).model_validate(data)
+
+
+def test_duration_cap_adds_edit_list():
+    cfg = build_job_config(input_uri="gs://up/raw/abc/source", max_duration_seconds=900)
+    assert cfg["inputs"] == [{"key": "input0", "uri": "gs://up/raw/abc/source"}]
+    assert cfg["editList"][0]["endTimeOffset"] == "900s"
+    assert "editList" not in build_job_config()
+
+
+def test_duration_cap_needs_input_uri():
+    with pytest.raises(ValueError):
+        build_job_config(max_duration_seconds=900)

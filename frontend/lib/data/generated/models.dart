@@ -1,6 +1,31 @@
 // GENERATED FROM models/ BY tools/codegen.py. DO NOT EDIT BY HAND.
 // ignore_for_file: type=lint
 
+/// The body of every error response.
+class ErrorResponse {
+  final String code;
+  final String message;
+  final List<String> details;
+
+  const ErrorResponse({
+    required this.code,
+    required this.message,
+    required this.details,
+  });
+
+  factory ErrorResponse.fromJson(Map<String, dynamic> json) => ErrorResponse(
+        code: json['code'] as String,
+        message: json['message'] as String,
+        details: ((json['details'] ?? []) as List).cast<String>(),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'code': code,
+        'message': message,
+        'details': details,
+      };
+}
+
 /// A buyer's order for one product.
 class Order {
   final String id;
@@ -8,6 +33,7 @@ class Order {
   final String buyerName;
   final int quantity;
   final double total;
+  final String currency;
   final String status;
   final DateTime createdAt;
 
@@ -17,6 +43,7 @@ class Order {
     required this.buyerName,
     required this.quantity,
     required this.total,
+    required this.currency,
     required this.status,
     required this.createdAt,
   });
@@ -27,6 +54,7 @@ class Order {
         buyerName: json['buyer_name'] as String,
         quantity: json['quantity'] as int,
         total: (json['total'] as num).toDouble(),
+        currency: json['currency'] as String,
         status: json['status'] as String,
         createdAt: DateTime.parse(json['created_at'] as String),
       );
@@ -37,12 +65,13 @@ class Order {
         'buyer_name': buyerName,
         'quantity': quantity,
         'total': total,
+        'currency': currency,
         'status': status,
         'created_at': createdAt.toIso8601String(),
       };
 }
 
-/// Body for creating a Order.
+/// Request body to create a new Order (server-set fields excluded).
 class OrderCreate {
   final String productId;
   final String buyerName;
@@ -124,7 +153,7 @@ class Product {
       };
 }
 
-/// Body for creating a Product.
+/// Request body to create a new Product (server-set fields excluded).
 class ProductCreate {
   final String title;
   final String description;
@@ -161,16 +190,135 @@ class ProductCreate {
       };
 }
 
+/// A product as shown in search results (no description, no video URL).
+class ProductSummary {
+  final String id;
+  final String title;
+  final double price;
+  final String currency;
+  final List<String> tags;
+  final String artisanName;
+  final String? thumbnailUrl;
+
+  const ProductSummary({
+    required this.id,
+    required this.title,
+    required this.price,
+    required this.currency,
+    required this.tags,
+    required this.artisanName,
+    this.thumbnailUrl,
+  });
+
+  factory ProductSummary.fromJson(Map<String, dynamic> json) => ProductSummary(
+        id: json['id'] as String,
+        title: json['title'] as String,
+        price: (json['price'] as num).toDouble(),
+        currency: json['currency'] as String,
+        tags: ((json['tags'] ?? []) as List).cast<String>(),
+        artisanName: json['artisan_name'] as String,
+        thumbnailUrl: json['thumbnail_url'] == null ? null : json['thumbnail_url'] as String,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'price': price,
+        'currency': currency,
+        'tags': tags,
+        'artisan_name': artisanName,
+        'thumbnail_url': thumbnailUrl,
+      };
+}
+
+/// One page of search results.
+class ProductPage {
+  final List<ProductSummary> items;
+  final String? nextCursor;
+
+  const ProductPage({
+    required this.items,
+    this.nextCursor,
+  });
+
+  factory ProductPage.fromJson(Map<String, dynamic> json) => ProductPage(
+        items: ((json['items'] ?? []) as List).map((e) => ProductSummary.fromJson(e as Map<String, dynamic>)).toList(),
+        nextCursor: json['next_cursor'] == null ? null : json['next_cursor'] as String,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'items': items.map((e) => e.toJson()).toList(),
+        'next_cursor': nextCursor,
+      };
+}
+
+/// Tags that currently have at least one ready product, most used first.
+class TagList {
+  final List<String> tags;
+
+  const TagList({
+    required this.tags,
+  });
+
+  factory TagList.fromJson(Map<String, dynamic> json) => TagList(
+        tags: ((json['tags'] ?? []) as List).cast<String>(),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'tags': tags,
+      };
+}
+
+/// What the app must check before it starts an upload.
+class UploadPolicy {
+  final int maxDurationSeconds;
+  final List<String> allowedMimeTypes;
+  final int chunkSizeBytes;
+
+  const UploadPolicy({
+    required this.maxDurationSeconds,
+    required this.allowedMimeTypes,
+    required this.chunkSizeBytes,
+  });
+
+  factory UploadPolicy.fromJson(Map<String, dynamic> json) => UploadPolicy(
+        maxDurationSeconds: json['max_duration_seconds'] as int,
+        allowedMimeTypes: ((json['allowed_mime_types'] ?? []) as List).cast<String>(),
+        chunkSizeBytes: json['chunk_size_bytes'] as int,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'max_duration_seconds': maxDurationSeconds,
+        'allowed_mime_types': allowedMimeTypes,
+        'chunk_size_bytes': chunkSizeBytes,
+      };
+}
+
+/// A new listing plus where and how to upload its video.
 class UploadTicket {
   final Product product;
   final String uploadUrl;
   final String uploadMethod;
+  final int chunkSizeBytes;
 
-  const UploadTicket({required this.product, required this.uploadUrl, required this.uploadMethod});
+  const UploadTicket({
+    required this.product,
+    required this.uploadUrl,
+    required this.uploadMethod,
+    required this.chunkSizeBytes,
+  });
 
   factory UploadTicket.fromJson(Map<String, dynamic> json) => UploadTicket(
         product: Product.fromJson(json['product'] as Map<String, dynamic>),
         uploadUrl: json['upload_url'] as String,
         uploadMethod: json['upload_method'] as String,
+        chunkSizeBytes: json['chunk_size_bytes'] as int,
       );
+
+  Map<String, dynamic> toJson() => {
+        'product': product.toJson(),
+        'upload_url': uploadUrl,
+        'upload_method': uploadMethod,
+        'chunk_size_bytes': chunkSizeBytes,
+      };
 }

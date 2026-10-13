@@ -30,7 +30,7 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final _query = TextEditingController();
-  late Future<List<Product>> _results = api.listProducts();
+  late Future<ProductPage> _results = api.listProducts();
 
   void _search() => setState(() {
         final q = _query.text.trim();
@@ -54,12 +54,12 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
           Expanded(
-            child: FutureBuilder<List<Product>>(
+            child: FutureBuilder<ProductPage>(
               future: _results,
               builder: (context, snap) {
                 if (snap.hasError) return Center(child: Text('Error: ${snap.error}'));
                 if (!snap.hasData) return const Center(child: CircularProgressIndicator());
-                final items = snap.data!;
+                final items = snap.data!.items;
                 if (items.isEmpty) return const Center(child: Text('No products yet'));
                 return ListView.builder(
                   itemCount: items.length,
@@ -69,10 +69,15 @@ class _SearchScreenState extends State<SearchScreen> {
                       title: Text(p.title),
                       subtitle: Text('${p.artisanName} · ${p.tags.join(', ')}'),
                       trailing: Text('${p.currency} ${p.price.toStringAsFixed(0)}'),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => PlayerScreen(product: p)),
-                      ),
+                      onTap: () async {
+                        // Search results are summaries; fetch the full product (with its HLS URL) to play it.
+                        final product = await api.getProduct(p.id);
+                        if (!context.mounted) return;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => PlayerScreen(product: product)),
+                        );
+                      },
                     );
                   },
                 );

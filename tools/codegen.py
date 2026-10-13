@@ -4,7 +4,7 @@
         -> models/build/schema.json                     (JSON Schema)
         -> backend/app/generated/models.py              (Pydantic models for FastAPI)
         -> frontend/lib/data/generated/models.dart      (Dart models for Flutter)
-        -> frontend/lib/data/generated/api_client.dart  (Dart HTTP client)
+        -> frontend/lib/data/generated/api_client.dart  (Dart HTTP client, public endpoints only)
 
 Run with:  python tools/codegen.py   (or `make gen`)
 Never edit the generated files by hand; edit the YAML and regenerate.
@@ -13,6 +13,7 @@ Never edit the generated files by hand; edit the YAML and regenerate.
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import yaml
@@ -23,8 +24,19 @@ ENDPOINTS = MODELS / "endpoints.yml"
 DART_OUT = ROOT / "frontend" / "lib" / "data" / "generated"
 HEADER = "GENERATED FROM models/ BY tools/codegen.py. DO NOT EDIT BY HAND."
 
+SCALARS = {"string", "integer", "number", "boolean", "datetime"}
+MODEL_KEYS = {"model", "description", "create", "fields"}
+FIELD_KEYS = {"type", "items", "required", "readonly", "nullable", "values", "default",
+              "min_length", "max_length", "minimum", "maximum", "max_items", "description"}
+ENDPOINT_KEYS = {"name", "method", "path", "query", "body", "returns", "status", "summary", "mode"}
+QUERY_TYPES = {"string", "integer"}
 
-# ---------------------------------------------------------------- loading
+
+class SpecError(ValueError):
+    pass
+
+
+# ---------------------------------------------------------------- loading + validation
 
 def load_models() -> dict[str, dict]:
     models = {}
@@ -32,12 +44,68 @@ def load_models() -> dict[str, dict]:
         if path == ENDPOINTS:
             continue
         spec = yaml.safe_load(path.read_text())
+        _check_keys(spec, MODEL_KEYS, path.name)
         models[spec["model"]] = spec
-    return models
+    for name, spec in models.items():
+        for fname, f in spec["fields"].items():
+            where = f"{name}.{fname}"
+            _check_keys(f, FIELD_KEYS, where)
+            t = f["type"]
+            if t not in SCALARS | {"enum", "array"} and t not in models:
+                raise SpecError(f"{where}: unknown type {t!r}")
+            if t == "array" and f.get("items", "string") not in SCALARS | set(models):
+                raise SpecError(f"{where}: unknown array item type {f['items']!r}")
+            if t == "enum" and not f.get("values"):
+                raise SpecError(f"{where}: enum needs `values`")
+    return dict(_dependency_order(models))
 
 
-def load_api() -> dict:
-    return yaml.safe_load(ENDPOINTS.read_text())
+def load_api(models: dict) -> dict:
+    api = yaml.safe_load(ENDPOINTS.read_text())
+    _check_keys(api, {"base_path", "endpoints", "internal"}, ENDPOINTS.name)
+    known = set(models) | {f"{m}Create" for m, s in models.items() if s.get("create")}
+    for ep in api["endpoints"] + api.get("internal", []):
+        _check_keys(ep, ENDPOINT_KEYS, ep.get("name", "?"))
+        for key in ("body", "returns"):
+            if key in ep and ep[key] not in known:
+                raise SpecError(f"{ep['name']}: unknown {key} type {ep[key]!r}")
+        for q, t in ep.get("query", {}).items():
+            if t not in QUERY_TYPES:
+                raise SpecError(f"{ep['name']}: query param {q!r} has unsupported type {t!r}")
+    return api
+
+
+def _check_keys(d: dict, allowed: set[str], where: str) -> None:
+    unknown = set(d) - allowed
+    if unknown:
+        raise SpecError(f"{where}: unknown keys {sorted(unknown)}")
+
+
+def _refs(spec: dict) -> set[str]:
+    out = set()
+    for f in spec["fields"].values():
+        out.add(f["type"])
+        if f["type"] == "array":
+            out.add(f.get("items", "string"))
+    return out
+
+
+def _dependency_order(models: dict) -> list[tuple[str, dict]]:
+    """Emit models after the models they contain, so generated code needs no forward references."""
+    done: list[str] = []
+
+    def visit(name: str, stack: tuple[str, ...]) -> None:
+        if name in done:
+            return
+        if name in stack:
+            raise SpecError(f"circular model reference: {' -> '.join((*stack, name))}")
+        for ref in sorted(_refs(models[name]) & set(models)):
+            visit(ref, (*stack, name))
+        done.append(name)
+
+    for name in models:
+        visit(name, ())
+    return [(n, models[n]) for n in done]
 
 
 def create_fields(spec: dict) -> dict:
@@ -45,26 +113,43 @@ def create_fields(spec: dict) -> dict:
     return {k: v for k, v in spec["fields"].items() if not v.get("readonly")}
 
 
+def classes(models: dict) -> list[tuple[str, dict, str]]:
+    """(class name, fields, doc) for every generated class, in dependency order."""
+    out = []
+    for name, spec in models.items():
+        out.append((name, spec["fields"], spec.get("description", "")))
+        if spec.get("create"):
+            out.append((f"{name}Create", create_fields(spec), f"Request body to create a new {name} (server-set fields excluded)."))
+    return out
+
+
 # ---------------------------------------------------------------- JSON Schema
+
+def _type_schema(t: str) -> dict:
+    if t == "datetime":
+        return {"type": "string", "format": "date-time"}
+    if t in SCALARS:
+        return {"type": t}
+    return {"$ref": f"#/$defs/{t}"}
+
 
 def field_schema(f: dict) -> dict:
     t = f["type"]
     if t == "enum":
         s: dict = {"type": "string", "enum": f["values"]}
-    elif t == "datetime":
-        s = {"type": "string", "format": "date-time"}
     elif t == "array":
-        s = {"type": "array", "items": {"type": f.get("items", "string")}}
+        s = {"type": "array", "items": _type_schema(f.get("items", "string"))}
         if "max_items" in f:
             s["maxItems"] = f["max_items"]
     else:
-        s = {"type": t}
+        s = _type_schema(t)
     for yk, jk in [("min_length", "minLength"), ("max_length", "maxLength"),
-                   ("minimum", "minimum"), ("maximum", "maximum"), ("default", "default")]:
+                   ("minimum", "minimum"), ("maximum", "maximum"), ("default", "default"),
+                   ("description", "description")]:
         if yk in f:
             s[jk] = f[yk]
     if f.get("nullable"):
-        s["type"] = [s["type"], "null"]
+        s = {"anyOf": [s, {"type": "null"}]}
     if f.get("readonly"):
         s["readOnly"] = True
     return s
@@ -72,18 +157,14 @@ def field_schema(f: dict) -> dict:
 
 def build_schema(models: dict) -> dict:
     defs = {}
-    for name, spec in models.items():
-        defs[name] = {
+    for cls, fields, doc in classes(models):
+        is_create = cls.endswith("Create") and cls[:-6] in models
+        defs[cls] = {
             "type": "object",
-            "description": spec.get("description", ""),
-            "properties": {k: field_schema(v) for k, v in spec["fields"].items()},
-            "required": list(spec["fields"].keys()),
-        }
-        cf = create_fields(spec)
-        defs[f"{name}Create"] = {
-            "type": "object",
-            "properties": {k: field_schema(v) for k, v in cf.items()},
-            "required": [k for k, v in cf.items() if v.get("required")],
+            "description": doc,
+            "properties": {k: field_schema(v) for k, v in fields.items()},
+            "required": [k for k, v in fields.items() if v.get("required")] if is_create else list(fields),
+            "additionalProperties": False,
         }
     return {"$schema": "https://json-schema.org/draft/2020-12/schema", "$defs": defs}
 
@@ -98,9 +179,10 @@ def py_type(f: dict) -> str:
     if t == "enum":
         base = "Literal[" + ", ".join(repr(v) for v in f["values"]) + "]"
     elif t == "array":
-        base = f"list[{PY_TYPES[f.get('items', 'string')]}]"
+        item = f.get("items", "string")
+        base = f"list[{PY_TYPES.get(item, item)}]"
     else:
-        base = PY_TYPES[t]
+        base = PY_TYPES.get(t, t)
     return f"{base} | None" if f.get("nullable") else base
 
 
@@ -116,27 +198,21 @@ def py_field(name: str, f: dict, create: bool) -> str:
     else:
         args.append("...")
     for yk, pk in [("min_length", "min_length"), ("max_length", "max_length"),
-                   ("minimum", "ge"), ("maximum", "le"), ("max_items", "max_length")]:
+                   ("minimum", "ge"), ("maximum", "le"), ("max_items", "max_length"),
+                   ("description", "description")]:
         if yk in f:
             args.append(f"{pk}={f[yk]!r}")
     return f"    {name}: {py_type(f)} = Field({', '.join(args)})"
 
 
-def build_python(models: dict, api: dict) -> str:
+def build_python(models: dict) -> str:
     out = [f'"""{HEADER}"""', "", "from __future__ import annotations", "",
            "from datetime import datetime", "from typing import Literal", "",
            "from pydantic import BaseModel, Field", ""]
-    for name, spec in models.items():
-        out += ["", f"class {name}(BaseModel):", f'    """{spec.get("description", "")}"""', ""]
-        out += [py_field(k, v, create=False) for k, v in spec["fields"].items()]
-        out += ["", "", f"class {name}Create(BaseModel):",
-                f'    """Body for creating a {name} (server-set fields excluded)."""', ""]
-        out += [py_field(k, v, create=True) for k, v in create_fields(spec).items()]
-        out.append("")
-    for tname, fields in api.get("types", {}).items():
-        out += ["", f"class {tname}(BaseModel):"]
-        for k, t in fields.items():
-            out.append(f"    {k}: {PY_TYPES.get(t, t)}")
+    for cls, fields, doc in classes(models):
+        create = cls.endswith("Create") and cls[:-6] in models
+        out += ["", f"class {cls}(BaseModel):", f'    """{doc}"""', ""]
+        out += [py_field(k, v, create=create) for k, v in fields.items()]
         out.append("")
     return "\n".join(out).rstrip() + "\n"
 
@@ -149,29 +225,54 @@ DART_TYPES = {"string": "String", "integer": "int", "number": "double", "boolean
 
 def dart_type(f: dict) -> str:
     t = f["type"]
-    base = f"List<{DART_TYPES[f.get('items', 'string')]}>" if t == "array" else DART_TYPES[t]
+    if t == "array":
+        item = f.get("items", "string")
+        base = f"List<{DART_TYPES.get(item, item)}>"
+    else:
+        base = DART_TYPES.get(t, t)
     return base + "?" if f.get("nullable") else base
+
+
+def _dart_value_from_json(t: str, j: str) -> str:
+    if t == "datetime":
+        return f"DateTime.parse({j} as String)"
+    if t == "number":
+        return f"({j} as num).toDouble()"
+    if t in DART_TYPES:
+        return f"{j} as {DART_TYPES[t]}"
+    return f"{t}.fromJson({j} as Map<String, dynamic>)"
 
 
 def dart_from_json(name: str, f: dict) -> str:
     j = f"json['{name}']"
     t = f["type"]
-    if t == "datetime":
-        expr = f"DateTime.parse({j} as String)"
-    elif t == "number":
-        expr = f"({j} as num).toDouble()"
-    elif t == "array":
-        expr = f"(({j} ?? []) as List).cast<{DART_TYPES[f.get('items', 'string')]}>()"
+    if t == "array":
+        item = f.get("items", "string")
+        if item in SCALARS and item not in ("datetime", "number"):
+            expr = f"(({j} ?? []) as List).cast<{DART_TYPES[item]}>()"
+        else:
+            expr = f"(({j} ?? []) as List).map((e) => {_dart_value_from_json(item, 'e')}).toList()"
     else:
-        expr = f"{j} as {DART_TYPES[t]}"
+        expr = _dart_value_from_json(t, j)
     if f.get("nullable"):
-        return f"{j} == null ? null : {expr.replace(' as String)', ' as String)')}"
+        return f"{j} == null ? null : {expr}"
     return expr
 
 
 def dart_to_json(name: str, f: dict) -> str:
-    if f["type"] == "datetime":
-        return f"{name}{'?' if f.get('nullable') else ''}.toIso8601String()"
+    q = "?" if f.get("nullable") else ""
+    t = f["type"]
+    if t == "datetime":
+        return f"{name}{q}.toIso8601String()"
+    if t == "array":
+        item = f.get("items", "string")
+        if item == "datetime":
+            return f"{name}{q}.map((e) => e.toIso8601String()).toList()"
+        if item not in SCALARS:
+            return f"{name}{q}.map((e) => e.toJson()).toList()"
+        return name
+    if t not in SCALARS and t != "enum":
+        return f"{name}{q}.toJson()"
     return name
 
 
@@ -198,39 +299,42 @@ def dart_class(cls: str, fields: dict, doc: str) -> list[str]:
     return out
 
 
-def build_dart_models(models: dict, api: dict) -> str:
+def build_dart_models(models: dict) -> str:
     out = [f"// {HEADER}", "// ignore_for_file: type=lint", ""]
-    for name, spec in models.items():
-        out += dart_class(name, spec["fields"], spec.get("description", ""))
-        out += dart_class(f"{name}Create", create_fields(spec), f"Body for creating a {name}.")
-    for tname, fields in api.get("types", {}).items():
-        out.append(f"class {tname} {{")
-        for k, t in fields.items():
-            out.append(f"  final {DART_TYPES.get(t, t)} {camel(k)};")
-        out += ["", f"  const {tname}({{" + ", ".join(f"required this.{camel(k)}" for k in fields) + "});", "",
-                f"  factory {tname}.fromJson(Map<String, dynamic> json) => {tname}("]
-        for k, t in fields.items():
-            expr = f"{t}.fromJson(json['{k}'] as Map<String, dynamic>)" if t in models else f"json['{k}'] as {DART_TYPES.get(t, t)}"
-            out.append(f"        {camel(k)}: {expr},")
-        out += ["      );", "}", ""]
+    for cls, fields, doc in classes(models):
+        out += dart_class(cls, fields, doc)
     return "\n".join(out)
 
 
-def build_dart_client(api: dict) -> str:
+def build_dart_client(api: dict, models: dict) -> str:
+    has_error = "ErrorResponse" in models
     out = [f"// {HEADER}", "// ignore_for_file: type=lint", "",
            "import 'dart:convert';", "", "import 'package:http/http.dart' as http;", "",
            "import 'models.dart';", "",
            "class ApiException implements Exception {",
-           "  final int statusCode;", "  final String body;",
-           "  ApiException(this.statusCode, this.body);",
-           "  @override", "  String toString() => 'ApiException($statusCode): $body';", "}", "",
-           "class ApiClient {", "  final String baseUrl;", "  final http.Client _http;", "",
-           "  ApiClient(String host, {http.Client? client})",
-           f"      : baseUrl = '$host{api['base_path']}',",
-           "        _http = client ?? http.Client();", "",
-           "  dynamic _decode(http.Response r) {",
-           "    if (r.statusCode >= 400) throw ApiException(r.statusCode, r.body);",
-           "    return jsonDecode(utf8.decode(r.bodyBytes));", "  }", ""]
+           "  final int statusCode;", "  final String body;"]
+    if has_error:
+        out += ["  /// Parsed error body, when the server sent the standard ErrorResponse shape.",
+                "  final ErrorResponse? error;", "  ApiException(this.statusCode, this.body, this.error);"]
+    else:
+        out += ["  ApiException(this.statusCode, this.body);"]
+    out += ["  @override", "  String toString() => 'ApiException($statusCode): $body';", "}", "",
+            "class ApiClient {", "  final String baseUrl;", "  final http.Client _http;", "",
+            "  ApiClient(String host, {http.Client? client})",
+            f"      : baseUrl = '$host{api['base_path']}',",
+            "        _http = client ?? http.Client();", "",
+            "  dynamic _decode(http.Response r) {",
+            "    final text = utf8.decode(r.bodyBytes);",
+            "    if (r.statusCode >= 400) {"]
+    if has_error:
+        out += ["      ErrorResponse? error;",
+                "      try {",
+                "        error = ErrorResponse.fromJson(jsonDecode(text) as Map<String, dynamic>);",
+                "      } catch (_) {}",
+                "      throw ApiException(r.statusCode, text, error);"]
+    else:
+        out += ["      throw ApiException(r.statusCode, text);"]
+    out += ["    }", "    return jsonDecode(text);", "  }", ""]
     for ep in api["endpoints"]:
         path = ep["path"]
         params = [seg[1:-1] for seg in path.split("/") if seg.startswith("{")]
@@ -238,32 +342,29 @@ def build_dart_client(api: dict) -> str:
         if "body" in ep:
             args.append(f"{ep['body']} body")
         query = ep.get("query", {})
-        named = [f"String? {camel(q)}" for q in query]
+        named = [f"{'int' if t == 'integer' else 'String'}? {camel(q)}" for q, t in query.items()]
         sig = ", ".join(args)
         if named:
             sig += (", " if sig else "") + "{" + ", ".join(named) + "}"
         ret = ep["returns"]
-        is_list = ret.endswith("[]")
-        rtype = f"List<{ret[:-2]}>" if is_list else ret
         dart_path = path
         for p in params:
             dart_path = dart_path.replace("{" + p + "}", "$" + camel(p))
         out.append(f"  /// {ep.get('summary', '')}")
-        out.append(f"  Future<{rtype}> {ep['name']}({sig}) async {{")
+        out.append(f"  Future<{ret}> {ep['name']}({sig}) async {{")
         if query:
-            qmap = ", ".join(f"if ({camel(q)} != null) '{q}': {camel(q)}" for q in query)
+            values = {q: f"{camel(q)}.toString()" if t == "integer" else camel(q) for q, t in query.items()}
+            qmap = ", ".join(f"if ({camel(q)} != null) '{q}': {v}" for q, v in values.items())
             out.append(f"    final uri = Uri.parse('$baseUrl{dart_path}').replace(queryParameters: {{{qmap}}});")
         else:
             out.append(f"    final uri = Uri.parse('$baseUrl{dart_path}');")
         m = ep["method"].lower()
         if "body" in ep:
-            out.append(f"    final r = await _http.{m}(uri, headers: {{'Content-Type': 'application/json'}}, body: jsonEncode(body.toJson()));")
+            out.append(f"    final r = await _http.{m}(uri, headers: {{'Content-Type': 'application/json'}}, "
+                       "body: jsonEncode(body.toJson()));")
         else:
             out.append(f"    final r = await _http.{m}(uri);")
-        if is_list:
-            out.append(f"    return (_decode(r) as List).map((e) => {ret[:-2]}.fromJson(e as Map<String, dynamic>)).toList();")
-        else:
-            out.append(f"    return {ret}.fromJson(_decode(r) as Map<String, dynamic>);")
+        out.append(f"    return {ret}.fromJson(_decode(r) as Map<String, dynamic>);")
         out += ["  }", ""]
     out.append("}")
     return "\n".join(out) + "\n"
@@ -278,13 +379,17 @@ def write(path: Path, text: str) -> None:
 
 
 def main() -> None:
-    models, api = load_models(), load_api()
+    try:
+        models = load_models()
+        api = load_api(models)
+    except SpecError as e:
+        sys.exit(f"models/ is invalid: {e}")
     print("Generating code from models/ ...")
     write(MODELS / "build" / "schema.json", json.dumps(build_schema(models), indent=2) + "\n")
-    write(ROOT / "backend" / "app" / "generated" / "models.py", build_python(models, api))
+    write(ROOT / "backend" / "app" / "generated" / "models.py", build_python(models))
     write(ROOT / "backend" / "app" / "generated" / "__init__.py", "")
-    write(DART_OUT / "models.dart", build_dart_models(models, api))
-    write(DART_OUT / "api_client.dart", build_dart_client(api))
+    write(DART_OUT / "models.dart", build_dart_models(models))
+    write(DART_OUT / "api_client.dart", build_dart_client(api, models))
     print("Done.")
 
 

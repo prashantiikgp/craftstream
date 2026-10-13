@@ -1,0 +1,17 @@
+# ErrorResponse: the one shape every error from the API takes (4xx and 5xx).
+
+model: ErrorResponse
+description: The body of every error response.
+
+fields:
+  code:
+    type: string
+    description: machine-readable, e.g. not_found, validation_error, unsupported_media_type
+  message:
+    type: string
+    description: human-readable summary
+  details:
+    type: array
+    items: string
+    default: []
+    description: one entry per problem, e.g. "body.price - Input should be greater than or equal to 0.01"

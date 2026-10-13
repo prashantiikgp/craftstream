@@ -1,0 +1,25 @@
+# ProductSummary: what a search result card needs, and nothing more.
+# Search results travel over < 50 kbps links, so the long description is left out.
+
+model: ProductSummary
+description: A product as shown in search results (no description, no video URL).
+
+fields:
+  id:
+    type: string
+  title:
+    type: string
+  price:
+    type: number
+  currency:
+    type: enum
+    values: [INR, USD]
+  tags:
+    type: array
+    items: string
+    default: []
+  artisan_name:
+    type: string
+  thumbnail_url:
+    type: string
+    nullable: true

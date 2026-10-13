@@ -86,17 +86,20 @@ def load_search_rules() -> SearchRules:
 
 | Method | Path | Purpose |
 |---|---|---|
-| POST | `/api/v1/products` | Create a listing → `UploadTicket` (product + resumable upload URL + chunk size) |
-| GET | `/api/v1/products?q=&tag=&cursor=` | Search ready products (paged) |
+| POST | `/api/v1/products` | Create a listing → `UploadTicket` (product + resumable upload URL + chunk size) · 201 |
+| GET | `/api/v1/products?q=&tag=&cursor=&limit=` | Search ready products → `ProductPage` of `ProductSummary` (no description) |
 | GET | `/api/v1/products/{id}` | Product details + `video_status` + `hls_url` (the app polls this while transcoding runs) |
-| GET | `/api/v1/tags` | Tag list for the filter chips |
+| GET | `/api/v1/tags` | `TagList` for the filter chips, most used first |
 | GET | `/api/v1/upload-policy` | The app's pre-upload check (15 min, file types). Read from the **same YAML**, so the rule is defined once. |
 | POST | `/api/v1/orders` | Place an order → `Order(status=placed)` |
 | POST | `/internal/media/uploaded` | Eventarc: an upload finished → start transcoding *(not public)* |
 | POST | `/internal/media/transcoded` | Pub/Sub: a transcode finished → mark ready or failed *(not public)* |
 | GET | `/healthz` | Liveness |
+| PUT | `/local-upload/{id}` | **Local mode only.** Fake GCS resumable target (Content-Range chunks → 308 + `Range` until the last) |
 
-`upload-complete` from the scaffold goes away: Eventarc fires even if the app closes right after the upload. In **local mode**, the uploads router has a fake upload target that calls the same `media_service.on_uploaded()`, so the whole flow runs on a laptop with no GCP.
+Every error is an `ErrorResponse` (`code`, `message`, `details`). The route test checks method, path **and** success status against `models/endpoints.yml` (public `endpoints` + `internal`), both ways.
+
+`upload-complete` from the scaffold is gone: Eventarc fires even if the app closes right after the upload. In **local mode**, `/local-upload/{id}` speaks the same resumable protocol as GCS and calls the same `on_uploaded()`, so the app's uploader is tested against the real protocol on a laptop.
 
 ---
 
@@ -114,7 +117,8 @@ gs://<proj>-media/hls/<id>/manifest.m3u8 ◄── Transcoder ──done──�
 ## 6. Phases and tasks
 
 ### B1: Core skeleton (local, no GCP)
-- [ ] `core/settings.py`, `core/yaml_loader.py`, `core/errors.py`, `core/logging.py`
+- [x] `core/settings.py`, `core/yaml_loader.py`, `core/errors.py` (S0/S1)
+- [ ] `core/logging.py`
 - [ ] `main.py` as an app factory; split the current all-in-one `main.py` into `api/routers/*`
 - [ ] `db/repositories/`: `ProductRepo`/`OrderRepo` Protocols + InMemory versions
 - [ ] Services: `catalog_service`, `media_service`, `order_service`
@@ -122,11 +126,12 @@ gs://<proj>-media/hls/<id>/manifest.m3u8 ◄── Transcoder ──done──�
 
 ### B2: Rule files (the pattern, ×4)
 - [x] `ladder`: YAML + `_schema` + `_loader` + `_engine` (done in S0, with `core/yaml_loader.py`)
-- [ ] For `search`, `upload_policy` and `order_rules`: YAML + `_schema` + `_loader` + `_engine`
+- [x] `upload_policy`: YAML + `_schema` + `_loader` + `_engine` (done in S1; the 15:00 cap is an `editList` in the Transcoder job)
+- [ ] For `search` and `order_rules`: YAML + `_schema` + `_loader` + `_engine` (moves page size and total rounding out of `main.py`)
 - [ ] Unit tests per engine (`tests/unit/<domain>/`)
 - [ ] Export JSON Schema from each `<xyz>_schema` and map it in `.vscode/settings.json` (`yaml.schemas`) so rule YAML gets autocomplete
 - [ ] `config_validation`: every YAML loads; **convention test**: each `xyz.yml` has `xyz_schema` + `xyz_loader`
-- [ ] New endpoints: `/tags`, `/upload-policy`; pagination on the list endpoint
+- [x] New endpoints: `/tags`, `/upload-policy`; pagination on the list endpoint (done in S1)
 - [ ] Done when the full artisan → buyer → order flow works in `/docs` in local mode
 
 ### B3: Prove the 50 kbps budget locally
@@ -146,7 +151,7 @@ gs://<proj>-media/hls/<id>/manifest.m3u8 ◄── Transcoder ──done──�
 
 ### B5: Hardening + evidence
 - [ ] gzip responses, small payloads (no description in list results), `Cache-Control` on HLS objects
-- [ ] Errors: one `ErrorResponse` shape everywhere
+- [x] Errors: one `ErrorResponse` shape everywhere (`core/errors.py`, done in S1)
 - [ ] Smoke test against the deployed URL
 - [ ] GCP evidence checklist for the video: Cloud Run revisions + logs, the Transcoder job list, bucket contents, Firestore docs
 

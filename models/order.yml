@@ -2,6 +2,7 @@
 
 model: Order
 description: A buyer's order for one product.
+create: true
 
 fields:
   id:
@@ -23,6 +24,12 @@ fields:
   total:
     type: number
     readonly: true
+    description: unit price x quantity, rounded per orders/order_rules.yml
+  currency:
+    type: enum
+    values: [INR, USD]
+    readonly: true
+    description: copied from the product
   status:
     type: enum
     values: [placed]

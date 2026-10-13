@@ -22,9 +22,17 @@ def lowest_rung_within_budget(rules: LadderRules | None = None) -> bool:
     return sorted_rungs(rules)[0].total_kbps <= rules.max_lowest_rung_total_kbps
 
 
-def build_job_config(rules: LadderRules | None = None) -> dict:
-    """Return the Transcoder API JobConfig as a plain dict (easy to inspect and test)."""
+def build_job_config(
+    rules: LadderRules | None = None, *, input_uri: str | None = None, max_duration_seconds: int | None = None
+) -> dict:
+    """Return the Transcoder API JobConfig as a plain dict (easy to inspect and test).
+
+    With `max_duration_seconds`, the job only encodes the first N seconds of `input_uri` (an editList),
+    so the server enforces the upload limit even if the app's own check is bypassed.
+    """
     rules = rules or load_ladder_rules()
+    if max_duration_seconds is not None and not input_uri:
+        raise ValueError("input_uri is required when capping the duration")
     seg = f"{rules.segment_seconds}s"
     elementary, mux = [], []
 
@@ -60,10 +68,14 @@ def build_job_config(rules: LadderRules | None = None) -> dict:
                 "segmentSettings": {"segmentDuration": seg},
             })
 
-    return {
+    config: dict = {
         "elementaryStreams": elementary,
         "muxStreams": mux,
         "manifests": [{"fileName": "manifest.m3u8", "type": "HLS", "muxStreams": [m["key"] for m in mux]}],
         "spriteSheets": [{"filePrefix": "thumb", "spriteWidthPixels": 320, "spriteHeightPixels": 180,
                           "columnCount": 1, "rowCount": 1, "totalCount": 1}],
     }
+    if max_duration_seconds is not None:
+        config["inputs"] = [{"key": "input0", "uri": input_uri}]
+        config["editList"] = [{"key": "atom0", "inputs": ["input0"], "endTimeOffset": f"{max_duration_seconds}s"}]
+    return config

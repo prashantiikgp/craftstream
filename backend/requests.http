@@ -20,14 +20,23 @@ Content-Type: application/json
   "artisan_name": "Meera"
 }
 
-### Local mode: pretend the upload finished (marks the video ready)
-POST {{api}}/products/{{create.response.body.product.id}}/upload-complete
+### What the app checks before uploading (15-min cap, file types, chunk size)
+GET {{api}}/upload-policy
+
+### Local mode: "upload" the video to the fake resumable target (marks it ready)
+PUT {{create.response.body.upload_url}}
+Content-Range: bytes 0-4/5
+
+hello
+
+### Tags for the filter chips
+GET {{api}}/tags
 
 ### Buyer: search by keyword
 GET {{api}}/products?q=clay
 
-### Buyer: filter by tag
-GET {{api}}/products?tag=pottery
+### Buyer: filter by tag, 10 per page
+GET {{api}}/products?tag=pottery&limit=10
 
 ### Buyer: product details
 GET {{api}}/products/{{create.response.body.product.id}}
