@@ -143,23 +143,30 @@ gs://<proj>-media/hls/<id>/manifest.m3u8 ◄── Transcoder ──done──�
 - [x] Done when the number is measured and recorded in `docs/ARCHITECTURE.md` (**42.8 kbps** on the wire, worst case)
 
 ### B4: GCP
-- [ ] New project `craftstream-<suffix>`; enable APIs: Run, Storage, Firestore, Transcoder, Eventarc, Pub/Sub, Cloud Build, Artifact Registry
-- [ ] Check that the Transcoder API is available in `asia-south1` (fall back to `asia-southeast1`)
-- [ ] Buckets: `uploads` (private, CORS `PUT` from the web origin, lifecycle: delete raw files after N days) and `media` (public read, CORS `GET`)
-- [ ] Firestore (Native) + `FirestoreRepo`
-- [ ] Service accounts: the API (Storage, Firestore, Transcoder); Eventarc/Pub/Sub invoker (`infra/gcp/04_iam.sh`)
+- [x] New project `craftstream-<suffix>`; enable APIs: Run, Storage, Firestore, Transcoder, Eventarc, Pub/Sub, Cloud Build, Artifact Registry (`craftstream-qi0tvg`)
+- [x] Check that the Transcoder API is available in `asia-south1` (fall back to `asia-southeast1`): it is; everything runs in `asia-south1`
+- [x] Buckets: `uploads` (private, CORS `PUT` from the web origin, lifecycle: delete raw files after N days) and `media` (public read, CORS `GET`). The hosted web origin must be added to `WEB_ORIGINS` (F6)
+- [x] Firestore (Native) + `FirestoreRepo` (2 composite indexes, READY)
+- [x] Service accounts: the API (Storage, Firestore, Transcoder); Eventarc/Pub/Sub invoker (`infra/gcp/04_iam.sh`). The script first provisions Google's service agents (new projects create them lazily)
 - [x] **Verify OIDC tokens** on `/internal/*` (`infra/gcp/auth.py`; audience + allowed service accounts from settings)
 - [x] Code: `infra/gcp/transcoder.py` publishes job results to Pub/Sub (`pubsubDestination`); HLS marked cacheable when ready
-- [x] Scripts written (not yet run): `infra/gcp/setup.sh` → `01_project` … `06_events` (Eventarc trigger, Pub/Sub push with OIDC)
+- [x] Scripts `infra/gcp/setup.sh` → `01_project` … `06_events` (Eventarc trigger, Pub/Sub push with OIDC), run against the real project
 - [x] Cloud Run image builds and serves locally (`docker build backend`, 227 MB); `.gcloudignore` keeps `.venv` out of the upload
-- [ ] Deploy to Cloud Run with `gcloud run deploy --source` (scripts in `infra/gcp/`, idempotent)
-- [ ] Done when a real 15-min upload goes uploads bucket → transcode → `ready` → HLS plays from the media bucket
+- [x] Deploy to Cloud Run with `gcloud run deploy --source` (scripts in `infra/gcp/`, idempotent): `https://craftstream-api-424435123536.asia-south1.run.app`
+- [x] Done when a real 15-min upload goes uploads bucket → transcode → `ready` → HLS plays from the media bucket (900 s / 43.8 MB clip: PASS; lowest rung **43.5 kbps** averaged over the 15 minutes, worst 6 s segment 45.8 kbps)
+
+Lessons from the first deploy (all fixed and tested):
+- Cloud Run's front end reserves `/healthz`, so liveness is `/health`.
+- Eventarc signs tokens for the service's hash URL **plus the path**; Pub/Sub uses the audience we set. `INTERNAL_AUDIENCE` lists both URLs and the verifier accepts a path under them.
+- The job config is REST JSON (camelCase): parse it with `JobConfig.from_json`. Mono audio needs `channelLayout: ["fc"]`.
+- The Transcoder rejects an edit list that ends after the input, so the API measures each upload with `ffprobe` and caps only videos longer than 15:00. Unreadable uploads are marked `failed`.
+- Measured on GCP output: lowest rung **44.9 kbps** on the wire (video 31.1 + HE-AAC 13.9, fMP4 included). The lowest variant is listed first and its audio is the default track.
 
 ### B5: Hardening + evidence
 - [x] gzip responses, small payloads (no description in list results), `Cache-Control: immutable` on HLS objects
 - [x] Errors: one `ErrorResponse` shape everywhere (`core/errors.py`, done in S1)
 - [x] `tools/smoke_test.py <url>`: whole flow incl. real resumable upload (passes locally)
-- [ ] Smoke test against the deployed URL
+- [x] Smoke test against the deployed URL (upload → ready → search → order: PASS)
 - [ ] GCP evidence checklist for the video: Cloud Run revisions + logs, the Transcoder job list, bucket contents, Firestore docs
 
 ---

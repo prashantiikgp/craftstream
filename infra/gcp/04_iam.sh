@@ -22,11 +22,12 @@ step "Service accounts"
 ensure_sa craftstream-api "CraftStream API (Cloud Run)"
 ensure_sa craftstream-events "CraftStream Eventarc + Pub/Sub invoker"
 
-step "API: Firestore, start/read Transcoder jobs, create upload sessions, measure uploads"
+step "API: Firestore, start/read Transcoder jobs, create upload sessions, measure uploads, finalize HLS"
 project_role "serviceAccount:$API_SA" roles/datastore.user
 project_role "serviceAccount:$API_SA" roles/transcoder.admin
 bucket_role "$UPLOAD_BUCKET" "serviceAccount:$API_SA" roles/storage.objectCreator
 bucket_role "$UPLOAD_BUCKET" "serviceAccount:$API_SA" roles/storage.objectViewer   # ffprobe reads the headers
+bucket_role "$MEDIA_BUCKET" "serviceAccount:$API_SA" roles/storage.objectUser   # mark finished HLS cacheable
 
 step "Transcoder service agent: read raw uploads, write HLS, publish results"
 bucket_role "$UPLOAD_BUCKET" "serviceAccount:$TRANSCODER_AGENT" roles/storage.objectViewer

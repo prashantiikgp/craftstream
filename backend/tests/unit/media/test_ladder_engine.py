@@ -43,6 +43,11 @@ def test_duration_cap_adds_edit_list():
     assert "editList" not in build_job_config()
 
 
+def test_uncapped_job_still_names_its_input():
+    cfg = build_job_config(input_uri="gs://up/raw/abc/source", max_duration_seconds=None)
+    assert cfg["inputs"] == [{"key": "input0", "uri": "gs://up/raw/abc/source"}] and "editList" not in cfg
+
+
 def test_duration_cap_needs_input_uri():
     with pytest.raises(ValueError):
         build_job_config(max_duration_seconds=900)

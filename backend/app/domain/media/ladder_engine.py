@@ -86,8 +86,9 @@ def build_job_config(
     }
     if pubsub_topic:
         config["pubsubDestination"] = {"topic": pubsub_topic}  # job result -> /internal/media/transcoded
-    if max_duration_seconds is not None:
+    if input_uri:
         config["inputs"] = [{"key": "input0", "uri": input_uri}]
+    if max_duration_seconds is not None:
         config["editList"] = [{"key": "atom0", "inputs": ["input0"], "endTimeOffset": f"{max_duration_seconds}s"}]
     return config
 
