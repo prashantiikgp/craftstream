@@ -101,23 +101,25 @@ Upload limits (15 min, file types) are **not** a frontend YAML. The app reads th
 ### F2: Rule files (the pattern, ×5)
 - [x] `theme` (design tokens, 3 palettes, WCAG-tested) and `layout` (size classes, grid): YAML + `_schema` + `_loader` + `_engine` + tests
 - [x] Design system components (`lib/shared/widgets/`) + `/catalog` live gallery with palette and light/dark switcher
-- [ ] For `strings`, `player` and `filters`: YAML + `_schema` + `_loader` + `_engine` + tests
-- [ ] Done when the app shell (home with Buyer/Artisan switch) is fully driven by YAML
+- [x] For `strings`, `player` and `filters` (plus `upload` retry/polling): YAML + `_schema` + `_loader` + `_engine` + tests
+- [x] Done when the app shell (home with Buyer/Artisan switch) is fully driven by YAML
 
 ### F3: Data layer
-- [ ] Wire the generated API client + `env.dart` (`API_HOST` via `--dart-define`)
-- [ ] `product_repository`, `order_repository`; loading/empty/error states
-- [ ] Done when the app lists products from the local backend (in-memory mode)
+- [x] Wire the generated API client + `env.dart` (`API_HOST` via `--dart-define`; `make web MOCK=false` for the real API)
+- [x] `product_repository`, `order_repository`; loading/empty/error states (catalog, order and upload repositories in `lib/data/repositories/`)
+- [x] Done when the app lists products from the local backend (in-memory mode) (checked in Chrome)
 
 ### F4: Features
-- [ ] **catalog**: search box (debounced) + tag chips + responsive grid
-- [ ] **product**: player + details + Buy
-- [ ] **checkout**: name + quantity → "Order placed"
-- [ ] **upload**: form → picker → duration check → resumable upload with progress → poll until ready
+- [x] **catalog**: search box (debounced) + tag chips + responsive grid + "Show more" paging with the API's cursor (on mock data; real data is F3)
+- [x] **product**: player + details + Buy (on mock data, which plays the sample stream from `player.yml`; real data is F3)
+- [x] **checkout**: name + quantity → "Order placed" (on mock data; real data is F3)
+- [x] **upload**: form → picker → duration check → resumable upload with progress → poll until ready (checked in Chrome against the local backend, with a real connection reset mid-chunk; Android path not yet run on an emulator)
 - [ ] Done when the full artisan → buyer → order flow works on Chrome and the Android emulator against the local backend
 
 ### F5: Low-bandwidth player
-- [ ] `player_engine` start-low settings on web (hls.js) and Android (ExoPlayer)
+- [x] `player_engine` start-low settings on web (hls.js) and Android (ExoPlayer)
+  - Web: our own `<video>` + bundled hls.js (`web/vendor/`), every setting from `player.yml` (`startLevel: 0`, 40 kbps first guess, 30 s buffer cap); rung pill shows e.g. "144p · 47 kbps".
+  - Android: video_player has no track-selection API, so the bitrate cap cannot be set from Dart. ExoPlayer starts on the first variant of the master playlist, which our ladder lists lowest first. Confirmed on real GCP output: the 256x144 variant (31 kbps video) is listed first and its 12 kbps HE-AAC audio is the default track (44.9 kbps on the wire in total).
 - [ ] Test under a 45 kbps throttle: Chrome DevTools custom profile; Android emulator `-netspeed` / GPRS
 - [ ] Fallback low-band manifest if needed
 - [ ] Done when a video plays without stalling under throttle on both platforms

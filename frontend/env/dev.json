@@ -4,5 +4,6 @@
   "THEME_PALETTE": "saffron",
   "THEME_MODE": "system",
   "DEV_TOOLS": true,
+  "MOCK_DATA": true,
   "LOG_LEVEL": "debug"
 }

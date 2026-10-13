@@ -42,5 +42,13 @@ product_card:
   aspect_ratio: 1.0
   min_width: 150
 
+# Wide list cards (the artisan's products): as many columns as fit at min_width, up to max_columns.
+list_card:
+  min_width: 320
+  max_columns: 3
+
+# Forms (checkout, single-column upload) never grow wider than this.
+form_max_width: 560
+
 # Side-by-side product screen: share of the width the video takes.
 side_by_side_video_fraction: 0.58

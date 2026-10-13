@@ -42,6 +42,8 @@ class DesignCatalogScreen extends ConsumerWidget {
                   SizedBox(height: t.space.lg),
                   const _Readability(),
                   _gap(t),
+                  const _Brand(),
+                  _gap(t),
                   const _Colors(),
                   _gap(t),
                   const _Typography(),
@@ -438,6 +440,62 @@ class _LayoutInfo extends ConsumerWidget {
         StatusBadge('${layout.gridColumns(width)} columns', tone: Tone.info),
         StatusBadge('nav: ${sc.navigation.name}', tone: Tone.secondary),
         StatusBadge('product: ${sc.productLayout.name}', tone: Tone.secondary),
+      ]),
+    ]);
+  }
+}
+
+class _Brand extends StatelessWidget {
+  const _Brand();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final caption = context.type.caption.copyWith(color: t.sub);
+    Widget labelled(String label, Widget child) => Column(mainAxisSize: MainAxisSize.min, children: [
+          child,
+          SizedBox(height: t.space.xs),
+          Text(label, style: caption),
+        ]);
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const SectionHeader('Brand',
+          subtitle: 'A thrown vessel with a play button in its belly. Drawn in code from the palette (lib/shared/brand/).'),
+      const BrandLockup(height: 44),
+      SizedBox(height: t.space.lg),
+      Wrap(spacing: t.space.xl, runSpacing: t.space.lg, crossAxisAlignment: WrapCrossAlignment.end, children: [
+        for (final size in [16.0, 24.0, 32.0, 48.0, 96.0]) labelled('${size.toInt()} px', BrandMark(size: size)),
+        labelled('ink', const BrandMark(size: 48, tone: MarkTone.ink)),
+        labelled(
+          'on brand',
+          Container(
+            padding: EdgeInsets.all(t.space.sm),
+            decoration: BoxDecoration(color: t.brand, borderRadius: BorderRadius.circular(t.radius.md)),
+            child: const BrandMark(size: 48, tone: MarkTone.onBrand),
+          ),
+        ),
+      ]),
+      SizedBox(height: t.space.xl),
+      Text('Illustrations', style: context.type.title),
+      SizedBox(height: t.space.md),
+      Wrap(spacing: t.space.lg, runSpacing: t.space.lg, children: [
+        for (final (kind, label) in const [
+          (SpotKind.emptySearch, 'Nothing matches'),
+          (SpotKind.processing, 'Uploading / processing'),
+          (SpotKind.orderPlaced, 'Order placed'),
+          (SpotKind.slowNetwork, 'Slow network'),
+        ])
+          AppCard(child: labelled(label, SpotIllustration(kind, width: 180))),
+      ]),
+      SizedBox(height: t.space.xl),
+      Text('Poster placeholders', style: context.type.title),
+      SizedBox(height: t.space.md),
+      Wrap(spacing: t.space.lg, runSpacing: t.space.lg, children: [
+        for (final tag in ['pottery', 'textiles', 'woodwork', 'brass', 'jewellery', 'kantha'])
+          SizedBox(
+            width: 220,
+            child: labelled(tag,
+                ProductPosterPlaceholder(tag: tag, borderRadius: BorderRadius.circular(t.radius.md))),
+          ),
       ]),
     ]);
   }

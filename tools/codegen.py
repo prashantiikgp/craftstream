@@ -5,6 +5,7 @@
         -> backend/app/generated/models.py              (Pydantic models for FastAPI)
         -> frontend/lib/data/generated/models.dart      (Dart models for Flutter)
         -> frontend/lib/data/generated/api_client.dart  (Dart HTTP client, public endpoints only)
+        -> frontend/lib/data/generated/limits.dart      (field limits as Dart constants, for form checks)
 
 Run with:  python tools/codegen.py   (or `make gen`)
 Never edit the generated files by hand; edit the YAML and regenerate.
@@ -306,6 +307,29 @@ def build_dart_models(models: dict) -> str:
     return "\n".join(out)
 
 
+LIMIT_SUFFIX = {"min_length": "MinLength", "max_length": "MaxLength", "minimum": "Min", "maximum": "Max",
+                "max_items": "MaxItems"}
+
+
+def _dart_limit(f: dict, key: str) -> str:
+    v = f[key]
+    if key == "minimum" or key == "maximum":
+        return repr(float(v)) if f["type"] == "number" else str(int(v))
+    return str(int(v))
+
+
+def build_dart_limits(models: dict) -> str:
+    """One `<Model>Limits` class per model with limits, so forms check exactly what the API enforces."""
+    out = [f"// {HEADER}", "// ignore_for_file: type=lint", ""]
+    for name, spec in models.items():
+        consts = [f"  static const {camel(k)}{suffix} = {_dart_limit(f, key)};"
+                  for k, f in spec["fields"].items() for key, suffix in LIMIT_SUFFIX.items() if key in f]
+        if consts:
+            out += [f"/// Field limits of {name} (models/), the same ones the API enforces.",
+                    f"abstract final class {name}Limits {{", *consts, "}", ""]
+    return "\n".join(out)
+
+
 def build_dart_client(api: dict, models: dict) -> str:
     has_error = "ErrorResponse" in models
     out = [f"// {HEADER}", "// ignore_for_file: type=lint", "",
@@ -390,6 +414,7 @@ def main() -> None:
     write(ROOT / "backend" / "app" / "generated" / "__init__.py", "")
     write(DART_OUT / "models.dart", build_dart_models(models))
     write(DART_OUT / "api_client.dart", build_dart_client(api, models))
+    write(DART_OUT / "limits.dart", build_dart_limits(models))
     print("Done.")
 
 

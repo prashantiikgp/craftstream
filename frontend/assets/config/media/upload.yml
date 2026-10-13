@@ -1,0 +1,11 @@
+# How the app uploads a process video and waits for it. Limits (15:00, file types, chunk size) are NOT here:
+# they come from GET /api/v1/upload-policy and the UploadTicket. Read by upload_engine.
+
+# After a dropped connection, wait this long before asking GCS how much it has, then resume from there.
+# One entry per attempt; the last value repeats.
+retry_backoff_seconds: [1, 2, 5, 10, 30]
+max_retries: 20                  # then show "Upload paused" and let the artisan resume by hand
+
+# While the video processes, check the product's video_status this often, for at most this long.
+status_poll_seconds: 3
+status_poll_timeout_minutes: 30

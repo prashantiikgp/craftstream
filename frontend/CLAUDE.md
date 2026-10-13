@@ -6,11 +6,11 @@ Read with the root `CLAUDE.md`. Full plan: `docs/FRONTEND_PLAN.md`.
 
 | Layer | Folder | May | Must not |
 |---|---|---|---|
-| Rules | `assets/config/<domain>/<xyz>.yml` | hold theme, layout, strings, player and filter settings | hold API URLs or secrets |
+| Rules | `assets/config/<domain>/<xyz>.yml` | hold theme, layout, strings, filters, player and upload-retry settings | hold API URLs or secrets |
 | Schemas | `lib/schemas/<domain>/<xyz>_schema.dart` | define immutable classes with `fromJson` that reject unknown keys | contain logic |
 | Loaders | `lib/domain/<domain>/<xyz>_loader.dart` | call `core/yaml_loader.dart`, load once at startup | do anything else |
 | Engines | `lib/domain/<domain>/<xyz>_engine.dart` | pure Dart over loaded rules | import Flutter widgets, HTTP or repositories |
-| Data | `lib/data/repositories/`, `lib/data/upload/` | call the generated API client and GCS | contain UI or business rules |
+| Data | `lib/data/repositories/`, `lib/data/upload/`, `lib/data/mock/` | call the generated API client and GCS (or the mock) | contain UI or business rules |
 | Generated | `lib/data/generated/` | be imported by repositories | be edited by hand |
 | Features | `lib/features/<feature>/` | screen + widgets + controller (Riverpod) | read YAML or call HTTP directly |
 | Shared | `lib/shared/widgets/` | widgets used by 2+ features | hold feature logic |
@@ -18,12 +18,18 @@ Read with the root `CLAUDE.md`. Full plan: `docs/FRONTEND_PLAN.md`.
 **Flow:** `screen → controller → engine (rules) or repository (data)`.
 
 **Nothing hard-coded in screens:**
-- text comes from `strings_engine`;
+- text comes from `strings_engine`: `context.s('group.key', {'name': value})`, keys as string literals
+  (`strings_engine_test` fails on a missing or unused key);
 - colours and spacing come from `theme_engine`;
 - breakpoints and columns come from `layout_engine`;
 - player settings come from `player_engine`.
 
-Upload limits are **not** frontend YAML: read them from `GET /api/v1/upload-policy`.
+Upload limits are **not** frontend YAML: read them from `GET /api/v1/upload-policy`. Form limits mirror
+`models/*.yml` as constants in the controllers; `test/features/model_limits_test.dart` keeps them in step.
+
+**Real or mock data:** `lib/data/providers.dart` is the only place that chooses. `MOCK_DATA=true` (dev) uses
+`MockStore` (sample products, the API's search rules, a simulated resumable upload); otherwise the generated
+API client. Screens and controllers only see the repository interfaces.
 
 ## Design system
 

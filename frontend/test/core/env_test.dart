@@ -7,6 +7,7 @@ Map<String, Object?> base([Map<String, Object?> changes = const {}]) => {
       'THEME_PALETTE': 'saffron',
       'THEME_MODE': 'light',
       'DEV_TOOLS': false,
+      'MOCK_DATA': false,
       'LOG_LEVEL': 'warn',
       ...changes,
     };
@@ -35,6 +36,7 @@ void main() {
   test('prod cannot ship dev tools or debug logging', () {
     expectRejected(base({'DEV_TOOLS': true}), 'DEV_TOOLS must be false in prod');
     expectRejected(base({'LOG_LEVEL': 'debug'}), 'debug is not allowed in prod');
+    expectRejected(base({'MOCK_DATA': true}), 'MOCK_DATA must be false in prod');
   });
 
   test('API_HOST must be a bare origin without credentials', () {

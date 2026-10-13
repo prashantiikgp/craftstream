@@ -16,12 +16,16 @@ class LayoutSchema {
   final List<SizeClassSchema> sizeClasses;
   final double maxContentWidth;
   final ProductCardSchema productCard;
+  final ListCardSchema listCard;
+  final double formMaxWidth;
   final double sideBySideVideoFraction;
 
   const LayoutSchema({
     required this.sizeClasses,
     required this.maxContentWidth,
     required this.productCard,
+    required this.listCard,
+    required this.formMaxWidth,
     required this.sideBySideVideoFraction,
   });
 
@@ -59,4 +63,14 @@ class ProductCardSchema {
   const ProductCardSchema({required this.aspectRatio, required this.minWidth});
 
   factory ProductCardSchema.fromJson(Map<String, dynamic> json) => _$ProductCardSchemaFromJson(json);
+}
+
+@JsonSerializable()
+class ListCardSchema {
+  final double minWidth;
+  final int maxColumns;
+
+  const ListCardSchema({required this.minWidth, required this.maxColumns});
+
+  factory ListCardSchema.fromJson(Map<String, dynamic> json) => _$ListCardSchemaFromJson(json);
 }

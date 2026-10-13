@@ -1,0 +1,200 @@
+# Every user-visible string in the app, grouped by screen. Screens call context.s('group.key', {...}).
+# {name} is filled in by the screen. Keys are snake_case; a test fails if a key used in lib/ is missing here
+# or a key here is never used.
+
+locale: en
+
+strings:
+  common:
+    back: Back
+    retry: Try again
+    error_title: Something went wrong
+    error_message: We couldn't load this. Check your connection and try again.
+
+  shell:
+    role_buyer: Buy
+    role_artisan: Sell
+    design_system: Design system
+
+  nav:
+    discover: Discover
+    orders: Orders
+    my_products: My products
+    new_product: New product
+
+  status:
+    ready: Live
+    processing: Processing
+    failed: Failed
+    awaiting_upload: Waiting for video
+
+  discover:
+    title: Made by hand, shown in full
+    subtitle: Watch how each piece is made, then order it straight from the artisan.
+    search_hint: Search pottery, ikat, brass…
+    clear_search: Clear search
+    all_tags: All
+    sort_label: Sort
+    sort_newest: Newest
+    sort_price_low: Price, low to high
+    sort_price_high: Price, high to low
+    searching: Looking…
+    count_one: 1 piece
+    count_many: "{count} pieces"
+    count_more: "{count} pieces shown, more to see"
+    load_more: Show more
+    load_more_failed: Couldn't load more. Check your connection and try again.
+    tag_filter: "#{tag}"
+    card_video: Process video
+    empty_title: Nothing matches yet
+    empty_message: Try a shorter word, or clear the tag filter.
+    none_title: No pieces yet
+    none_message: Artisans' process videos appear here as soon as they're ready to watch.
+    clear_filters: Clear filters
+
+  product:
+    screen_title: Product
+    by_artisan: by {artisan}
+    play: Play the process video
+    pause: Pause
+    slow_network_note: Starts at 144p, so it plays even on a slow connection
+    rung: "{height}p · {kbps} kbps"
+    rung_height_only: "{height}p"
+    network_estimate: "Network ≈ {kbps} kbps"
+    buffering: Loading the video
+    video_error: The video stopped loading. Check your connection and try again.
+    seek: Video position
+    time: "{position} / {duration}"
+    buy: Buy
+    about: How it's made
+    tags: Tags
+    not_ready_title: The video is still processing
+    not_ready_message: You can buy this once the process video is ready to watch.
+    after_order_title: What happens after you order
+    after_order_message: "{artisan} gets your order and contacts you to arrange delivery. No payment is taken in the app."
+    load_error: We couldn't load this product. Check your connection and try again.
+
+  checkout:
+    title: Place your order
+    each: "{price} each"
+    name_label: Your name
+    name_hint: How the artisan should address you
+    name_too_short: Please enter at least {min} letters.
+    name_too_long: Please keep it under {max} characters.
+    quantity_label: Quantity
+    quantity_limit: Up to {max} per order
+    decrease: One less
+    increase: One more
+    total: Total
+    total_note: "{quantity} × {price}. The final total is confirmed when the order is placed."
+    place_order: Place order
+    failed_title: The order didn't go through
+    failed_message: Nothing was ordered. Check your connection and try again.
+    no_payment_note: No payment now. The artisan contacts you to arrange delivery.
+
+  placed:
+    title: Order placed
+    message: "{artisan} will be in touch about delivery."
+    message_generic: The artisan will be in touch about delivery.
+    order_id: Order number
+    product: Product
+    quantity: Quantity
+    total: Total
+    status: Status
+    status_placed: Placed
+    keep_exploring: Keep exploring
+    see_orders: See your orders
+
+  orders:
+    title: Your orders
+    subtitle: Orders placed from this device.
+    empty_title: No orders yet
+    empty_message: When you order something, it shows up here.
+    start_exploring: Start exploring
+    line: "{quantity} × · from {artisan}"
+
+  studio:
+    title: Your products
+    subtitle: Listings created from this device, with their video status.
+    new_product: New product
+    refresh: Refresh
+    hint_ready: Live. Buyers can find it and order.
+    hint_processing: Making the 144p to 720p versions. Usually a few minutes.
+    hint_failed: The video couldn't be processed. Upload it again.
+    hint_awaiting_upload: Waiting for the video upload to finish.
+    upload_again: Upload again
+    empty_title: No products yet
+    empty_message: Add your first product with a short video of how you make it.
+
+  upload:
+    title: New product
+    subtitle: Tell buyers what it is, then add a video of how you make it.
+    title_label: Title
+    title_hint: e.g. Hand-thrown clay mug
+    title_too_short: Use at least {min} characters.
+    title_too_long: Keep it under {max} characters.
+    description_label: Description
+    description_hint: Materials, size, how long it takes to make…
+    description_too_long: Keep it under {max} characters.
+    price_label: Price
+    price_hint: "450"
+    currency_symbol: ₹
+    price_invalid: Enter a price, like 450 or 1200.50.
+    tags_label: Tags
+    other_tags_label: Other tags
+    other_tags_hint: e.g. kitchen, gift
+    tags_helper: Separate with commas. Up to {max} tags in all.
+    tags_too_many: Use at most {max} tags.
+    artisan_label: Your name
+    artisan_hint: Shown to buyers on the product
+    artisan_helper: There are no accounts. Buyers see this name.
+    artisan_too_long: Keep it under {max} characters.
+    required: Required.
+    video_label: Process video
+    video_empty_title: Add the process video
+    video_empty_message: Up to {max} long, any file size. It uploads straight to storage and picks up where it left off if the connection drops.
+    video_empty_message_loading: Any file size. It uploads straight to storage and picks up where it left off if the connection drops.
+    choose_video: Choose video
+    change_video: Change
+    video_required: Pick the process video to continue.
+    check_ok_title: Ready to upload
+    check_ok: "{duration} long, within the {max} limit."
+    check_too_long_title: This video is too long
+    check_too_long: "{duration} is longer than {max}. Trim it and pick it again."
+    check_unknown_title: Length not checked
+    check_unknown: This device couldn't read the length. Only the first {max} will be processed.
+    check_bad_type_title: This file type can't be used
+    check_bad_type: Pick a video file. MP4, MOV and WebM work everywhere.
+    fix_title: A few things need attention
+    fix_message: Check the highlighted fields and the video.
+    publish: Publish and upload
+    publish_note: The listing goes live after the video is processed.
+    progress_subtitle: "{price} · by {artisan}"
+    creating: Creating your listing…
+    uploading_file: Uploading {name}
+    uploaded_file: Uploaded {name}
+    progress_bytes: "{sent} of {total} · {percent}%"
+    chunk_note: Sent in {chunk} pieces, so a dropped connection only loses the last piece.
+    pause: Pause
+    resume: Resume
+    paused_badge: Paused
+    simulate_drop: Simulate a dropped connection
+    reconnecting_title: Connection lost
+    reconnecting: Asking how much arrived, then resuming from {sent} (attempt {attempt}).
+    paused_title: Upload paused
+    paused_message: Resume when you're ready. Nothing already sent is lost.
+    keep_open_title: Keep the app open
+    keep_open_message: You can switch screens while it uploads. Closing the app pauses it; it resumes from the last piece.
+    processing_title: Processing your video
+    processing_message: Making a 144p version for slow networks and sharper ones for fast ones. Usually a few minutes; you can leave this screen.
+    processing_slow: This is taking longer than usual. Check My products later.
+    go_to_products: Go to My products
+    live_title: Your product is live
+    live_message: Buyers can now find "{title}" and watch how you made it.
+    view_product: View product
+    add_another: Add another
+    failed_title: Upload stopped
+    failed_message: The upload couldn't continue. Resume to carry on from where it stopped.
+    processing_failed_title: Processing failed
+    processing_failed_message: The video couldn't be processed. Start over and pick the video again.
+    start_over: Start over

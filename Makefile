@@ -3,6 +3,9 @@ VENV     ?= backend/.venv
 PY       ?= $(VENV)/bin/python
 ENV      ?= dev
 # ENV selects frontend/env/$(ENV).json: dev | staging | prod
+# MOCK=false runs the dev app against the API at API_HOST (start it with `make api`) instead of in-app mock data
+MOCK     ?=
+DEFINES   = --dart-define-from-file=env/$(ENV).json $(if $(MOCK),--dart-define=MOCK_DATA=$(MOCK))
 FLUTTER  ?= $(HOME)/development/flutter/bin/flutter
 
 help:            ## Show this list
@@ -30,11 +33,11 @@ hls:             ## Make a local HLS ladder: make hls SRC=video.mp4
 flutter-init:    ## One-time: generate Flutter android/web folders and add hls.js
 	bash tools/setup_flutter.sh
 
-web:             ## Serve the Flutter web app on :8080 (ENV=dev|staging|prod; open in Windows Chrome)
-	cd frontend && $(FLUTTER) run -d web-server --web-port 8080 --dart-define-from-file=env/$(ENV).json
+web:             ## Serve the Flutter web app on :8080 (ENV=dev|staging|prod, MOCK=false for `make api`; open in Windows Chrome)
+	cd frontend && $(FLUTTER) run -d web-server --web-port 8080 $(DEFINES)
 
 apk:             ## Build the Android APK (ENV=prod for the deployed backend)
-	cd frontend && $(FLUTTER) build apk --release --dart-define-from-file=env/$(ENV).json
+	cd frontend && $(FLUTTER) build apk --release $(DEFINES)
 
 web-build:       ## Build the web app for hosting (ENV=prod)
 	cd frontend && $(FLUTTER) build web --release --dart-define-from-file=env/$(ENV).json

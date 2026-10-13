@@ -6,8 +6,16 @@ import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../domain/catalog/filters_engine.dart';
+import '../domain/catalog/filters_loader.dart';
+import '../domain/media/player_engine.dart';
+import '../domain/media/player_loader.dart';
+import '../domain/media/upload_engine.dart';
+import '../domain/media/upload_loader.dart';
 import '../domain/ui/layout_engine.dart';
 import '../domain/ui/layout_loader.dart';
+import '../domain/ui/strings_engine.dart';
+import '../domain/ui/strings_loader.dart';
 import '../domain/ui/theme_engine.dart';
 import '../domain/ui/theme_loader.dart';
 import 'env.dart';
@@ -16,7 +24,19 @@ class AppConfig {
   final AppEnv env;
   final ThemeEngine theme;
   final LayoutEngine layout;
-  const AppConfig({required this.env, required this.theme, required this.layout});
+  final StringsEngine strings;
+  final FiltersEngine filters;
+  final PlayerEngine player;
+  final UploadEngine upload;
+  const AppConfig({
+    required this.env,
+    required this.theme,
+    required this.layout,
+    required this.strings,
+    required this.filters,
+    required this.player,
+    required this.upload,
+  });
 }
 
 Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
@@ -25,8 +45,15 @@ Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
   if (!theme.paletteNames.contains(e.themePalette)) {
     throw EnvError(['THEME_PALETTE "${e.themePalette}" is not in theme.yml (have: ${theme.paletteNames.join(', ')})']);
   }
-  final layout = LayoutEngine(await loadLayoutRules(bundle: bundle));
-  return AppConfig(env: e, theme: theme, layout: layout);
+  return AppConfig(
+    env: e,
+    theme: theme,
+    layout: LayoutEngine(await loadLayoutRules(bundle: bundle)),
+    strings: StringsEngine(await loadStringsRules(bundle: bundle)),
+    filters: FiltersEngine(await loadFiltersRules(bundle: bundle)),
+    player: PlayerEngine(await loadPlayerRules(bundle: bundle)),
+    upload: UploadEngine(await loadUploadRules(bundle: bundle)),
+  );
 }
 
 /// Overridden in main.dart with the loaded config.

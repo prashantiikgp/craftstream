@@ -1,0 +1,21 @@
+# How buyers search and filter. Read by filters_engine; the Discover screen never hard-codes these.
+
+search:
+  debounce_ms: 350          # wait this long after the last keystroke before searching
+  min_query_length: 2       # shorter text is ignored (shows everything)
+  max_query_length: 80      # longer text is cut (the API rejects very long queries)
+
+# Products asked for per request. Small pages keep each response tiny on slow networks.
+page_size: 24
+
+# Tag chips: these come first (when at least one ready product has them), then the most used tags from
+# GET /tags, up to max_chips in total.
+featured_tags: [pottery, textiles, woodwork, brass, jewellery]
+max_chips: 10
+
+# Sort menu. Applied on the device to the loaded results; `newest` is the order the API returns.
+sort_options:
+  - id: newest
+    default: true
+  - id: price_low
+  - id: price_high

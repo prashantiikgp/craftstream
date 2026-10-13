@@ -1,0 +1,28 @@
+# How the process video plays. Read by player_engine; the F5 player (hls.js on web, ExoPlayer on Android)
+# takes every value from here. Hard rule: the player starts on the lowest rung (<= 50 kbps on the wire).
+
+start_on_lowest_rung: true      # must stay true; the engine rejects false
+
+# First bandwidth guess before any segment is measured. Keep it under the lowest rung's bitrate so the
+# player never tries a bigger rung first on a slow connection.
+initial_bandwidth_bps: 40000
+
+# Buffering
+min_buffer_to_start_seconds: 4   # Android starts playback once this much is buffered   # start playback once this much is buffered
+max_buffer_seconds: 30           # never fetch further ahead than this (saves data on mobile)
+
+# Switching up: only move to a bigger rung once the measured bandwidth beats its bitrate by this factor.
+upswitch_safety_factor: 1.4
+
+poster:
+  show_until_first_frame: true   # keep the poster on screen until the first frame is decoded
+  buffering_indicator_after_ms: 300
+
+# Grids and lists show posters only; video loads on the product screen and only when tapped.
+autoplay_in_grids: false
+autoplay_on_product_page: false
+
+# MOCK_DATA builds have no media bucket: their `mock://` video URLs play this public sample instead (the same
+# stream `make api` returns in local mode). Its lowest rung is far above 50 kbps, so throttled demos need
+# the real ladder (staging/prod, or a product uploaded through the deployed backend).
+sample_stream_url: https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8

@@ -43,4 +43,15 @@ void main() {
         throwsA(isA<LayoutRulesError>()));
     expect(() => rules((y) => y.replaceFirst('navigation: rail', 'navigation: drawer')), throwsA(isA<ConfigError>()));
   });
+
+  test('wide list cards: as many columns as fit, capped', () {
+    expect(engine.listColumns(390), 1);
+    expect(engine.listColumns(820), 2);
+    expect(engine.listColumns(1440), 3);
+  });
+
+  test('pages are padded, then centred past max_content_width', () {
+    expect(engine.horizontalInset(390), 16);
+    expect(engine.horizontalInset(1180 + 200), 100 + 32);
+  });
 }

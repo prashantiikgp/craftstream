@@ -12,7 +12,7 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     final env = AppEnv.parse({
       'APP_ENV': 'dev', 'API_HOST': 'http://localhost:8000', 'THEME_PALETTE': 'saffron',
-      'THEME_MODE': 'light', 'DEV_TOOLS': true, 'LOG_LEVEL': 'debug',
+      'THEME_MODE': 'light', 'DEV_TOOLS': true, 'MOCK_DATA': true, 'LOG_LEVEL': 'debug',
     });
     config = await loadAppConfig(env: env);
   });

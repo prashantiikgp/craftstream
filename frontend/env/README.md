@@ -14,7 +14,12 @@ go in the app; they stay on the backend (Cloud Run env vars / Secret Manager).
 | `THEME_PALETTE` | a palette name from `assets/config/ui/theme.yml` | must exist in theme.yml |
 | `THEME_MODE` | `light` · `dark` · `system` | |
 | `DEV_TOOLS` | `true` · `false` | must be `false` in prod (palette switcher, debug overlays) |
+| `MOCK_DATA` | `true` · `false` | must be `false` in prod (`true` = in-app fake data, no API calls) |
 | `LOG_LEVEL` | `debug` · `info` · `warn` · `error` | `debug` not allowed in prod |
+
+**Dev against the real API:** `dev.json` uses mock data. Run `make api` and then `make web MOCK=false` (or
+`make apk MOCK=false` for the emulator, where `localhost` becomes `10.0.2.2`). A `--dart-define` given after
+`--dart-define-from-file` wins, so one key can be overridden without another env file.
 
 A test (`test/core/env_files_test.dart`) fails if any env file has an unknown key, a key that looks like a secret
 (`*KEY*`, `*SECRET*`, `*TOKEN*`, `*PASSWORD*`, `*CREDENTIAL*`) or breaks the rules above.

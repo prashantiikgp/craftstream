@@ -18,18 +18,19 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Handmade goods, shown in the making. Watch the process video, then order.">
+  <meta name="theme-color" content="#FE5722">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="craftstream">
+  <meta name="apple-mobile-web-app-title" content="CraftStream">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>craftstream</title>
+  <title>CraftStream</title>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -41,6 +42,9 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <!-- hls.js (light build) for the low-bandwidth player, bundled so it is never fetched from a CDN at runtime.
+       Loaded with the app shell: the throttled demo opens the app first, then switches the throttle on. -->
+  <script src="vendor/hls.light.min.js" defer></script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

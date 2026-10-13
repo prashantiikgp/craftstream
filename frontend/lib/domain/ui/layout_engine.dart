@@ -32,6 +32,7 @@ class LayoutEngine {
     for (final c in classes) {
       if (c.gridColumns < 1) throw LayoutRulesError('${c.name}.grid_columns must be at least 1');
     }
+    if (rules.listCard.maxColumns < 1) throw const LayoutRulesError('list_card.max_columns must be at least 1');
     if (rules.sideBySideVideoFraction <= 0 || rules.sideBySideVideoFraction >= 1) {
       throw const LayoutRulesError('side_by_side_video_fraction must be between 0 and 1');
     }
@@ -48,12 +49,23 @@ class LayoutEngine {
     return math.min(width, rules.maxContentWidth) - 2 * c.pagePadding;
   }
 
+  /// Left/right inset that pads the page and centres it once the screen is wider than max_content_width.
+  double horizontalInset(double width) =>
+      (width - math.min(width, rules.maxContentWidth)) / 2 + sizeClassFor(width).pagePadding;
+
   /// Product cards per row: the class's column count, reduced if cards would get narrower than min_width.
   int gridColumns(double width) {
     final c = sizeClassFor(width);
     final available = contentWidth(width);
     final fit = ((available + c.gutter) / (rules.productCard.minWidth + c.gutter)).floor();
     return math.max(1, math.min(c.gridColumns, fit));
+  }
+
+  /// Columns for wide list cards (the artisan's products).
+  int listColumns(double width) {
+    final c = sizeClassFor(width);
+    final fit = ((contentWidth(width) + c.gutter) / (rules.listCard.minWidth + c.gutter)).floor();
+    return math.max(1, math.min(rules.listCard.maxColumns, fit));
   }
 
   bool usesRail(double width) => sizeClassFor(width).navigation == NavigationStyle.rail;

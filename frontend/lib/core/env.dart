@@ -23,6 +23,7 @@ class AppEnv {
   final String themePalette;
   final String themeMode; // light | dark | system
   final bool devTools;
+  final bool mockData; // true = in-app fake data, no API calls (lib/data/mock/)
   final LogLevel logLevel;
 
   const AppEnv({
@@ -31,6 +32,7 @@ class AppEnv {
     required this.themePalette,
     required this.themeMode,
     required this.devTools,
+    required this.mockData,
     required this.logLevel,
   });
 
@@ -42,6 +44,7 @@ class AppEnv {
   static const _rawPalette = String.fromEnvironment('THEME_PALETTE', defaultValue: 'saffron');
   static const _rawMode = String.fromEnvironment('THEME_MODE', defaultValue: 'system');
   static const _rawDevTools = bool.fromEnvironment('DEV_TOOLS', defaultValue: true);
+  static const _rawMockData = bool.fromEnvironment('MOCK_DATA', defaultValue: true);
   static const _rawLogLevel = String.fromEnvironment('LOG_LEVEL', defaultValue: 'debug');
 
   /// Reads the compiled-in values and validates them. Throws [EnvError] listing every problem.
@@ -52,6 +55,7 @@ class AppEnv {
           'THEME_PALETTE': _rawPalette,
           'THEME_MODE': _rawMode,
           'DEV_TOOLS': _rawDevTools,
+          'MOCK_DATA': _rawMockData,
           'LOG_LEVEL': _rawLogLevel,
         },
         releaseMode: releaseMode,
@@ -90,6 +94,10 @@ class AppEnv {
     if (devTools is! bool) problems.add('DEV_TOOLS must be true or false');
     if (name == AppEnvName.prod && devTools == true) problems.add('DEV_TOOLS must be false in prod');
 
+    final mockData = raw['MOCK_DATA'];
+    if (mockData is! bool) problems.add('MOCK_DATA must be true or false');
+    if (name == AppEnvName.prod && mockData == true) problems.add('MOCK_DATA must be false in prod');
+
     final level = LogLevel.values.where((l) => l.name == raw['LOG_LEVEL']).firstOrNull;
     if (level == null) problems.add('LOG_LEVEL must be debug, info, warn or error');
     if (name == AppEnvName.prod && level == LogLevel.debug) problems.add('LOG_LEVEL debug is not allowed in prod');
@@ -101,6 +109,7 @@ class AppEnv {
       themePalette: palette,
       themeMode: mode,
       devTools: devTools as bool,
+      mockData: mockData as bool,
       logLevel: level!,
     );
   }

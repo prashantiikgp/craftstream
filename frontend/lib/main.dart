@@ -14,6 +14,8 @@ Future<void> main() async {
   try {
     final config = await loadAppConfig();
     runApp(ProviderScope(
+      // Screens show errors with a Retry button; repositories own any retrying, so providers never auto-retry.
+      retry: (_, _) => null,
       overrides: [appConfigProvider.overrideWithValue(config)],
       child: const CraftStreamApp(),
     ));

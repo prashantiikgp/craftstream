@@ -21,6 +21,7 @@ def test_generated_code_matches_models():
         "backend/app/generated/models.py": cg.build_python(models),
         "frontend/lib/data/generated/models.dart": cg.build_dart_models(models),
         "frontend/lib/data/generated/api_client.dart": cg.build_dart_client(api, models),
+        "frontend/lib/data/generated/limits.dart": cg.build_dart_limits(models),
     }
     stale = [path for path, text in expected.items() if (ROOT / path).read_text() != text]
     assert not stale, f"run `make gen`: out of date: {stale}"
