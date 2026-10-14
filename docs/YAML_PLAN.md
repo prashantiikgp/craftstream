@@ -196,7 +196,7 @@ per size class.
       Keep exploring.
 - [x] `orders.yml`: the order list. Each card shows a poster, title, quantity × artisan, total, status, order
       number and date, and opens the receipt. The newest order is highlighted.
-- [ ] **Orders must survive a restart.** Today `orders_controller.dart` keeps them in memory only and there is
+- [x] **Orders must survive a restart.** Today `orders_controller.dart` keeps them in memory only and there is
       no endpoint to read an order back, so "check where my order is" breaks once the app is closed.
   - Keep the placed order ids on the device; the storage key and how many to keep go in `orders/orders.yml`.
   - Add `GET /orders/{order_id}` to `models/endpoints.yml` (backend in 2.1). The list and receipt load each
@@ -246,7 +246,8 @@ and the light and dark theme B match the canvas.
   - error code ↔ status map, default messages, the validation and internal error codes;
   - CORS methods, headers and expose list.
   - Add `product_not_ready` to `models/error_response.yml`.
-- [ ] `GET /orders/{order_id}` (needed by 1.4's Your orders): handler, Firestore read, API test, smoke test step.
+- [x] `GET /orders/{order_id}` (needed by 1.4's Your orders): handler, Firestore read, API test, smoke test step.
+      (Code done; the Cloud Run deploy waits for the user's OK.)
 - [ ] Keep `/docs` (OpenAPI) correct when routes are mounted from `endpoints.yml`: the handlers keep their typed
       signatures, and the YAML maps path and method to a handler name.
 
