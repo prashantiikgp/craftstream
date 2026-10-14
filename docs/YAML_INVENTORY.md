@@ -59,9 +59,9 @@ review column is for the user: **Y** move to YAML, **C** keep in code (give a re
 | B7 | Catalog | `core/ids.py:10` 12-hex ids; search field map duplicates search_schema; tag order; `LIST_LIMIT=500`; collections `products` and `orders`; indexes duplicated in 03_firestore.sh | Y: done, `catalog/listing.yml`; the field map is gone (search.yml lists the fields); indexes in `infra/gcp/resources.yml` |
 | B8 | Events | Pub/Sub envelope shape and error texts in `internal.py:26-47`; event type in 06_events.sh | Y: done, `platform/events.yml` (the API now also ignores other Eventarc event types) |
 | B9 | Ingest | `ffprobe.py:10,19` timeout 60 s, stderr cap 200 | Y: done, `media/ingest.yml` |
-| B10 | Infra | `_common.sh` names; 9 APIs; lifecycle; public media bucket; 2 CORS templates; Firestore indexes; 14 IAM bindings; Cloud Run sizing (1 CPU, 512 Mi, 0–3 instances, concurrency 40); Pub/Sub retry 30 s / 10–600 s | |
+| B10 | Infra | `_common.sh` names; 9 APIs; lifecycle; public media bucket; 2 CORS templates; Firestore indexes; 14 IAM bindings; Cloud Run sizing (1 CPU, 512 Mi, 0–3 instances, concurrency 40); Pub/Sub retry 30 s / 10–600 s | Y: done, `infra/gcp/resources.yml` + `resources.py` (the `.tmpl` files are gone; scripts not run yet) |
 | B11 | Tools | codegen maps; local_hls sample settings; throttle proxy defaults; smoke test timeouts and payload; subset_fonts ranges and families | |
-| B12 | Convention test | `tests/config_validation/test_rule_files.py` checks file trios and `extra="forbid"`; it does **not** check for literals in services or engines | |
+| B12 | Convention test | `tests/config_validation/test_rule_files.py` checks file trios and `extra="forbid"`; it does **not** check for literals in services or engines | Y: done, `test_literal_lint.py`; the backend baseline is empty |
 
 **Duplicated facts to collapse:**
 

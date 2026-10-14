@@ -1,0 +1,117 @@
+# Every GCP resource CraftStream uses, in one place. The scripts in this folder read it through resources.py:
+#
+#     python3 infra/gcp/resources.py get buckets.uploads.name   # one value (what the scripts do)
+#     python3 infra/gcp/resources.py --print                    # dry run: every gcloud command setup.sh would run
+#
+# Values that change per environment stay in config.env (PROJECT_ID, REGION, SERVICE, WEB_ORIGINS,
+# RAW_RETENTION_DAYS); `${NAME}` below is filled from it. PROJECT_NUMBER is looked up from the project.
+# The backend must agree with this file: object names (backend/config/media/storage_layout.yml), Firestore
+# collections (catalog/listing.yml), callback paths and event type (platform/events.yml) and the Firestore
+# queries in product_repo.py. backend/tests/config_validation/test_infra_resources.py checks them.
+
+# APIs to enable.
+apis:
+  - run.googleapis.com
+  - cloudbuild.googleapis.com
+  - artifactregistry.googleapis.com
+  - storage.googleapis.com
+  - firestore.googleapis.com
+  - transcoder.googleapis.com
+  - eventarc.googleapis.com
+  - pubsub.googleapis.com
+  - iam.googleapis.com
+
+# Our service accounts (id@PROJECT_ID.iam.gserviceaccount.com).
+service_accounts:
+  api:                          # the Cloud Run service runs as this
+    id: craftstream-api
+    display_name: CraftStream API (Cloud Run)
+  events:                       # Eventarc and Pub/Sub sign their OIDC tokens as this
+    id: craftstream-events
+    display_name: CraftStream Eventarc + Pub/Sub invoker
+
+# Google's own service agents. Google creates them lazily, and IAM bindings fail with "does not exist" until
+# they are provisioned, so the IAM step provisions them first.
+service_agents:
+  storage: {service: storage.googleapis.com, email: "service-${PROJECT_NUMBER}@gs-project-accounts.iam.gserviceaccount.com"}
+  pubsub: {service: pubsub.googleapis.com, email: "service-${PROJECT_NUMBER}@gcp-sa-pubsub.iam.gserviceaccount.com"}
+  transcoder: {service: transcoder.googleapis.com, email: "service-${PROJECT_NUMBER}@gcp-sa-transcoder.iam.gserviceaccount.com"}
+  eventarc: {service: eventarc.googleapis.com, email: "service-${PROJECT_NUMBER}@gcp-sa-eventarc.iam.gserviceaccount.com"}
+
+buckets:
+  uploads:                      # raw artisan uploads: private, deleted after a while
+    name: "${PROJECT_ID}-uploads"
+    public: false
+    lifecycle:
+      delete_prefix: raw/       # must be where storage_layout.yml puts raw uploads
+      delete_after_days: "${RAW_RETENTION_DAYS}"
+    cors:                       # the app uploads straight to GCS from the browser (resumable PUTs)
+      methods: [PUT, POST, OPTIONS]
+      response_headers: [Content-Type, Content-Range, Range, X-Goog-Upload-Status, X-GUploader-UploadID]
+      max_age_seconds: 3600
+  media:                        # HLS output: public read, cached (storage_layout.yml hls_cache_control)
+    name: "${PROJECT_ID}-media"
+    public: true
+    cors:
+      methods: [GET, HEAD]
+      response_headers: [Content-Type, Content-Length, Range, Accept-Ranges]
+      max_age_seconds: 3600
+
+firestore:
+  database: (default)
+  type: firestore-native
+  # Composite indexes for product search: listed products newest first, optionally narrowed by one keyword
+  # (FirestoreProductRepo.list_with_status).
+  indexes:
+    - collection: products
+      fields:
+        - {path: video_status, order: ascending}
+        - {path: created_at, order: descending}
+    - collection: products
+      fields:
+        - {path: video_status, order: ascending}
+        - {path: keywords, array: contains}
+        - {path: created_at, order: descending}
+
+pubsub:
+  topic: transcode-done         # the Transcoder publishes job results here (TRANSCODE_TOPIC)
+  subscription:                 # pushes them to the API with an OIDC token
+    name: transcode-done-push
+    push_path: /internal/media/transcoded
+    ack_deadline_seconds: 30
+    min_retry_delay: 10s
+    max_retry_delay: 600s
+
+eventarc:
+  trigger: upload-finalized     # an upload landed -> the API starts transcoding
+  bucket: uploads
+  event_type: google.cloud.storage.object.v1.finalized
+  path: /internal/media/uploaded
+
+cloud_run:
+  cpu: 1
+  memory: 512Mi
+  min_instances: 0              # scale to zero between demos
+  max_instances: 3
+  concurrency: 40
+  allow_unauthenticated: true   # the public API; /internal routes check OIDC tokens themselves
+
+# Least privilege. A member is `sa:<service_accounts key>`, `agent:<service_agents key>` or `allUsers`.
+iam:
+  project:
+    - {member: "sa:api", role: roles/datastore.user}               # Firestore
+    - {member: "sa:api", role: roles/transcoder.admin}             # start and read Transcoder jobs
+    - {member: "sa:events", role: roles/eventarc.eventReceiver}
+    - {member: "sa:events", role: roles/run.invoker}
+    - {member: "agent:storage", role: roles/pubsub.publisher}      # GCS publishes object events
+  buckets:
+    - {bucket: uploads, member: "sa:api", role: roles/storage.objectCreator}        # create upload sessions
+    - {bucket: uploads, member: "sa:api", role: roles/storage.objectViewer}         # ffprobe reads the headers
+    - {bucket: media, member: "sa:api", role: roles/storage.objectUser}             # mark finished HLS cacheable
+    - {bucket: uploads, member: "agent:transcoder", role: roles/storage.objectViewer}
+    - {bucket: media, member: "agent:transcoder", role: roles/storage.objectAdmin}
+    - {bucket: media, member: allUsers, role: roles/storage.objectViewer}           # public HLS
+  service_accounts:
+    - {account: events, member: "agent:pubsub", role: roles/iam.serviceAccountTokenCreator}  # OIDC for push
+  topics:
+    - {member: "agent:transcoder", role: roles/pubsub.publisher}   # on pubsub.topic

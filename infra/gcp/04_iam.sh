@@ -1,48 +1,41 @@
 #!/usr/bin/env bash
-# Service accounts and the least permissions each part needs. Safe to re-run.
+# Service accounts and the least permissions each part needs (resources.yml `service_accounts`, `iam`).
+# Safe to re-run.
 source "$(dirname "$0")/_common.sh"
-num=$(project_number)
-TRANSCODER_AGENT="service-${num}@gcp-sa-transcoder.iam.gserviceaccount.com"
-PUBSUB_AGENT="service-${num}@gcp-sa-pubsub.iam.gserviceaccount.com"
-GCS_AGENT="service-${num}@gs-project-accounts.iam.gserviceaccount.com"
+PROJECT_NUMBER=$(project_number)
+export PROJECT_NUMBER   # resources.py fills the Google service agent emails with it
 
 # Google creates these service agents lazily; IAM bindings fail with "does not exist" until they are provisioned.
-step "Google service agents (Storage, Pub/Sub, Transcoder, Eventarc)"
-for svc in storage.googleapis.com pubsub.googleapis.com transcoder.googleapis.com eventarc.googleapis.com; do
-  gc beta services identity create --service "$svc" >/dev/null
+step "Google service agents"
+for key in $(res get service_agents); do
+  gc beta services identity create --service "$(res get "service_agents.$key.service")" >/dev/null
 done
 gc storage service-agent >/dev/null   # also provisions the GCS agent on older projects
 
-ensure_sa() { gc iam service-accounts describe "$1@${PROJECT_ID}.iam.gserviceaccount.com" >/dev/null 2>&1 || \
-  gc iam service-accounts create "$1" --display-name "$2"; }
-project_role() { gc projects add-iam-policy-binding "$PROJECT_ID" --member "$1" --role "$2" --condition None >/dev/null; }
-bucket_role() { gc storage buckets add-iam-policy-binding "gs://$1" --member "$2" --role "$3" >/dev/null; }
-
 step "Service accounts"
-ensure_sa craftstream-api "CraftStream API (Cloud Run)"
-ensure_sa craftstream-events "CraftStream Eventarc + Pub/Sub invoker"
+for key in $(res get service_accounts); do
+  id=$(res get "service_accounts.$key.id")
+  gc iam service-accounts describe "$id@${PROJECT_ID}.iam.gserviceaccount.com" >/dev/null 2>&1 || \
+    gc iam service-accounts create "$id" --display-name "$(res get "service_accounts.$key.display_name")"
+done
 
-step "API: Firestore, start/read Transcoder jobs, create upload sessions, measure uploads, finalize HLS"
-project_role "serviceAccount:$API_SA" roles/datastore.user
-project_role "serviceAccount:$API_SA" roles/transcoder.admin
-bucket_role "$UPLOAD_BUCKET" "serviceAccount:$API_SA" roles/storage.objectCreator
-bucket_role "$UPLOAD_BUCKET" "serviceAccount:$API_SA" roles/storage.objectViewer   # ffprobe reads the headers
-bucket_role "$MEDIA_BUCKET" "serviceAccount:$API_SA" roles/storage.objectUser   # mark finished HLS cacheable
+step "Project roles"
+while read -r project member role; do
+  gc projects add-iam-policy-binding "$project" --member "$member" --role "$role" --condition None >/dev/null
+done < <(res iam project)
 
-step "Transcoder service agent: read raw uploads, write HLS, publish results"
-bucket_role "$UPLOAD_BUCKET" "serviceAccount:$TRANSCODER_AGENT" roles/storage.objectViewer
-bucket_role "$MEDIA_BUCKET" "serviceAccount:$TRANSCODER_AGENT" roles/storage.objectAdmin
+step "Bucket roles (including public read on the media bucket)"
+while read -r bucket member role; do
+  gc storage buckets add-iam-policy-binding "$bucket" --member "$member" --role "$role" >/dev/null
+done < <(res iam buckets)
 
-step "Events SA: receive Eventarc events, invoke Cloud Run"
-project_role "serviceAccount:$EVENTS_SA" roles/eventarc.eventReceiver
-project_role "serviceAccount:$EVENTS_SA" roles/run.invoker
-
-step "Google agents: GCS publishes events; Pub/Sub mints OIDC tokens for push"
-project_role "serviceAccount:$GCS_AGENT" roles/pubsub.publisher
-gc iam service-accounts add-iam-policy-binding "$EVENTS_SA" --member "serviceAccount:$PUBSUB_AGENT" \
-  --role roles/iam.serviceAccountTokenCreator >/dev/null
+step "Service account roles (Pub/Sub mints OIDC tokens for push)"
+while read -r account member role; do
+  gc iam service-accounts add-iam-policy-binding "$account" --member "$member" --role "$role" >/dev/null
+done < <(res iam service_accounts)
 
 step "Transcoder results topic: $TOPIC"
 gc pubsub topics describe "$TOPIC" >/dev/null 2>&1 || gc pubsub topics create "$TOPIC"
-gc pubsub topics add-iam-policy-binding "$TOPIC" --member "serviceAccount:$TRANSCODER_AGENT" \
-  --role roles/pubsub.publisher >/dev/null
+while read -r topic member role; do
+  gc pubsub topics add-iam-policy-binding "$topic" --member "$member" --role "$role" >/dev/null
+done < <(res iam topics)
