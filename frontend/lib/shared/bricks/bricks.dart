@@ -9,6 +9,7 @@ import '../../domain/ui/bricks_engine.dart';
 import '../format/money.dart';
 import '../screens/screen_scope.dart';
 import '../theme/app_theme.dart';
+import 'browse_bricks.dart';
 import 'kit.dart';
 
 typedef BrickBuild = Widget Function(BuildContext context, BrickNode node);
@@ -36,12 +37,17 @@ const brickBuilders = <String, BrickBuilder>{
   'list': BrickBuilder(_list),
   'order_card': BrickBuilder(_orderCard),
   'empty_state': BrickBuilder(_emptyState),
+  'search_field': BrickBuilder(searchFieldBrick),
+  'chip_row': BrickBuilder(chipRowBrick),
+  'results_bar': BrickBuilder(resultsBarBrick),
+  'product_grid': BrickBuilder(productGridBrick),
+  'load_more': BrickBuilder(loadMoreBrick),
   'spacer': BrickBuilder(_spacer, flexes: true),
 };
 
 Widget buildBrick(BuildContext context, BrickNode node) {
   final b = brickBuilders[node.brick] ?? (throw StateError('${node.where}: no builder for brick "${node.brick}"'));
-  return b.build(context, node);
+  return BrickScope.of(context).shows(node) ? b.build(context, node) : const SizedBox.shrink();
 }
 
 bool brickFlexes(BrickNode node) => brickBuilders[node.brick]?.flexes ?? false;

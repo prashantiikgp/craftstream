@@ -86,9 +86,10 @@ SearchSchema _$SearchSchemaFromJson(Map<String, dynamic> json) =>
 
 SortOptionSchema _$SortOptionSchemaFromJson(Map<String, dynamic> json) =>
     $checkedCreate('SortOptionSchema', json, ($checkedConvert) {
-      $checkKeys(json, allowedKeys: const ['id', 'default']);
+      $checkKeys(json, allowedKeys: const ['id', 'label', 'default']);
       final val = SortOptionSchema(
         id: $checkedConvert('id', (v) => $enumDecode(_$SortIdEnumMap, v)),
+        label: $checkedConvert('label', (v) => v as String),
         isDefault: $checkedConvert('default', (v) => v as bool? ?? false),
       );
       return val;

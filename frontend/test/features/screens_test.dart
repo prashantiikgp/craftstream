@@ -1,6 +1,7 @@
 // Every screen renders on mock data at phone, tablet and desktop widths, in light and dark, without
 // layout errors, and shows its key text.
 import 'package:craftstream/core/config.dart';
+import 'package:craftstream/core/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -42,20 +43,26 @@ void main() {
     }
   }
 
-  testWidgets('phones get a bottom bar, desktops a rail', (tester) async {
-    await pumpApp(tester, light, size: const Size(390, 844));
+  // The v1 shell (bottom bar / rail and the Buy/Sell switch) now wraps only the Sell screens still in v1.
+  testWidgets('v1 Sell screens: phones get a bottom bar, desktops a rail', (tester) async {
+    await pumpApp(tester, light, size: const Size(390, 844), location: '/studio');
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.byType(NavigationRail), findsNothing);
-    await pumpApp(tester, light, size: const Size(1280, 900));
+    await pumpApp(tester, light, size: const Size(1280, 900), location: '/studio');
     expect(find.byType(NavigationRail), findsOneWidget);
   });
 
-  testWidgets('the Buy/Sell switch moves between the buyer and artisan sides', (tester) async {
-    await pumpApp(tester, light);
-    await tester.tap(find.text(str(light, 'shell.role_artisan')));
+  testWidgets('Buy and Sell: the home doors and the v1 switch move between the two sides', (tester) async {
+    final container = await pumpApp(tester, light, location: '/');
+    await tester.tap(find.text(str(light, 'home.sell_title')));
     await settle(tester);
     expect(find.text(str(light, 'studio.title')), findsOneWidget);
     await tester.tap(find.text(str(light, 'shell.role_buyer')));
+    await settle(tester);
+    expect(find.text(str(light, 'discover.title')), findsOneWidget);
+    container.read(routerProvider).go('/');
+    await settle(tester);
+    await tester.tap(find.text(str(light, 'home.buy_title')));
     await settle(tester);
     expect(find.text(str(light, 'discover.title')), findsOneWidget);
   });

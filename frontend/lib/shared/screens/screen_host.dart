@@ -28,12 +28,15 @@ class ScreenHost extends ConsumerWidget {
     final source = spec.data == null
         ? null
         : screenSources[spec.data] ?? (throw StateError('${spec.name}.yml: no data source "${spec.data}" in sources.dart'));
-    final data = source?.call(ref, params) ?? const ScreenData.ready({});
+    final data = source?.build(ref, params) ?? const ScreenData.ready({});
     final t = context.tokens;
 
-    void run(BuildContext context, ActionSpec action, BrickScope scope) {
+    void run(BuildContext context, ActionSpec action, BrickScope scope, [Object? value]) {
       final router = GoRouter.of(context);
       switch (action) {
+        case CallAction(:final name, :final withPath):
+          final call = data.calls[name] ?? (throw StateError('${spec.name}.yml: data source has no call "$name"'));
+          call(withPath == null ? value : scope.lookup(withPath));
         case GoAction(:final template):
           router.go(scope.fillTemplate(template));
         case BackAction():
@@ -149,7 +152,7 @@ class _Bricks extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: fill ? MainAxisSize.max : MainAxisSize.min,
       children: [
-        for (final (i, n) in nodes.indexed) ...[if (i > 0) SizedBox(height: gap), one(n)],
+        for (final (i, n) in nodes.where(scope.shows).indexed) ...[if (i > 0) SizedBox(height: gap), one(n)],
       ],
     );
   }

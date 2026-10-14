@@ -16,11 +16,10 @@ routes:
     screen: orders
   - path: /placed/:order_id
     screen: placed
+  - path: /discover
+    screen: discover
 
   # v1 screens, until each becomes a screen YAML
-  - path: /discover
-    legacy: discover
-    shell: true
   - path: /studio
     legacy: studio
     shell: true

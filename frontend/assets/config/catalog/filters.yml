@@ -14,8 +14,12 @@ featured_tags: [pottery, textiles, woodwork, brass, jewellery]
 max_chips: 10
 
 # Sort menu. Applied on the device to the loaded results; `newest` is the order the API returns.
+# label: the strings.yml key shown in the menu.
 sort_options:
   - id: newest
+    label: discover.sort_newest
     default: true
   - id: price_low
+    label: discover.sort_price_low
   - id: price_high
+    label: discover.sort_price_high

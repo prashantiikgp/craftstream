@@ -32,6 +32,14 @@ class ToggleThemeAction extends ActionSpec {
   const ToggleThemeAction();
 }
 
+/// Ask the screen's data source to do something (`{call: toggle_tag, with: item.value}`). [withPath] is a data
+/// path whose value is passed along; bricks that produce a value (a search field) pass their own.
+class CallAction extends ActionSpec {
+  final String name;
+  final String? withPath;
+  const CallAction(this.name, [this.withPath]);
+}
+
 /// One receipt line: a strings key for the label and a field of the bound record.
 class ReceiptRow {
   final String label, field;
@@ -46,7 +54,10 @@ class BrickNode {
   /// List<BrickNode>, `action` as ActionSpec, `args` as Map<String, String>, `rows` as List<ReceiptRow>.
   final Map<String, Object?> props;
   final String where;
-  const BrickNode(this.brick, this.props, this.where);
+
+  /// Data paths: the brick shows only while [when] is truthy and [unless] is not (any brick may have them).
+  final String? when, unless;
+  const BrickNode(this.brick, this.props, this.where, {this.when, this.unless});
 
   T? prop<T>(String name) => props[name] as T?;
   T need<T>(String name) => props[name] as T? ?? (throw BricksRulesError('$where: $brick.$name is missing'));
@@ -122,8 +133,15 @@ class BricksEngine {
     if (name is! String) throw BricksRulesError('$where: missing "brick:"');
     final at = '$where ($name)';
     final b = rules.bricks[name] ?? (throw BricksRulesError('$where: unknown brick "$name" (see ui/bricks.yml)'));
+    String? condition(String key) {
+      final v = raw[key];
+      if (v == null) return null;
+      if (v is! String || !_path.hasMatch(v)) throw BricksRulesError('$at.$key: "$v" is not a data path');
+      return v;
+    }
+
     for (final key in raw.keys) {
-      if (key != 'brick' && !b.props.containsKey(key)) {
+      if (!const {'brick', 'when', 'unless'}.contains(key) && !b.props.containsKey(key)) {
         throw BricksRulesError('$at: unknown prop "$key" (has: ${b.props.keys.join(', ')})');
       }
     }
@@ -136,7 +154,7 @@ class BricksEngine {
       }
       props[prop] = _value(p, value, '$at.$prop', refs);
     });
-    return BrickNode(name, props, at);
+    return BrickNode(name, props, at, when: condition('when'), unless: condition('unless'));
   }
 
   Object? _value(PropSchema p, Object value, String at, BrickRefs refs) {
@@ -212,8 +230,18 @@ class BricksEngine {
   }
 
   ActionSpec _action(Object value, String at, BrickRefs refs) {
+    if (value is Map && value.containsKey('call')) {
+      final name = value['call'], arg = value['with'];
+      if (name is! String || !_field.hasMatch(name)) throw BricksRulesError('$at: call needs a name like load_more');
+      if (value.keys.any((k) => k != 'call' && k != 'with')) throw BricksRulesError('$at: a call takes only "with"');
+      if (arg != null && (arg is! String || !_path.hasMatch(arg))) {
+        throw BricksRulesError('$at: with: "$arg" is not a data path');
+      }
+      return CallAction(name, arg as String?);
+    }
     if (value is! Map || value.length != 1) {
-      throw BricksRulesError('$at: an action is one of {go: /path}, {back: true}, {toggle_theme: true}');
+      throw BricksRulesError(
+          '$at: an action is one of {go: /path}, {back: true}, {toggle_theme: true}, {call: name, with: path}');
     }
     final MapEntry(:key, value: arg) = value.entries.single;
     switch (key) {

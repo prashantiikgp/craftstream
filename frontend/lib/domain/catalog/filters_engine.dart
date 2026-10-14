@@ -39,6 +39,17 @@ class FiltersEngine {
 
   SortId get defaultSort => rules.sortOptions.firstWhere((o) => o.isDefault).id;
 
+  /// The strings.yml key a sort option shows.
+  String sortLabel(SortId id) => rules.sortOptions.firstWhere((o) => o.id == id).label;
+
+  /// Every sort label key, for the startup cross-check.
+  Iterable<String> get sortLabels => rules.sortOptions.map((o) => o.label);
+
+  /// A sort's id as filters.yml writes it (`price_low`), and back.
+  static String sortName(SortId id) => id.name.replaceAllMapped(RegExp('[A-Z]'), (m) => '_${m[0]!.toLowerCase()}');
+  SortId sortNamed(String name) =>
+      sortIds.firstWhere((id) => sortName(id) == name, orElse: () => throw FiltersRulesError('unknown sort "$name"'));
+
   /// What to send as `q`: trimmed, single-spaced, capped; null when too short to search on.
   String? normaliseQuery(String raw) {
     var q = raw.trim().replaceAll(RegExp(r'\s+'), ' ');

@@ -85,7 +85,9 @@ Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
   final status = StatusEngine(await loadStatusRules(bundle: bundle));
   final art = ArtEngine(await loadArtRules(bundle: bundle));
   final bricks = BricksEngine(await loadBricksRules(bundle: bundle));
-  _crossCheck(theme: theme, strings: strings, routes: routes, navigation: navigation, status: status, art: art);
+  final filters = FiltersEngine(await loadFiltersRules(bundle: bundle));
+  _crossCheck(
+      theme: theme, strings: strings, routes: routes, navigation: navigation, status: status, art: art, filters: filters);
   final refs = brickRefs(theme: theme, strings: strings, routes: routes, navigation: navigation, icons: icons, art: art);
   final screens = ScreenEngine(await loadScreenRules(bundle: bundle), bricks, refs, backdrops: art.backdropNames.toSet());
   final unrouted = routes.screenNames.difference(screens.names.toSet());
@@ -95,7 +97,7 @@ Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
     theme: theme,
     layout: LayoutEngine(await loadLayoutRules(bundle: bundle)),
     strings: strings,
-    filters: FiltersEngine(await loadFiltersRules(bundle: bundle)),
+    filters: filters,
     player: PlayerEngine(await loadPlayerRules(bundle: bundle)),
     upload: UploadEngine(await loadUploadRules(bundle: bundle)),
     routes: routes,
@@ -141,6 +143,7 @@ void _crossCheck({
   required NavigationEngine navigation,
   required StatusEngine status,
   required ArtEngine art,
+  required FiltersEngine filters,
 }) {
   final accents = theme.light.accents.keys.toSet(), tones = theme.light.toneNames.toSet();
   final problems = <String>[
@@ -155,6 +158,8 @@ void _crossCheck({
       if (!tones.contains(tone)) 'status.yml: tone "$tone" is not in theme.yml tones',
     for (final key in status.stringKeys)
       if (!strings.has(key)) 'status.yml: "$key" is not in strings.yml',
+    for (final key in filters.sortLabels)
+      if (!strings.has(key)) 'filters.yml sort label: "$key" is not in strings.yml',
   ];
   if (problems.isNotEmpty) throw ConfigCrossCheckError(problems);
 }

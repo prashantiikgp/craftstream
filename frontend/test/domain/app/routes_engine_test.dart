@@ -25,7 +25,7 @@ void main() {
   test('concrete locations and go: templates match routes', () {
     expect(engine.match('/placed/3129d7a45f42')?.screen, 'placed');
     expect(engine.match('/product/p_01/buy')?.legacy, 'checkout');
-    expect(engine.match('/discover?q=mug')?.legacy, 'discover');
+    expect(engine.match('/discover?q=mug')?.screen, 'discover');
     expect(engine.match('/nowhere'), isNull);
     expect(engine.acceptsTemplate('/placed/{item.id}'), isTrue);
     expect(engine.acceptsTemplate('/placed/{item.id}/more'), isFalse);

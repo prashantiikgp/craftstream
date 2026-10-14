@@ -223,6 +223,116 @@ bricks:
       message: body
       message_color: text_muted
 
+  search_field:
+    about: The search box. Sends its text through `action` once typing pauses (or on Enter); has a clear button.
+    props:
+      bind: { type: bind, required: true }       # the current text, so the box follows other changes
+      hint: { type: text, required: true }
+      clear: { type: text, required: true }      # label of the clear button (screen readers)
+      debounce: { type: bind, required: true }   # milliseconds to wait after the last keystroke
+      action: { type: action, required: true }   # a {call: …}; gets the text
+    style:
+      height: 46
+      padding: md
+      gap: sm
+      icon: 18
+      search_icon: search
+      clear_icon: close
+      background: surface
+      border: line_strong
+      focus: brand.line
+      radius: sharp
+      text: body
+      hint: text_faint
+      icon_color: text_muted
+
+  chip_row:
+    about: A row of tag chips that scrolls sideways, starting with "All". One can be selected.
+    props:
+      bind: { type: bind, required: true }       # list of {value, selected}
+      all: { type: text, required: true }
+      all_selected: { type: bind, required: true }
+      action: { type: action, required: true }   # e.g. {call: toggle_tag, with: item.value}; All passes null
+    style:
+      gap: xs
+      height: 34
+      padding: md
+      label: eyebrow
+      tone: brand                                # selected chip fill
+      background: surface
+      border: line_strong
+      radius: sharp
+
+  results_bar:
+    about: How many results there are (and the tag filter in use), with the sort menu on the right.
+    props:
+      bind: { type: bind, required: true }       # {loading, count, has_more, tag}
+      searching: { type: text, required: true }
+      one: { type: text, required: true }
+      many: { type: text, required: true }       # "{count} pieces"
+      more: { type: text, required: true }       # "{count} pieces shown, more to see"
+      tag: { type: text, required: true }        # "#{tag}"
+      sorts: { type: bind, required: true }      # list of {value, label (strings key), selected}
+      sort_label: { type: text, required: true }
+      action: { type: action, required: true }   # a {call: …}; gets the chosen sort's value
+    style:
+      gap: sm
+      count: caption
+      count_color: text_muted
+      tag_style: eyebrow
+      tag_tone: brand
+      sort_icon: sort
+      sort_icon_size: 16
+      sort_style: label
+      sort_color: text_muted
+      menu_style: body
+
+  product_grid:
+    about: Product cards in a grid (columns from ui/layout.yml). Posters only, never video. Skeletons while loading.
+    props:
+      bind: { type: bind, required: true }       # list of products (ProductSummary fields)
+      loading: { type: bind, required: true }
+      video_tag: { type: text, required: true }  # the small "Process video" tag on each poster
+      action: { type: action, required: true }   # e.g. {go: /product/{item.id}}
+    style:
+      padding: sm
+      gap: xxs
+      background: surface
+      border: line
+      title: title
+      title_lines: 2
+      artisan: caption
+      artisan_color: text_muted
+      price: price_sm
+      price_color: marigold.ink
+      tag: eyebrow
+      tag_background: scrim
+      tag_color: on_scrim
+      tag_icon: play
+      tag_icon_size: 10
+      tag_inset: sm
+      skeleton: surface_alt
+      skeleton_rows: 2
+
+  load_more:
+    about: Fetches the next page on request (no auto-loading on slow networks). Keeps the results when it fails.
+    props:
+      bind: { type: bind, required: true }       # {loading, failed}
+      label: { type: text, required: true }
+      retry: { type: text, required: true }
+      error: { type: text, required: true }      # shown above the button when a page failed
+      action: { type: action, required: true }
+    style:
+      height: 48
+      gap: sm
+      label: label
+      background: surface
+      border: line_strong
+      error: caption
+      error_color: danger.ink
+      spinner: 18
+      spinner_stroke: 2
+
   spacer:
     about: "Takes the free height, pushing what follows to the bottom (only inside a screen with `fill: true`)."
     props: {}

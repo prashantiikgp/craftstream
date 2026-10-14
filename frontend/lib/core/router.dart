@@ -10,7 +10,6 @@ import 'package:go_router/go_router.dart';
 import '../domain/app/routes_engine.dart';
 import '../features/checkout/checkout_screen.dart';
 import '../features/design_catalog/design_catalog_screen.dart';
-import '../features/discover/discover_screen.dart';
 import '../features/product/product_screen.dart';
 import '../features/shell/app_shell.dart';
 import '../features/studio/studio_screen.dart';
@@ -20,7 +19,6 @@ import 'config.dart';
 
 /// v1 screens by the name routes.yml gives them (`legacy: discover`). Delete an entry when its screen YAML lands.
 final legacyScreens = <String, Widget Function(GoRouterState state)>{
-  'discover': (_) => const DiscoverScreen(),
   'studio': (_) => const StudioScreen(),
   'upload': (_) => const UploadScreen(),
   'product': (s) => ProductScreen(productId: s.pathParameters['id']!),

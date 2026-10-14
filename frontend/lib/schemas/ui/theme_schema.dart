@@ -61,6 +61,7 @@ class ModeColorsSchema {
   final String textMuted;
   final String textFaint;
   final String scrim;
+  final String onScrim;
 
   const ModeColorsSchema({
     required this.ground,
@@ -72,6 +73,7 @@ class ModeColorsSchema {
     required this.textMuted,
     required this.textFaint,
     required this.scrim,
+    required this.onScrim,
   });
 
   factory ModeColorsSchema.fromJson(Map<String, dynamic> json) => _$ModeColorsSchemaFromJson(json);

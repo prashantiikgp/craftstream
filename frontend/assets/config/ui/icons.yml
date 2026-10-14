@@ -19,6 +19,8 @@ icons:
   play:   { fill: ["M7 4l13 8-13 8z"] }
   video:  { stroke: ["M3 6h13v12H3z", "M16 10l5-3v10l-5-3z"] }
   info:   { stroke: ["M12 8v5", "M12 16h.01"], circles: [[12, 12, 9]] }
+  shop:   { stroke: ["M4 10h16v10H4z", "M3 10l2-6h14l2 6", "M10 20v-5h4v5"] }
+  sort:   { stroke: ["M8 4v16", "M4 8l4-4 4 4", "M16 20V4", "M12 16l4 4 4-4"] }
   # theme toggle: shows where a tap takes you (sun in dark mode, moon in light mode)
   sun:
     stroke: ["M12 2v2", "M12 20v2", "M4.9 4.9l1.4 1.4", "M17.7 17.7l1.4 1.4", "M2 12h2", "M20 12h2",

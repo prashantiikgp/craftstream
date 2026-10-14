@@ -95,7 +95,7 @@ class Radii {
 class DesignTokens {
   final Brightness brightness;
   // ground and text
-  final Color ground, surface, surfaceAlt, line, lineStrong, text, textMuted, textFaint, scrim;
+  final Color ground, surface, surfaceAlt, line, lineStrong, text, textMuted, textFaint, scrim, onScrim;
   final Map<String, AccentColors> accents;
   final Map<String, String> _tones;
   // type, space, shape, depth, motion, focus
@@ -125,6 +125,7 @@ class DesignTokens {
     required this.textMuted,
     required this.textFaint,
     required this.scrim,
+    required this.onScrim,
     required this.accents,
     required Map<String, String> tones,
     required this.styles,
@@ -220,7 +221,7 @@ class DesignTokens {
   /// Every colour by the name theme.yml uses for it: `ground`, `text`, `orange.fill`, `pink.ink` …
   Map<String, Color> get namedColors => {
         'ground': ground, 'surface': surface, 'surface_alt': surfaceAlt, 'line': line, 'line_strong': lineStrong,
-        'text': text, 'text_muted': textMuted, 'text_faint': textFaint, 'scrim': scrim,
+        'text': text, 'text_muted': textMuted, 'text_faint': textFaint, 'scrim': scrim, 'on_scrim': onScrim,
         for (final MapEntry(key: name, value: a) in accents.entries)
           for (final MapEntry(key: part, value: c) in a.parts.entries) '$name.$part': c,
       };
@@ -356,6 +357,7 @@ class ThemeEngine {
       'text_muted': hex(c.textMuted, 'colors.$mode.text_muted'),
       'text_faint': hex(c.textFaint, 'colors.$mode.text_faint'),
       'scrim': hex(c.scrim, 'colors.$mode.scrim'),
+      'on_scrim': hex(c.onScrim, 'colors.$mode.on_scrim'),
     };
     Color ref(String r, String where) {
       if (base.containsKey(r)) return base[r]!;
@@ -404,6 +406,7 @@ class ThemeEngine {
       textMuted: base['text_muted']!,
       textFaint: base['text_faint']!,
       scrim: base['scrim']!,
+      onScrim: base['on_scrim']!,
       accents: accents,
       tones: _toneMap,
       styles: {for (final MapEntry(:key, :value) in rules.styles.entries) key: text(key, value)},

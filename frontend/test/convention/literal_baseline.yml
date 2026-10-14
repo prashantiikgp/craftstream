@@ -3,10 +3,6 @@
 lib/features/checkout/checkout_screen.dart: {icon: 1, route: 2, size: 4}
 lib/features/checkout/widgets/quantity_stepper.dart: {icon: 2, size: 1}
 lib/features/design_catalog/design_catalog_screen.dart: {icon: 8, route: 1, size: 30, inset: 1}
-lib/features/discover/discover_screen.dart: {icon: 4, route: 1}
-lib/features/discover/widgets/filter_bar.dart: {icon: 1, size: 1}
-lib/features/discover/widgets/product_card.dart: {size: 7, icon: 1}
-lib/features/discover/widgets/search_field.dart: {icon: 2}
 lib/features/product/product_screen.dart: {route: 3, icon: 2, status: 1, size: 10}
 lib/features/product/widgets/process_video.dart: {status: 1, size: 5, icon: 8}
 lib/features/product/widgets/product_details.dart: {status: 2, icon: 1}

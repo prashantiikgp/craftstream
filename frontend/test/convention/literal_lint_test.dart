@@ -28,7 +28,8 @@ final kinds = <String, RegExp>{
       r'minWidth|maxHeight|minHeight|blurRadius|spreadRadius|aspectRatio)\s*:\s*(\d+\.?\d*)'),
   'inset': RegExp(r'(EdgeInsets\.\w+\(\s*\d|circular\(\s*\d)'),
   'route': RegExp(r'''(\.(go|push|replace|pushReplacement)\(\s*['"]/|\bpath:\s*['"]/)'''),
-  'status': RegExp(r"""['"](ready|processing|failed|awaiting_upload|placed)['"]"""),
+  // A status compared or passed as a value; map keys ('failed': …) and lookups (m['failed']) are field names.
+  'status': RegExp(r"""(?<!\[)['"](ready|processing|failed|awaiting_upload|placed)['"](?!\s*[:\]])"""),
 };
 
 Map<String, Map<String, int>> countLiterals() {

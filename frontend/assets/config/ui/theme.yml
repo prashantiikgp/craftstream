@@ -11,7 +11,7 @@
 #   surface_alt   skeletons, inset areas      line / line_strong   hairlines / field borders and outlines
 #   text          main text                   text_muted    secondary text (AA on ground and surface)
 #   text_faint    placeholders only (decorative, never the only carrier of meaning)
-#   scrim         behind the video and dialogs
+#   scrim         behind the video and dialogs           on_scrim   text and icons placed on the scrim
 colors:
   light:
     ground: "#F5F5F5"
@@ -23,6 +23,7 @@ colors:
     text_muted: "#57506A"
     text_faint: "#7A7290"
     scrim: "#150F20"
+    on_scrim: "#FFFFFF"
   dark:
     ground: "#0F0B18"
     surface: "#19132A"
@@ -33,6 +34,7 @@ colors:
     text_muted: "#B4AACB"
     text_faint: "#8E84A6"
     scrim: "#000000"
+    on_scrim: "#F6F2FC"
 
 # Accents, per mode. Each has:
 #   fill     shapes, filled buttons and badges     on_fill  text and icons placed on the fill
@@ -143,6 +145,7 @@ contrast:
     - { fg: text_muted, bg: surface, min: 4.5, why: secondary text on cards }
     - { fg: text_muted, bg: surface_alt, min: 4.5, why: secondary text on inset areas }
     - { fg: line_strong, bg: surface, min: 1.4, why: field borders stay visible }
+    - { fg: on_scrim, bg: scrim, min: 7.0, why: tags on posters and the video }
   each_accent:
     - { fg: ink, bg: ground, min: 4.5, why: coloured text }
     - { fg: ink, bg: surface, min: 4.5, why: coloured text on cards }

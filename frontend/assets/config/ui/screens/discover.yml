@@ -1,0 +1,78 @@
+about: Browse. Search by keyword, filter by tag, sort, and open a product. Posters only; one small page at a time.
+data: discover
+width: wide
+gap: md
+
+top:
+  - brick: top_bar
+    leading: home
+    label: common.home
+    role: buy
+    action: { go: / }
+
+body:
+  - brick: text
+    text: discover.title
+    style: h1
+
+  - brick: search_field
+    bind: discover.text
+    hint: discover.search_hint
+    clear: discover.clear_search
+    debounce: discover.debounce_ms
+    action: { call: set_text }
+
+  - brick: chip_row
+    bind: discover.chips
+    all: discover.all_tags
+    all_selected: discover.all_selected
+    action: { call: toggle_tag, with: item.value }
+
+  - brick: results_bar
+    bind: discover
+    searching: discover.searching
+    one: discover.count_one
+    many: discover.count_many
+    more: discover.count_more
+    tag: discover.tag_filter
+    sorts: discover.sorts
+    sort_label: discover.sort_label
+    action: { call: set_sort }
+
+  - brick: product_grid
+    when: discover.show_grid
+    bind: discover.items
+    loading: discover.loading
+    video_tag: discover.card_video
+    action: { go: "/product/{item.id}" }
+
+  # Nothing is live yet: no search to blame, so nothing to clear.
+  - brick: empty_state
+    when: discover.none
+    icon: shop
+    title: discover.none_title
+    message: discover.none_message
+
+  - brick: empty_state
+    when: discover.no_match
+    icon: search
+    title: discover.empty_title
+    message: discover.empty_message
+    button: discover.clear_filters
+    action: { call: clear }
+
+  - brick: empty_state
+    when: discover.failed
+    icon: info
+    title: common.error_title
+    message: common.error_message
+    button: common.retry
+    action: { call: retry }
+
+  - brick: load_more
+    when: discover.more.show
+    bind: discover.more
+    label: discover.load_more
+    retry: common.retry
+    error: discover.load_more_failed
+    action: { call: load_more }

@@ -125,6 +125,7 @@ ModeColorsSchema _$ModeColorsSchemaFromJson(Map<String, dynamic> json) =>
             'text_muted',
             'text_faint',
             'scrim',
+            'on_scrim',
           ],
         );
         final val = ModeColorsSchema(
@@ -137,6 +138,7 @@ ModeColorsSchema _$ModeColorsSchemaFromJson(Map<String, dynamic> json) =>
           textMuted: $checkedConvert('text_muted', (v) => v as String),
           textFaint: $checkedConvert('text_faint', (v) => v as String),
           scrim: $checkedConvert('scrim', (v) => v as String),
+          onScrim: $checkedConvert('on_scrim', (v) => v as String),
         );
         return val;
       },
@@ -145,6 +147,7 @@ ModeColorsSchema _$ModeColorsSchemaFromJson(Map<String, dynamic> json) =>
         'lineStrong': 'line_strong',
         'textMuted': 'text_muted',
         'textFaint': 'text_faint',
+        'onScrim': 'on_scrim',
       },
     );
 

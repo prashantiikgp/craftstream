@@ -41,10 +41,13 @@ enum SortId { newest, priceLow, priceHigh }
 @JsonSerializable()
 class SortOptionSchema {
   final SortId id;
+
+  /// A strings.yml key.
+  final String label;
   @JsonKey(name: 'default')
   final bool isDefault;
 
-  const SortOptionSchema({required this.id, this.isDefault = false});
+  const SortOptionSchema({required this.id, required this.label, this.isDefault = false});
 
   factory SortOptionSchema.fromJson(Map<String, dynamic> json) => _$SortOptionSchemaFromJson(json);
 }

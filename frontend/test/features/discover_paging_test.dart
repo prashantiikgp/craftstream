@@ -8,7 +8,6 @@ import 'package:craftstream/data/mock/mock_store.dart';
 import 'package:craftstream/data/providers.dart';
 import 'package:craftstream/data/repositories/catalog_repository.dart';
 import 'package:craftstream/features/discover/discover_controller.dart';
-import 'package:craftstream/features/discover/widgets/product_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -162,7 +161,7 @@ void main() {
     failing.failNext = true;
     await tapShowMore(tester, str(config, 'discover.load_more'));
     expect(find.text(str(config, 'discover.load_more_failed')), findsOneWidget);
-    expect(find.byType(ProductCard), findsWidgets);
+    expect(find.text('Hand-thrown clay mug'), findsWidgets);
     await tapShowMore(tester, str(config, 'common.retry'));
     expect(find.text(str(config, 'discover.load_more_failed')), findsNothing);
     expect(failing.cursors.length, 3); // first page, the failed one, the retry
@@ -188,7 +187,7 @@ void main() {
     expect(find.text(str(config, 'discover.none_title')), findsNothing);
     await tester.tap(find.text(str(config, 'discover.clear_filters')));
     await settle(tester);
-    expect(find.byType(ProductCard), findsWidgets);
+    expect(find.text('Hand-thrown clay mug'), findsWidgets);
   });
 
   // Tablet portrait and landscape, with the button and a full feed, light and dark: no overflow.
@@ -198,7 +197,7 @@ void main() {
         final c = mode == 'light' ? config : dark;
         await pumpApp(tester, c, size: size, overrides: [catalogRepositoryProvider.overrideWithValue(PagingRepo())]);
         expect(tester.takeException(), isNull);
-        expect(find.byType(ProductCard), findsWidgets);
+        expect(find.text('Hand-thrown clay mug'), findsWidgets);
         await tapShowMore(tester, str(c, 'discover.load_more'));
         expect(tester.takeException(), isNull);
       });

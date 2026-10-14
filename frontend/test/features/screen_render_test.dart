@@ -4,6 +4,7 @@
 import 'package:craftstream/core/config.dart';
 import 'package:craftstream/core/router.dart';
 import 'package:craftstream/data/generated/models.dart';
+import 'package:craftstream/domain/ui/bricks_engine.dart';
 import 'package:craftstream/features/orders/orders_controller.dart';
 import 'package:craftstream/shared/bricks/bricks.dart';
 import 'package:craftstream/shared/screens/screen_host.dart';
@@ -43,11 +44,18 @@ void main() {
     expect(brickBuilders.keys.toSet(), config.bricks.names.toSet());
   });
 
-  test('every screen\'s data source exists', () async {
+  test('every screen\'s data source exists and answers every {call:} the screen makes', () async {
     final config = configs['light']!;
     for (final name in config.screens.names) {
-      final data = config.screens.screen(name).data;
-      if (data != null) expect(screenSources.keys, contains(data), reason: '$name.yml data: $data');
+      final screen = config.screens.screen(name);
+      final source = screen.data == null ? null : screenSources[screen.data];
+      if (screen.data != null) expect(source, isNotNull, reason: '$name.yml data: ${screen.data}');
+      final calls = {
+        for (final b in screen.allBricks)
+          for (final v in b.props.values)
+            if (v is CallAction) v.name,
+      };
+      expect(calls.difference(source?.calls ?? const {}), isEmpty, reason: '$name.yml calls its source does not answer');
     }
   });
 

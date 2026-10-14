@@ -50,8 +50,7 @@ strings:
     to_dark: Switch to the dark theme
 
   discover:
-    title: Made by hand, shown in full
-    subtitle: Watch how each piece is made, then order it straight from the artisan.
+    title: Find a craft
     search_hint: Search pottery, ikat, brass…
     clear_search: Clear search
     all_tags: All
