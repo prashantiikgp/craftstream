@@ -55,7 +55,7 @@ review column is for the user: **Y** move to YAML, **C** keep in code (give a re
 | B3 | Errors | `core/errors.py:21-79` code ↔ status map, default messages; `order_service.py:29` `product_not_ready` is not in error_response.yml | |
 | B4 | Video state machine | `product_repo.py:13` Literal duplicates product.yml; transitions in `media_service.py:63-94`; Transcoder states `SUCCEEDED`/`FAILED`; `"ready"` in product_repo:39,72 and order_rules_engine:18 | Y: done, `media/video_lifecycle.yml` (states test-checked against product.yml) |
 | B5 | Storage layout | `infra/gcp/gcs.py:13-65`: `raw/{id}/source` and its regex, `hls/{id}/`, `manifest.m3u8`, thumbnail name, public URL, cache-control; repeated in transcoder.py:31-38 and 02_storage.sh | Y: done, `media/storage_layout.yml` (also the local upload path and sample stream) |
-| B6 | Encoder | `ladder_engine.py:49-145`: `h264` key, `vbr`, `aac-he`, channel layout, `fmp4`, sprite grid, `input0`/`atom0`, baseline ≤ 240p, ffmpeg preset, maxrate ×1.2, bufsize ×2, headroom 1.1, HLS v7 | |
+| B6 | Encoder | `ladder_engine.py:49-145`: `h264` key, `vbr`, `aac-he`, channel layout, `fmp4`, sprite grid, `input0`/`atom0`, baseline ≤ 240p, ffmpeg preset, maxrate ×1.2, bufsize ×2, headroom 1.1, HLS v7 | Y: done, `ladder.yml` `encoder:` (job configs and FFmpeg args unchanged); C: FFmpeg flag names and JobConfig field names are the tools' APIs |
 | B7 | Catalog | `core/ids.py:10` 12-hex ids; search field map duplicates search_schema; tag order; `LIST_LIMIT=500`; collections `products` and `orders`; indexes duplicated in 03_firestore.sh | |
 | B8 | Events | Pub/Sub envelope shape and error texts in `internal.py:26-47`; event type in 06_events.sh | |
 | B9 | Ingest | `ffprobe.py:10,19` timeout 60 s, stderr cap 200 | |

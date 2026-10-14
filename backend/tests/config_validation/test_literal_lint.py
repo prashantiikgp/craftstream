@@ -21,7 +21,7 @@ EXEMPT = ("schemas/", "generated/", "core/yaml_loader.py")
 
 KINDS = {
     "status": re.compile(r"""["'](awaiting_upload|processing|ready|failed|placed|SUCCEEDED|FAILED|RUNNING)["']"""),
-    "path": re.compile(r"""["'][^"'\n]*(/api/|/internal/|raw/|hls/|\.m3u8|\.jpe?g|gs://|storage\.googleapis\.com)"""),
+    "path": re.compile(r"""["'][^"'\n]*(/api/|/internal/|raw/|hls/|\.m3u8|\.jpe?g\b|gs://|storage\.googleapis\.com)"""),
     "collection": re.compile(r"""["'](products|orders)["']"""),
     "tunable": re.compile(r"\b\w*(timeout|max_age|minimum_size|limit|retries|ttl)\w*\s*[=:]\s*\d", re.IGNORECASE),
 }

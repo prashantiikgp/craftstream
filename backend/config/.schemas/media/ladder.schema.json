@@ -28,6 +28,195 @@
       "title": "AudioSettings",
       "type": "object"
     },
+    "EncoderSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "h264_profiles": {
+          "items": {
+            "$ref": "#/$defs/H264Profile"
+          },
+          "minItems": 1,
+          "title": "H264 Profiles",
+          "type": "array"
+        },
+        "transcoder": {
+          "$ref": "#/$defs/TranscoderEncoder"
+        },
+        "ffmpeg": {
+          "$ref": "#/$defs/FfmpegEncoder"
+        },
+        "master_playlist": {
+          "$ref": "#/$defs/MasterPlaylist"
+        }
+      },
+      "required": [
+        "h264_profiles",
+        "transcoder",
+        "ffmpeg",
+        "master_playlist"
+      ],
+      "title": "EncoderSettings",
+      "type": "object"
+    },
+    "FfmpegEncoder": {
+      "additionalProperties": false,
+      "properties": {
+        "video_codec": {
+          "minLength": 1,
+          "title": "Video Codec",
+          "type": "string"
+        },
+        "preset": {
+          "minLength": 1,
+          "title": "Preset",
+          "type": "string"
+        },
+        "audio_codec": {
+          "minLength": 1,
+          "title": "Audio Codec",
+          "type": "string"
+        },
+        "he_aac": {
+          "$ref": "#/$defs/HeAac"
+        },
+        "maxrate_factor": {
+          "minimum": 1,
+          "title": "Maxrate Factor",
+          "type": "number"
+        },
+        "bufsize_factor": {
+          "exclusiveMinimum": 0,
+          "title": "Bufsize Factor",
+          "type": "number"
+        },
+        "log_level": {
+          "minLength": 1,
+          "title": "Log Level",
+          "type": "string"
+        },
+        "playlist_type": {
+          "enum": [
+            "vod",
+            "event"
+          ],
+          "title": "Playlist Type",
+          "type": "string"
+        },
+        "segment_type": {
+          "enum": [
+            "fmp4",
+            "mpegts"
+          ],
+          "title": "Segment Type",
+          "type": "string"
+        },
+        "playlist": {
+          "minLength": 1,
+          "title": "Playlist",
+          "type": "string"
+        },
+        "init_segment": {
+          "minLength": 1,
+          "title": "Init Segment",
+          "type": "string"
+        },
+        "segment_pattern": {
+          "minLength": 1,
+          "title": "Segment Pattern",
+          "type": "string"
+        }
+      },
+      "required": [
+        "video_codec",
+        "preset",
+        "audio_codec",
+        "he_aac",
+        "maxrate_factor",
+        "bufsize_factor",
+        "log_level",
+        "playlist_type",
+        "segment_type",
+        "playlist",
+        "init_segment",
+        "segment_pattern"
+      ],
+      "title": "FfmpegEncoder",
+      "type": "object"
+    },
+    "H264Profile": {
+      "additionalProperties": false,
+      "properties": {
+        "max_height": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Height"
+        },
+        "profile": {
+          "enum": [
+            "baseline",
+            "main",
+            "high"
+          ],
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile"
+      ],
+      "title": "H264Profile",
+      "type": "object"
+    },
+    "HeAac": {
+      "additionalProperties": false,
+      "properties": {
+        "codec": {
+          "minLength": 1,
+          "title": "Codec",
+          "type": "string"
+        },
+        "profile": {
+          "minLength": 1,
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "codec",
+        "profile"
+      ],
+      "title": "HeAac",
+      "type": "object"
+    },
+    "MasterPlaylist": {
+      "additionalProperties": false,
+      "properties": {
+        "hls_version": {
+          "minimum": 1,
+          "title": "Hls Version",
+          "type": "integer"
+        },
+        "bandwidth_headroom": {
+          "minimum": 1,
+          "title": "Bandwidth Headroom",
+          "type": "number"
+        }
+      },
+      "required": [
+        "hls_version",
+        "bandwidth_headroom"
+      ],
+      "title": "MasterPlaylist",
+      "type": "object"
+    },
     "Rung": {
       "additionalProperties": false,
       "properties": {
@@ -81,6 +270,33 @@
       "title": "Rung",
       "type": "object"
     },
+    "SpriteGrid": {
+      "additionalProperties": false,
+      "properties": {
+        "columns": {
+          "minimum": 1,
+          "title": "Columns",
+          "type": "integer"
+        },
+        "rows": {
+          "minimum": 1,
+          "title": "Rows",
+          "type": "integer"
+        },
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "columns",
+        "rows",
+        "count"
+      ],
+      "title": "SpriteGrid",
+      "type": "object"
+    },
     "ThumbnailSettings": {
       "additionalProperties": false,
       "properties": {
@@ -107,6 +323,83 @@
         "jpeg_quality"
       ],
       "title": "ThumbnailSettings",
+      "type": "object"
+    },
+    "TranscoderEncoder": {
+      "additionalProperties": false,
+      "properties": {
+        "rate_control": {
+          "enum": [
+            "vbr",
+            "cbr"
+          ],
+          "title": "Rate Control",
+          "type": "string"
+        },
+        "container": {
+          "enum": [
+            "fmp4",
+            "ts"
+          ],
+          "title": "Container",
+          "type": "string"
+        },
+        "manifest_type": {
+          "enum": [
+            "HLS",
+            "DASH"
+          ],
+          "title": "Manifest Type",
+          "type": "string"
+        },
+        "audio_codecs": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "enum": [
+              "he-aac",
+              "aac-lc"
+            ]
+          },
+          "title": "Audio Codecs",
+          "type": "object"
+        },
+        "channel_layouts": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Channel Layouts",
+          "type": "object"
+        },
+        "sprite_grid": {
+          "$ref": "#/$defs/SpriteGrid"
+        },
+        "input_key": {
+          "minLength": 1,
+          "title": "Input Key",
+          "type": "string"
+        },
+        "edit_atom_key": {
+          "minLength": 1,
+          "title": "Edit Atom Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rate_control",
+        "container",
+        "manifest_type",
+        "audio_codecs",
+        "channel_layouts",
+        "sprite_grid",
+        "input_key",
+        "edit_atom_key"
+      ],
+      "title": "TranscoderEncoder",
       "type": "object"
     }
   },
@@ -145,6 +438,9 @@
       "exclusiveMinimum": 0,
       "title": "Max Lowest Rung Total Kbps",
       "type": "integer"
+    },
+    "encoder": {
+      "$ref": "#/$defs/EncoderSettings"
     }
   },
   "required": [
@@ -154,7 +450,8 @@
     "audio",
     "rungs",
     "thumbnail",
-    "max_lowest_rung_total_kbps"
+    "max_lowest_rung_total_kbps",
+    "encoder"
   ],
   "title": "LadderRules",
   "type": "object",

@@ -259,7 +259,7 @@ and the light and dark theme B match the canvas.
   - This replaces the strings in `product_repo`, `media_service` and `order_rules_engine`.
 - [x] `config/media/storage_layout.yml`: raw path template and regex, HLS prefix, manifest and thumbnail
       names, public base URL, cache-control, Transcoder label key, local sample stream.
-- [ ] `config/media/ladder.yml` gains an `encoder:` block:
+- [x] `config/media/ladder.yml` gains an `encoder:` block:
   - Transcoder: codec key, rate control, container, H.264 profile threshold, sprite grid;
   - local FFmpeg: preset, maxrate and bufsize factors, playlist headroom, HLS version.
 - [ ] `config/media/ingest.yml`: ffprobe timeout, error text cap.

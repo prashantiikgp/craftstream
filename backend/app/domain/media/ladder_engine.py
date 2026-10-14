@@ -43,67 +43,69 @@ def build_job_config(
     rules = rules or load_ladder_rules()
     if max_duration_seconds is not None and not input_uri:
         raise ValueError("input_uri is required when capping the duration")
+    enc = rules.encoder.transcoder
     seg = f"{rules.segment_seconds}s"
     elementary, mux = [], []
 
     for r in sorted_rungs(rules):
         elementary.append({
             "key": f"video-{r.name}",
-            "videoStream": {"h264": {
+            "videoStream": {rules.video_codec: {
                 "widthPixels": r.width,
                 "heightPixels": r.height,
                 "frameRate": r.fps,
                 "bitrateBps": r.video_kbps * 1000,
                 "gopDuration": f"{rules.keyframe_seconds}s",
-                "profile": h264_profile(r),
-                "rateControlMode": "vbr",
+                "profile": h264_profile(r, rules),
+                "rateControlMode": enc.rate_control,
             }},
         })
         elementary.append({
             "key": f"audio-{r.name}",
             "audioStream": {
-                "codec": "aac-he" if r.audio_profile == "he-aac" else "aac",
+                "codec": enc.audio_codecs[r.audio_profile],
                 "bitrateBps": r.audio_kbps * 1000,
                 "channelCount": rules.audio.channels,
-                # The API defaults to a stereo layout and rejects a count that doesn't match it.
-                "channelLayout": ["fc"] if rules.audio.channels == 1 else ["fl", "fr"],
+                "channelLayout": list(enc.channel_layouts[rules.audio.channels]),
                 "sampleRateHertz": rules.audio.sample_rate,
             },
         })
-        # fMP4 segments: ~14 kbps less container overhead than TS at these tiny bitrates
-        # (measured: 56.7 -> 42.0 kbps on the 144p rung). fMP4 mux streams hold one stream each.
-        for kind in ("video", "audio"):
+        for kind in ("video", "audio"):  # one stream per mux stream (an fMP4 rule)
             mux.append({
-                "key": f"{kind}-{r.name}-fmp4",
-                "container": "fmp4",
+                "key": f"{kind}-{r.name}-{enc.container}",
+                "container": enc.container,
                 "elementaryStreams": [f"{kind}-{r.name}"],
                 "segmentSettings": {"segmentDuration": seg},
             })
 
+    grid = enc.sprite_grid
     config: dict = {
         "elementaryStreams": elementary,
         "muxStreams": mux,
-        "manifests": [{"fileName": layout.manifest_name(storage), "type": "HLS",
+        "manifests": [{"fileName": layout.manifest_name(storage), "type": enc.manifest_type,
                        "muxStreams": [m["key"] for m in mux]}],
         "spriteSheets": [{
             "filePrefix": layout.thumbnail_prefix(storage),
             "spriteWidthPixels": rules.thumbnail.width,
             "spriteHeightPixels": rules.thumbnail.height,
             "quality": rules.thumbnail.jpeg_quality,
-            "columnCount": 1, "rowCount": 1, "totalCount": 1,
+            "columnCount": grid.columns, "rowCount": grid.rows, "totalCount": grid.count,
         }],
     }
     if pubsub_topic:
         config["pubsubDestination"] = {"topic": pubsub_topic}  # the job result goes to the API via Pub/Sub
     if input_uri:
-        config["inputs"] = [{"key": "input0", "uri": input_uri}]
+        config["inputs"] = [{"key": enc.input_key, "uri": input_uri}]
     if max_duration_seconds is not None:
-        config["editList"] = [{"key": "atom0", "inputs": ["input0"], "endTimeOffset": f"{max_duration_seconds}s"}]
+        config["editList"] = [{"key": enc.edit_atom_key, "inputs": [enc.input_key],
+                               "endTimeOffset": f"{max_duration_seconds}s"}]
     return config
 
 
-def h264_profile(rung: Rung) -> str:
-    return "baseline" if rung.height <= 240 else "main"
+def h264_profile(rung: Rung, rules: LadderRules | None = None) -> str:
+    """The first encoder.h264_profiles entry whose max_height fits the rung."""
+    rules = rules or load_ladder_rules()
+    return next(p.profile for p in rules.encoder.h264_profiles if p.max_height is None or rung.height <= p.max_height)
 
 
 def ffmpeg_args(
@@ -115,39 +117,44 @@ def ffmpeg_args(
     he_aac_available: bool = False,
     max_duration_seconds: int | None = None,
 ) -> list[str]:
-    """FFmpeg command producing one rung as fMP4 HLS (init.mp4 + seg_NNNN.m4s + index.m3u8) in `out_dir`.
+    """FFmpeg command producing one rung as HLS (init segment + media segments + playlist) in `out_dir`.
 
     Matches the Transcoder job: same size, fps, bitrates, GOP, profile, audio and segment length.
     Without libfdk_aac, HE-AAC rungs fall back to AAC-LC at the same bitrate (same size, lower quality).
     """
     rules = rules or load_ladder_rules()
+    ff = rules.encoder.ffmpeg
     gop = rung.fps * rules.keyframe_seconds
     if rung.audio_profile == "he-aac" and he_aac_available:
-        audio = ["-c:a", "libfdk_aac", "-profile:a", "aac_he"]
+        audio = ["-c:a", ff.he_aac.codec, "-profile:a", ff.he_aac.profile]
     else:
-        audio = ["-c:a", "aac"]
+        audio = ["-c:a", ff.audio_codec]
     cap = ["-t", str(max_duration_seconds)] if max_duration_seconds else []
     return [
-        "ffmpeg", "-y", "-loglevel", "error", "-i", src, *cap,
+        "ffmpeg", "-y", "-loglevel", ff.log_level, "-i", src, *cap,
         "-vf", (f"scale={rung.width}:{rung.height}:force_original_aspect_ratio=decrease,"
                 f"pad={rung.width}:{rung.height}:(ow-iw)/2:(oh-ih)/2,fps={rung.fps}"),
-        "-c:v", "libx264", "-preset", "veryslow", "-profile:v", h264_profile(rung),
-        "-b:v", f"{rung.video_kbps}k", "-maxrate", f"{int(rung.video_kbps * 1.2)}k",
-        "-bufsize", f"{rung.video_kbps * 2}k",
+        "-c:v", ff.video_codec, "-preset", ff.preset, "-profile:v", h264_profile(rung, rules),
+        "-b:v", f"{rung.video_kbps}k", "-maxrate", f"{int(rung.video_kbps * ff.maxrate_factor)}k",
+        "-bufsize", f"{int(rung.video_kbps * ff.bufsize_factor)}k",
         "-g", str(gop), "-keyint_min", str(gop), "-sc_threshold", "0",
         *audio, "-b:a", f"{rung.audio_kbps}k", "-ac", str(rules.audio.channels),
         "-ar", str(rules.audio.sample_rate),
-        "-f", "hls", "-hls_time", str(rules.segment_seconds), "-hls_playlist_type", "vod",
-        "-hls_segment_type", "fmp4", "-hls_fmp4_init_filename", "init.mp4",
-        "-hls_segment_filename", f"{out_dir}/seg_%04d.m4s",
-        f"{out_dir}/index.m3u8",
+        "-f", "hls", "-hls_time", str(rules.segment_seconds), "-hls_playlist_type", ff.playlist_type,
+        "-hls_segment_type", ff.segment_type, "-hls_fmp4_init_filename", ff.init_segment,
+        "-hls_segment_filename", f"{out_dir}/{ff.segment_pattern}",
+        f"{out_dir}/{ff.playlist}",
     ]
 
 
-def master_playlist(rungs: list[Rung], headroom: float = 1.1) -> str:
+def master_playlist(rungs: list[Rung], rules: LadderRules | None = None, *, headroom: float | None = None) -> str:
     """HLS master playlist listing each rung's folder, lowest first (players try the first entry first)."""
-    lines = ["#EXTM3U", "#EXT-X-VERSION:7"]
+    rules = rules or load_ladder_rules()
+    mp = rules.encoder.master_playlist
+    headroom = mp.bandwidth_headroom if headroom is None else headroom
+    lines = ["#EXTM3U", f"#EXT-X-VERSION:{mp.hls_version}"]
     for r in rungs:
         bw = int(r.total_kbps * 1000 * headroom)
-        lines += [f"#EXT-X-STREAM-INF:BANDWIDTH={bw},RESOLUTION={r.width}x{r.height}", f"{r.name}/index.m3u8"]
+        lines += [f"#EXT-X-STREAM-INF:BANDWIDTH={bw},RESOLUTION={r.width}x{r.height}",
+                  f"{r.name}/{rules.encoder.ffmpeg.playlist}"]
     return "\n".join(lines) + "\n"

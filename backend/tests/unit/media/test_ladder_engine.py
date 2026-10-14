@@ -2,8 +2,16 @@
 
 import pytest
 
-from app.domain.media.ladder_engine import build_job_config, lowest_rung_within_budget, sorted_rungs
+from app.domain.media.ladder_engine import (
+    build_job_config,
+    ffmpeg_args,
+    h264_profile,
+    lowest_rung_within_budget,
+    master_playlist,
+    sorted_rungs,
+)
 from app.domain.media.ladder_loader import load_ladder_rules
+from app.schemas.media.ladder_schema import H264Profile
 
 
 def test_lowest_rung_fits_budget():
@@ -65,3 +73,53 @@ def test_job_reports_to_pubsub_topic():
     cfg = build_job_config(pubsub_topic="projects/p/topics/transcode-done")
     assert cfg["pubsubDestination"] == {"topic": "projects/p/topics/transcode-done"}
     assert "pubsubDestination" not in build_job_config()
+
+
+def test_h264_profile_follows_the_encoder_rules():
+    rules = load_ladder_rules()
+    by_height = {r.height: h264_profile(r) for r in rules.rungs}
+    assert by_height[144] == by_height[240] == "baseline" and by_height[360] == by_height[720] == "main"
+    all_main = rules.encoder.model_copy(update={"h264_profiles": [H264Profile(profile="main")]})
+    assert h264_profile(sorted_rungs()[0], rules.model_copy(update={"encoder": all_main})) == "main"
+
+
+def test_transcoder_settings_come_from_the_encoder_block():
+    enc = load_ladder_rules().encoder.transcoder
+    cfg = build_job_config(input_uri="gs://up/raw/abc/source", max_duration_seconds=900)
+    lowest = cfg["elementaryStreams"][0]["videoStream"]["h264"]
+    assert lowest["rateControlMode"] == enc.rate_control and lowest["profile"] == "baseline"
+    assert cfg["elementaryStreams"][1]["audioStream"]["codec"] == enc.audio_codecs["he-aac"]
+    assert cfg["muxStreams"][0]["key"].endswith(enc.container)
+    assert cfg["editList"][0]["key"] == enc.edit_atom_key and cfg["editList"][0]["inputs"] == [enc.input_key]
+
+
+def test_ffmpeg_args_for_the_lowest_rung():
+    rung = sorted_rungs()[0]
+    args = ffmpeg_args(rung, "in.mp4", "out", he_aac_available=True)
+    ff = load_ladder_rules().encoder.ffmpeg
+    assert args[args.index("-maxrate") + 1] == f"{int(rung.video_kbps * ff.maxrate_factor)}k"
+    assert args[args.index("-bufsize") + 1] == f"{rung.video_kbps * 2}k"
+    assert args[args.index("-c:a") + 1] == ff.he_aac.codec
+    assert args[-1] == f"out/{ff.playlist}"
+    assert ffmpeg_args(rung, "in.mp4", "out")[args.index("-c:a") + 1] == ff.audio_codec
+
+
+def test_master_playlist_lists_the_lowest_rung_first():
+    rungs = sorted_rungs()
+    lines = master_playlist(rungs).splitlines()
+    assert lines[:2] == ["#EXTM3U", "#EXT-X-VERSION:7"]
+    assert lines[2] == f"#EXT-X-STREAM-INF:BANDWIDTH={int(rungs[0].total_kbps * 1100)},RESOLUTION=256x144"
+    assert lines[3] == f"{rungs[0].name}/index.m3u8"
+
+
+@pytest.mark.parametrize("change", [
+    lambda e: e["h264_profiles"].pop(),                                      # no catch-all profile
+    lambda e: e["transcoder"]["channel_layouts"].update({1: ["fl", "fr"]}),  # 2 names for 1 channel
+    lambda e: e["transcoder"]["audio_codecs"].pop("he-aac"),                 # a rung's audio can't be encoded
+    lambda e: e["ffmpeg"].update(crf=23),                                    # unknown key
+])
+def test_bad_encoder_rules_are_rejected(change):
+    data = load_ladder_rules().model_dump()
+    change(data["encoder"])
+    with pytest.raises(ValueError):
+        type(load_ladder_rules()).model_validate(data)
