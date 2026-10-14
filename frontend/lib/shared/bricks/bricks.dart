@@ -69,29 +69,18 @@ const brickBuilders = <String, BrickBuilder>{
 };
 
 Widget buildBrick(BuildContext context, BrickNode node) {
-  final b =
-      brickBuilders[node.brick] ??
-      (throw StateError('${node.where}: no builder for brick "${node.brick}"'));
-  return BrickScope.of(context).shows(node)
-      ? b.build(context, node)
-      : const SizedBox.shrink();
+  final b = brickBuilders[node.brick] ?? (throw StateError('${node.where}: no builder for brick "${node.brick}"'));
+  return BrickScope.of(context).shows(node) ? b.build(context, node) : const SizedBox.shrink();
 }
 
 bool brickFlexes(BrickNode node) => brickBuilders[node.brick]?.flexes ?? false;
 
-String _say(BuildContext context, BrickNode n, String prop) =>
-    say(context, n.need<String>(prop));
+String _say(BuildContext context, BrickNode n, String prop) => say(context, n.need<String>(prop));
 
-void _act(BuildContext context, BrickNode n) =>
-    BrickScope.of(context).act(context, n.prop<ActionSpec>('action'));
+void _act(BuildContext context, BrickNode n) => BrickScope.of(context).act(context, n.prop<ActionSpec>('action'));
 
 Widget _text(BuildContext context, BrickNode n) {
-  final text = say(
-    context,
-    n.need('text'),
-    args: n.prop('args'),
-    fallback: n.prop('fallback'),
-  );
+  final text = say(context, n.need('text'), args: n.prop('args'), fallback: n.prop('fallback'));
   return StyledText(
     text,
     style: n.need('style'),
@@ -132,11 +121,7 @@ Widget _wordmark(BuildContext context, BrickNode n) {
       children: [
         row,
         SizedBox(height: s.space('gap')),
-        StyledText(
-          say(context, tagline),
-          style: s.name('tagline'),
-          color: s.color('tagline_color'),
-        ),
+        StyledText(say(context, tagline), style: s.name('tagline'), color: s.color('tagline_color')),
       ],
     );
   }
@@ -147,11 +132,7 @@ Widget _wordmark(BuildContext context, BrickNode n) {
       name,
       if (tagline != null) ...[
         SizedBox(height: s.space('gap')),
-        StyledText(
-          say(context, tagline),
-          style: s.name('tagline'),
-          color: s.color('tagline_color'),
-        ),
+        StyledText(say(context, tagline), style: s.name('tagline'), color: s.color('tagline_color')),
       ],
     ],
   );
@@ -163,14 +144,11 @@ Widget _themeToggle(BuildContext context, BrickNode n) {
   final brand = t.tone('brand');
   final strings = configOf(context).strings;
   return Align(
-    alignment: n.need<String>('align') == 'start'
-        ? Alignment.centerLeft
-        : Alignment.centerRight,
+    alignment: n.need<String>('align') == 'start' ? Alignment.centerLeft : Alignment.centerRight,
     child: Pressable(
       accent: brand.fill,
       semanticLabel: strings.get(t.isDark ? 'theme.to_light' : 'theme.to_dark'),
-      onTap: () =>
-          BrickScope.of(context).act(context, const ToggleThemeAction()),
+      onTap: () => BrickScope.of(context).act(context, const ToggleThemeAction()),
       builder: (context, active) => Container(
         width: s.number('box'),
         height: s.number('box'),
@@ -180,11 +158,7 @@ Widget _themeToggle(BuildContext context, BrickNode n) {
           border: Border.all(color: active ? brand.line : s.color('border')),
           borderRadius: BorderRadius.circular(s.radius('radius')),
         ),
-        child: YamlIcon(
-          s.name(t.isDark ? 'icon_in_dark' : 'icon_in_light'),
-          size: s.number('icon'),
-          color: t.text,
-        ),
+        child: YamlIcon(s.name(t.isDark ? 'icon_in_dark' : 'icon_in_light'), size: s.number('icon'), color: t.text),
       ),
     ),
   );
@@ -194,34 +168,26 @@ Widget _doors(BuildContext context, BrickNode n) {
   final s = BrickStyle.of(context, 'doors');
   final layout = configOf(context).layout;
   final classes = layout.sizeClassNames;
-  final current = classes.indexOf(
-    layout.sizeClassFor(MediaQuery.sizeOf(context).width).name,
-  );
+  final current = classes.indexOf(layout.sizeClassFor(MediaQuery.sizeOf(context).width).name);
   final sideBySide = current >= classes.indexOf(s.name('side_by_side_from'));
   final share = BrickScope.of(context).fill || sideBySide;
   final gap = s.space('gap');
   final doors = n.need<List<BrickNode>>('items');
   final children = [
     for (final (i, d) in doors.indexed) ...[
-      if (i > 0)
-        SizedBox(
-          width: sideBySide ? gap : null,
-          height: sideBySide ? null : gap,
-        ),
+      if (i > 0) SizedBox(width: sideBySide ? gap : null, height: sideBySide ? null : gap),
       share ? Expanded(child: buildBrick(context, d)) : buildBrick(context, d),
     ],
   ];
-  return sideBySide
-      ? IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: children,
-          ),
-        )
-      : Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children,
-        );
+  final group = sideBySide
+      ? Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: children)
+      : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children);
+  if (!share) return group;
+  // Sharing the page's height: never taller than max_height, so the doors stay a sensible size on big screens.
+  return ConstrainedBox(
+    constraints: BoxConstraints(maxHeight: s.number(sideBySide ? 'max_height' : 'stacked_max_height')),
+    child: sideBySide && !BrickScope.of(context).fill ? IntrinsicHeight(child: group) : group,
+  );
 }
 
 Widget _door(BuildContext context, BrickNode n) {
@@ -231,10 +197,7 @@ Widget _door(BuildContext context, BrickNode n) {
   final roleName = n.need<String>('role');
   final role = config.navigation.role(roleName);
   final accent = t.accent(role.accent);
-  final tag = config.strings.get('nav.role_tag', {
-    'number': role.number,
-    'label': config.strings.get(role.label),
-  });
+  final tag = config.strings.get('nav.role_tag', {'number': role.number, 'label': config.strings.get(role.label)});
   final title = _say(context, n, 'title');
   final body = n.prop<String>('body');
   final radius = BorderRadius.circular(s.radius('radius'));
@@ -254,11 +217,7 @@ Widget _door(BuildContext context, BrickNode n) {
       ),
       child: Stack(
         children: [
-          Positioned.fill(
-            child: ArtShapes(
-              config.art.door(n.prop<String>('art') ?? roleName),
-            ),
-          ),
+          Positioned.fill(child: ArtShapes(config.art.door(n.prop<String>('art') ?? roleName))),
           Padding(
             padding: EdgeInsets.all(s.space(compact ? 'compact_padding' : 'padding')),
             child: Column(
@@ -268,24 +227,14 @@ Widget _door(BuildContext context, BrickNode n) {
                 Row(
                   children: [
                     Expanded(
-                      child: StyledText(
-                        tag,
-                        style: s.name('number'),
-                        color: accent.ink,
-                      ),
+                      child: StyledText(tag, style: s.name('number'), color: accent.ink),
                     ),
                     Container(
                       width: s.number('arrow_box'),
                       height: s.number('arrow_box'),
                       alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: accent.line),
-                      ),
-                      child: YamlIcon(
-                        s.name('arrow'),
-                        size: s.number('arrow_icon'),
-                        color: accent.ink,
-                      ),
+                      decoration: BoxDecoration(border: Border.all(color: accent.line)),
+                      child: YamlIcon(s.name('arrow'), size: s.number('arrow_icon'), color: accent.ink),
                     ),
                   ],
                 ),
@@ -319,9 +268,7 @@ Widget _linkRow(BuildContext context, BrickNode n) {
   final tone = context.tokens.tone(n.need('tone'));
   final label = _say(context, n, 'label');
   final countPath = n.prop<String>('count');
-  final count = countPath == null
-      ? null
-      : BrickScope.of(context).lookup(countPath);
+  final count = countPath == null ? null : BrickScope.of(context).lookup(countPath);
   return Pressable(
     accent: tone.fill,
     semanticLabel: count == null ? label : '$label, $count',
@@ -340,9 +287,7 @@ Widget _linkRow(BuildContext context, BrickNode n) {
           Expanded(child: StyledText(label, style: s.name('label'))),
           if (count != null)
             StyledText(
-              configOf(
-                context,
-              ).strings.get('common.count_go', {'count': count}),
+              configOf(context).strings.get('common.count_go', {'count': count}),
               style: s.name('count'),
               color: tone.ink,
             ),
@@ -367,18 +312,13 @@ Widget _topBar(BuildContext context, BrickNode n) {
       children: [
         Pressable(
           accent: brand.fill,
-          semanticLabel: label == null
-              ? config.strings.get('common.back')
-              : say(context, label),
+          semanticLabel: label == null ? config.strings.get('common.back') : say(context, label),
           onTap: () => _act(context, n),
           builder: (context, active) => home
               ? Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Stripes(
-                      size: s.number('mark'),
-                      accents: s.names('stripes'),
-                    ),
+                    Stripes(size: s.number('mark'), accents: s.names('stripes')),
                     if (label != null) ...[
                       SizedBox(width: s.space('padding')),
                       StyledText(
@@ -393,16 +333,8 @@ Widget _topBar(BuildContext context, BrickNode n) {
                   width: s.number('box'),
                   height: s.number('box'),
                   alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: active ? brand.line : s.color('border'),
-                    ),
-                  ),
-                  child: YamlIcon(
-                    s.name('back_icon'),
-                    size: s.number('icon'),
-                    color: t.text,
-                  ),
+                  decoration: BoxDecoration(border: Border.all(color: active ? brand.line : s.color('border'))),
+                  child: YamlIcon(s.name('back_icon'), size: s.number('icon'), color: t.text),
                 ),
         ),
         SizedBox(width: s.space('padding')),
@@ -424,22 +356,29 @@ Widget _crumbs(BuildContext context, BrickStyle s, List<BrickNode> crumbs, RoleS
   final t = context.tokens;
   final shown = crumbs.where(scope.shows).toList();
   final link = role == null ? t.tone('brand').ink : t.accent(role.accent).ink;
-  return Row(mainAxisSize: MainAxisSize.min, children: [
-    for (final (i, c) in shown.indexed) ...[
-      if (i > 0) StyledText(s.name('separator'), style: s.name('crumb'), color: s.color('separator_color')),
-      Flexible(
-        child: c.prop<ActionSpec>('action') == null
-            ? StyledText(crumbText(context, c), style: s.name('crumb'), color: s.color('crumb_current'), maxLines: 1)
-            : Pressable(
-                accent: link,
-                semanticLabel: crumbText(context, c),
-                onTap: () => scope.act(context, c.prop<ActionSpec>('action')),
-                builder: (context, active) => StyledText(crumbText(context, c),
-                    style: s.name('crumb'), color: active ? t.text : link, maxLines: 1),
-              ),
-      ),
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      for (final (i, c) in shown.indexed) ...[
+        if (i > 0) StyledText(s.name('separator'), style: s.name('crumb'), color: s.color('separator_color')),
+        Flexible(
+          child: c.prop<ActionSpec>('action') == null
+              ? StyledText(crumbText(context, c), style: s.name('crumb'), color: s.color('crumb_current'), maxLines: 1)
+              : Pressable(
+                  accent: link,
+                  semanticLabel: crumbText(context, c),
+                  onTap: () => scope.act(context, c.prop<ActionSpec>('action')),
+                  builder: (context, active) => StyledText(
+                    crumbText(context, c),
+                    style: s.name('crumb'),
+                    color: active ? t.text : link,
+                    maxLines: 1,
+                  ),
+                ),
+        ),
+      ],
     ],
-  ]);
+  );
 }
 
 /// A crumb's words: its role ("01 / BUY"), its strings key, or its data.
@@ -469,12 +408,7 @@ Widget _mark(BuildContext context, BrickNode n) {
       height: s.number('box'),
       color: tone.fill,
       alignment: Alignment.center,
-      child: YamlIcon(
-        n.need('icon'),
-        size: s.number('icon'),
-        color: tone.onFill,
-        strokeWidth: s.number('stroke'),
-      ),
+      child: YamlIcon(n.need('icon'), size: s.number('icon'), color: tone.onFill, strokeWidth: s.number('stroke')),
     ),
   );
 }
@@ -488,11 +422,7 @@ Widget _receipt(BuildContext context, BrickNode n) {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Expanded(
-        child: StyledText(
-          label,
-          style: s.name('row_label'),
-          color: s.color('row_label_color'),
-        ),
+        child: StyledText(label, style: s.name('row_label'), color: s.color('row_label_color')),
       ),
       SizedBox(width: gap),
       Flexible(
@@ -517,21 +447,13 @@ Widget _receipt(BuildContext context, BrickNode n) {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    StyledText(
-                      _say(context, n, 'number'),
-                      style: s.name('label'),
-                      color: s.color('label_color'),
-                    ),
+                    StyledText(_say(context, n, 'number'), style: s.name('label'), color: s.color('label_color')),
                     SizedBox(height: gap),
                     SelectableText('${record['id']}', style: s.text('number')),
                   ],
                 ),
               ),
-              StatusTag(
-                kind: 'order',
-                value: '${record['status']}',
-                style: s.name('tag'),
-              ),
+              StatusTag(kind: 'order', value: '${record['status']}', style: s.name('tag')),
             ],
           ),
         ),
@@ -540,16 +462,10 @@ Widget _receipt(BuildContext context, BrickNode n) {
           padding: EdgeInsets.all(pad),
           child: Column(
             children: [
-              for (final r
-                  in n.prop<List<ReceiptRow>>('rows') ??
-                      const <ReceiptRow>[]) ...[
+              for (final r in n.prop<List<ReceiptRow>>('rows') ?? const <ReceiptRow>[]) ...[
                 line(
                   say(context, r.label),
-                  StyledText(
-                    '${record[r.field] ?? ''}',
-                    style: r.style ?? s.name('row_value'),
-                    align: TextAlign.end,
-                  ),
+                  StyledText('${record[r.field] ?? ''}', style: r.style ?? s.name('row_value'), align: TextAlign.end),
                 ),
                 SizedBox(height: gap),
               ],
@@ -557,10 +473,7 @@ Widget _receipt(BuildContext context, BrickNode n) {
               line(
                 _say(context, n, 'total'),
                 StyledText(
-                  formatMoney(
-                    record['total'] as num? ?? 0,
-                    '${record['currency']}',
-                  ),
+                  formatMoney(record['total'] as num? ?? 0, '${record['currency']}'),
                   style: s.name('total_value'),
                 ),
               ),
@@ -575,14 +488,9 @@ Widget _receipt(BuildContext context, BrickNode n) {
 Widget _button(BuildContext context, BrickNode n) {
   final s = BrickStyle.of(context, 'button');
   final t = context.tokens;
-  final enabledPath = n.prop<String>('enabled'),
-      busyPath = n.prop<String>('busy');
-  final busy =
-      busyPath != null && truthy(BrickScope.of(context).lookup(busyPath));
-  final enabled =
-      (enabledPath == null ||
-          truthy(BrickScope.of(context).lookup(enabledPath))) &&
-      !busy;
+  final enabledPath = n.prop<String>('enabled'), busyPath = n.prop<String>('busy');
+  final busy = busyPath != null && truthy(BrickScope.of(context).lookup(busyPath));
+  final enabled = (enabledPath == null || truthy(BrickScope.of(context).lookup(enabledPath))) && !busy;
   final tone = t.tone(enabled ? n.need('tone') : 'neutral');
   final primary = n.need<String>('variant') == 'primary';
   final label = _say(context, n, 'label');
@@ -597,18 +505,13 @@ Widget _button(BuildContext context, BrickNode n) {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: primary ? tone.fill : s.color('ghost_background'),
-        border: primary
-            ? null
-            : Border.all(color: active ? tone.line : s.color('ghost_border')),
+        border: primary ? null : Border.all(color: active ? tone.line : s.color('ghost_border')),
         borderRadius: BorderRadius.circular(s.radius('radius')),
       ),
       child: busy
           ? SizedBox.square(
               dimension: s.number('spinner'),
-              child: CircularProgressIndicator(
-                strokeWidth: s.number('spinner_stroke'),
-                color: ink,
-              ),
+              child: CircularProgressIndicator(strokeWidth: s.number('spinner_stroke'), color: ink),
             )
           : Padding(
               padding: EdgeInsets.symmetric(horizontal: s.space('padding')),
@@ -616,12 +519,7 @@ Widget _button(BuildContext context, BrickNode n) {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Flexible(
-                    child: StyledText(
-                      label,
-                      style: s.name('label'),
-                      color: ink,
-                      maxLines: 1,
-                    ),
+                    child: StyledText(label, style: s.name('label'), color: ink, maxLines: 1),
                   ),
                   if (icon != null) ...[
                     SizedBox(width: s.space('gap')),
@@ -641,19 +539,13 @@ Widget _list(BuildContext context, BrickNode n) {
   final item = n.need<BrickNode>('item');
   final built = [
     for (final (i, entry) in (items is List ? items : const []).indexed)
-      scope.withItem(
-        entry,
-        i,
-        Builder(builder: (context) => buildBrick(context, item)),
-      ),
+      scope.withItem(entry, i, Builder(builder: (context) => buildBrick(context, item))),
   ];
   final cards = n.need<String>('layout') == 'cards';
   return LayoutBuilder(
     builder: (context, box) {
       // cards: as many columns as layout.yml list_card fits in the width the list has (1 on phones).
-      final columns = cards
-          ? configOf(context).layout.listColumnsIn(box.maxWidth, gap)
-          : 1;
+      final columns = cards ? configOf(context).layout.listColumnsIn(box.maxWidth, gap) : 1;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -668,11 +560,7 @@ Widget _list(BuildContext context, BrickNode n) {
                   children: [
                     for (var c = 0; c < columns; c++) ...[
                       if (c > 0) SizedBox(width: gap),
-                      Expanded(
-                        child: r + c < built.length
-                            ? built[r + c]
-                            : const SizedBox.shrink(),
-                      ),
+                      Expanded(child: r + c < built.length ? built[r + c] : const SizedBox.shrink()),
                     ],
                   ],
                 ),
@@ -701,9 +589,7 @@ Widget _orderCard(BuildContext context, BrickNode n) {
     builder: (context, active) => Container(
       decoration: BoxDecoration(
         color: s.color('background'),
-        border: Border.all(
-          color: highlight || active ? brand.line : s.color('border'),
-        ),
+        border: Border.all(color: highlight || active ? brand.line : s.color('border')),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -713,20 +599,13 @@ Widget _orderCard(BuildContext context, BrickNode n) {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox.square(
-                  dimension: s.number('poster'),
-                  child: PosterArt('${o['product_id']}'),
-                ),
+                SizedBox.square(dimension: s.number('poster'), child: PosterArt('${o['product_id']}')),
                 SizedBox(width: s.space('gap')),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      StyledText(
-                        title,
-                        style: s.name('title'),
-                        maxLines: s.number('title_lines').toInt(),
-                      ),
+                      StyledText(title, style: s.name('title'), maxLines: s.number('title_lines').toInt()),
                       StyledText(
                         say(context, n.need('line'), args: n.prop('args')),
                         style: s.name('line_style'),
@@ -736,24 +615,15 @@ Widget _orderCard(BuildContext context, BrickNode n) {
                     ],
                   ),
                 ),
-                StatusTag(
-                  kind: 'order',
-                  value: '${o['status']}',
-                  style: s.name('tag'),
-                ),
+                StatusTag(kind: 'order', value: '${o['status']}', style: s.name('tag')),
               ],
             ),
           ),
           Divider(height: 1, thickness: 1, color: s.color('divider')),
           Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: s.space('padding'),
-              vertical: t.space.sm,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: s.space('padding'), vertical: t.space.sm),
             child: StyledText(
-              configOf(
-                context,
-              ).strings.get(n.need('number'), {'id': '${o['id']}'}),
+              configOf(context).strings.get(n.need('number'), {'id': '${o['id']}'}),
               style: s.name('footer'),
               color: s.color('footer_color'),
             ),
@@ -778,18 +648,10 @@ Widget _emptyState(BuildContext context, BrickNode n) {
           height: s.number('icon_box'),
           color: s.color('icon_background'),
           alignment: Alignment.center,
-          child: YamlIcon(
-            n.need('icon'),
-            size: s.number('icon'),
-            color: s.color('icon_color'),
-          ),
+          child: YamlIcon(n.need('icon'), size: s.number('icon'), color: s.color('icon_color')),
         ),
         SizedBox(height: s.space('gap')),
-        StyledText(
-          _say(context, n, 'title'),
-          style: s.name('title'),
-          align: TextAlign.center,
-        ),
+        StyledText(_say(context, n, 'title'), style: s.name('title'), align: TextAlign.center),
         if (message != null) ...[
           SizedBox(height: s.space('gap')),
           StyledText(
@@ -806,16 +668,9 @@ Widget _emptyState(BuildContext context, BrickNode n) {
             semanticLabel: say(context, button),
             onTap: () => _act(context, n),
             builder: (context, _) => Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: t.space.xl,
-                vertical: t.space.md,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: t.space.xl, vertical: t.space.md),
               color: brand.fill,
-              child: StyledText(
-                say(context, button),
-                style: s.name('title'),
-                color: brand.onFill,
-              ),
+              child: StyledText(say(context, button), style: s.name('title'), color: brand.onFill),
             ),
           ),
         ],

@@ -27,7 +27,8 @@ class ScreenHost extends ConsumerWidget {
     final spec = config.screens.screen(name);
     final source = spec.data == null
         ? null
-        : screenSources[spec.data] ?? (throw StateError('${spec.name}.yml: no data source "${spec.data}" in sources.dart'));
+        : screenSources[spec.data] ??
+              (throw StateError('${spec.name}.yml: no data source "${spec.data}" in sources.dart'));
     final data = source?.build(ref, params) ?? const ScreenData.ready({});
     final t = context.tokens;
 
@@ -68,53 +69,60 @@ class ScreenHost extends ConsumerWidget {
         params: params,
         run: run,
         sizeClass: config.layout.sizeClassFor(MediaQuery.sizeOf(context).width).name,
-        child: Stack(children: [
-          if (spec.backdrop != null) Positioned.fill(child: ArtShapes(config.art.backdrop(spec.backdrop!))),
-          SafeArea(
-            child: LayoutBuilder(builder: (context, box) {
-              final layout = config.layout;
-              final pad = layout.sizeClassFor(box.maxWidth).pagePadding;
-              final wide = switch (spec.width) {
-                ScreenWidth.narrow => false,
-                ScreenWidth.wide => true,
-                ScreenWidth.auto => layout.productSideBySide(box.maxWidth),
-              };
-              final maxWidth = wide ? layout.rules.maxContentWidth : layout.rules.formMaxWidth;
-              return Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxWidth),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: pad),
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                      if (spec.top.isNotEmpty)
-                        Padding(
-                          padding: EdgeInsets.only(top: pad),
-                          child: _Bricks(spec.top, gap: t.spacing(spec.gap), fill: false),
+        child: Stack(
+          children: [
+            if (spec.backdrop != null) Positioned.fill(child: ArtShapes(config.art.backdrop(spec.backdrop!))),
+            SafeArea(
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  final layout = config.layout;
+                  final pad = layout.sizeClassFor(box.maxWidth).pagePadding;
+                  final wide = switch (spec.width) {
+                    ScreenWidth.narrow => false,
+                    ScreenWidth.wide => true,
+                    ScreenWidth.auto => layout.productSideBySide(box.maxWidth),
+                  };
+                  final maxWidth = wide ? layout.rules.maxContentWidth : layout.rules.formMaxWidth;
+                  return Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxWidth),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: pad),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (spec.top.isNotEmpty)
+                              Padding(
+                                padding: EdgeInsets.only(top: pad),
+                                child: _Bricks(spec.top, gap: t.spacing(spec.gap), fill: false),
+                              ),
+                            Expanded(
+                              child: data.state == SourceState.loading
+                                  ? Center(child: CircularProgressIndicator(color: t.tone('brand').fill))
+                                  : _Body(spec, body),
+                            ),
+                            if (spec.bottom.isNotEmpty)
+                              Padding(
+                                padding: EdgeInsets.symmetric(vertical: pad),
+                                child: _Bricks(spec.bottom, gap: t.spacing(spec.gap), fill: false),
+                              ),
+                          ],
                         ),
-                      Expanded(
-                        child: data.state == SourceState.loading
-                            ? Center(child: CircularProgressIndicator(color: t.tone('brand').fill))
-                            : _Body(spec, body),
                       ),
-                      if (spec.bottom.isNotEmpty)
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: pad),
-                          child: _Bricks(spec.bottom, gap: t.spacing(spec.gap), fill: false),
-                        ),
-                    ]),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ]),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-/// The body: scrolls; in `fill: true` screens it is at least the screen's height, so doors share it and a spacer
-/// pushes what follows down.
+/// The body: scrolls; in `fill: true` screens it is at least the screen's height, so doors share it (up to their
+/// max_height, then the page centres) and a spacer pushes what follows down.
 class _Body extends StatelessWidget {
   final ScreenSpec spec;
   final List<BrickNode> nodes;
@@ -159,12 +167,14 @@ class _Bricks extends StatelessWidget {
       final flex = fill && brickFlexes(n);
       final child = scope.withFill(flex, Builder(builder: (context) => buildBrick(context, n)));
       if (!flex) return child;
-      return n.brick == 'spacer' ? const Spacer() : Expanded(child: child);
+      // Loose, so a brick with a height cap (the doors' max_height) can stay smaller; the column centres what is left.
+      return n.brick == 'spacer' ? const Spacer() : Flexible(child: child);
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: fill ? MainAxisSize.max : MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         for (final (i, n) in nodes.where(scope.shows).indexed) ...[if (i > 0) SizedBox(height: gap), one(n)],
       ],

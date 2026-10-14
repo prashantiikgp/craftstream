@@ -34,7 +34,7 @@ strings:
     buy_title: Buy
     buy_body: Search by craft, watch the whole making video, then order from the artisan.
     sell_title: Sell
-    sell_body: Upload a process video up to 15 minutes. Buyers can watch it even on a slow connection.
+    sell_body: Upload a process video, up to 15 minutes. Buyers can watch it on any connection.
     orders: Your orders
 
   theme:
