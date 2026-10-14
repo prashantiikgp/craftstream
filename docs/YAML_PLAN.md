@@ -1,6 +1,7 @@
 # V2 plan: everything YAML-driven, theme B
 
-Status: **Phase 1 in progress** (2026-10-14). Done: Phase 0; theme B; Home, Browse, Order placed, Your orders as screen YAML.
+Status: **Phase 1 in progress** (2026-10-14). Done: Phase 0; theme B; every user screen is screen YAML (Home, Browse,
+Product, Checkout, Order placed, Your orders, Your products, New product/Uploading); the v1 shell is gone.
 Live: https://craftstream-qi0tvg.web.app (V2 build; v1 is the previous release in Firebase Hosting history).
 Inventory of what is hard-coded today: [`YAML_INVENTORY.md`](YAML_INVENTORY.md).
 Look and screens: the "CraftStream new look" canvas, rows **B dark** and **B light**.
@@ -164,10 +165,10 @@ and the convention tests run and fail on today's literals. The failing list *is*
 
 ### 1.3 Bricks (`ui/bricks.yml` + `lib/shared/bricks/`)
 Every reusable widget becomes a brick, with variants, sizes and states in YAML.
-- [ ] **Basic bricks:** wordmark, door, button (primary / secondary / ghost / danger × sm / md / lg), icon
+- [x] **Basic bricks:** wordmark, door, button (primary / secondary / ghost / danger × sm / md / lg), icon
       button, text field, search field, chip row, sort menu, tag, status badge, price, stepper, notice,
       empty state, load error, skeleton, divider, key-value row, receipt card.
-- [ ] **Composite bricks:**
+- [x] **Composite bricks:**
   - product card, product grid, listing card, product summary;
   - video player and its overlay (rung pill, controls, buffering);
   - video pick card, upload progress, buy bar, top bar (back + crumb), section header.
@@ -186,10 +187,10 @@ One file per screen. Each lists its data source, its four states (loading, empty
 per size class.
 - [x] `home.yml`: wordmark, the two doors, theme toggle.
 - [x] `discover.yml`: top bar, title, search, chip row, sort, product grid, load more.
-- [ ] `product.yml`:
+- [x] `product.yml`:
   - stacked or side by side: video, tags, title, artisan row, price, description;
   - buy bar: quantity, then Buy, which goes to checkout.
-- [ ] `checkout.yml`: product summary, name field, quantity stepper and limit, total, note, Place order.
+- [x] `checkout.yml`: product summary, name field, quantity stepper and limit, total, note, Place order.
 - [x] **`placed.yml`, the new confirmation screen:** check mark, `03 / DONE`, "Order placed", artisan
       message, receipt card (order number, product, quantity, total, PLACED badge), **See your orders**,
       Keep exploring.
@@ -201,8 +202,9 @@ per size class.
   - Add `GET /orders/{order_id}` to `models/endpoints.yml` (backend in 2.1). The list and receipt load each
     order from the API, so they show the stored status.
 - [x] New copy (orders entry point, theme toggle, `03 / DONE`, receipt labels) goes in `strings.yml`.
-- [ ] `studio.yml` and `upload.yml`, using the 0.1 Sell mockups.
-- [ ] Remove the old `features/*/…_screen.dart` layouts. Controllers stay and expose view models for bindings.
+- [x] `studio.yml` and `upload.yml`, using the 0.1 Sell mockups.
+- [x] Remove the old `features/*/…_screen.dart` layouts. Controllers stay; each feature has a `<feature>_source.dart`
+      that exposes its view model and calls. (Left: the dev-only `/catalog` page, rebuilt in 1.1.)
 
 ### 1.5 Behaviour still in Dart → YAML
 - [ ] `catalog/filters.yml`: sorts become declarative (`field`, `direction`), so adding a sort needs no Dart.
