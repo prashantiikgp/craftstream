@@ -50,18 +50,18 @@ review column is for the user: **Y** move to YAML, **C** keep in code (give a re
 
 | # | Area | Main items (file:line) | Review |
 |---|---|---|---|
-| B1 | App settings | `main.py:19` `API="/api/v1"` (duplicates endpoints.yml); title and version :26; CORS methods and headers :30-33; GZip 500 :35; log format `core/logging.py:32-39`; required-in-GCP list `settings.py:39-40` | |
-| B2 | Routes | hand-written decorators in `api/routers/*.py`, kept in step with endpoints.yml only by a test; query limits `products.py:22-25` (q 200, tag 50, cursor 100) missing from endpoints.yml; `internal.py:19` prefix duplicated 4× | |
-| B3 | Errors | `core/errors.py:21-79` code ↔ status map, default messages; `order_service.py:29` `product_not_ready` is not in error_response.yml | |
-| B4 | Video state machine | `product_repo.py:13` Literal duplicates product.yml; transitions in `media_service.py:63-94`; Transcoder states `SUCCEEDED`/`FAILED`; `"ready"` in product_repo:39,72 and order_rules_engine:18 | |
-| B5 | Storage layout | `infra/gcp/gcs.py:13-65`: `raw/{id}/source` and its regex, `hls/{id}/`, `manifest.m3u8`, thumbnail name, public URL, cache-control; repeated in transcoder.py:31-38 and 02_storage.sh | |
-| B6 | Encoder | `ladder_engine.py:49-145`: `h264` key, `vbr`, `aac-he`, channel layout, `fmp4`, sprite grid, `input0`/`atom0`, baseline ≤ 240p, ffmpeg preset, maxrate ×1.2, bufsize ×2, headroom 1.1, HLS v7 | |
-| B7 | Catalog | `core/ids.py:10` 12-hex ids; search field map duplicates search_schema; tag order; `LIST_LIMIT=500`; collections `products` and `orders`; indexes duplicated in 03_firestore.sh | |
-| B8 | Events | Pub/Sub envelope shape and error texts in `internal.py:26-47`; event type in 06_events.sh | |
-| B9 | Ingest | `ffprobe.py:10,19` timeout 60 s, stderr cap 200 | |
-| B10 | Infra | `_common.sh` names; 9 APIs; lifecycle; public media bucket; 2 CORS templates; Firestore indexes; 14 IAM bindings; Cloud Run sizing (1 CPU, 512 Mi, 0–3 instances, concurrency 40); Pub/Sub retry 30 s / 10–600 s | |
+| B1 | App settings | `main.py:19` `API="/api/v1"` (duplicates endpoints.yml); title and version :26; CORS methods and headers :30-33; GZip 500 :35; log format `core/logging.py:32-39`; required-in-GCP list `settings.py:39-40` | Y: done for base path (generated from endpoints.yml), title, version, CORS, GZip (`api/http.yml`); log format and the required-in-GCP list are still code (`app.yml`, not in this pass) |
+| B2 | Routes | hand-written decorators in `api/routers/*.py`, kept in step with endpoints.yml only by a test; query limits `products.py:22-25` (q 200, tag 50, cursor 100) missing from endpoints.yml; `internal.py:19` prefix duplicated 4× | Y: internal prefix done (`platform/events.yml`); mounting routes from endpoints.yml and query limits are still open |
+| B3 | Errors | `core/errors.py:21-79` code ↔ status map, default messages; `order_service.py:29` `product_not_ready` is not in error_response.yml | Y: done, `api/http.yml`; error_response.yml lists every code (test-checked) |
+| B4 | Video state machine | `product_repo.py:13` Literal duplicates product.yml; transitions in `media_service.py:63-94`; Transcoder states `SUCCEEDED`/`FAILED`; `"ready"` in product_repo:39,72 and order_rules_engine:18 | Y: done, `media/video_lifecycle.yml` (states test-checked against product.yml) |
+| B5 | Storage layout | `infra/gcp/gcs.py:13-65`: `raw/{id}/source` and its regex, `hls/{id}/`, `manifest.m3u8`, thumbnail name, public URL, cache-control; repeated in transcoder.py:31-38 and 02_storage.sh | Y: done, `media/storage_layout.yml` (also the local upload path and sample stream) |
+| B6 | Encoder | `ladder_engine.py:49-145`: `h264` key, `vbr`, `aac-he`, channel layout, `fmp4`, sprite grid, `input0`/`atom0`, baseline ≤ 240p, ffmpeg preset, maxrate ×1.2, bufsize ×2, headroom 1.1, HLS v7 | Y: done, `ladder.yml` `encoder:` (job configs and FFmpeg args unchanged); C: FFmpeg flag names and JobConfig field names are the tools' APIs |
+| B7 | Catalog | `core/ids.py:10` 12-hex ids; search field map duplicates search_schema; tag order; `LIST_LIMIT=500`; collections `products` and `orders`; indexes duplicated in 03_firestore.sh | Y: done, `catalog/listing.yml`; the field map is gone (search.yml lists the fields); indexes in `infra/gcp/resources.yml` |
+| B8 | Events | Pub/Sub envelope shape and error texts in `internal.py:26-47`; event type in 06_events.sh | Y: done, `platform/events.yml` (the API now also ignores other Eventarc event types) |
+| B9 | Ingest | `ffprobe.py:10,19` timeout 60 s, stderr cap 200 | Y: done, `media/ingest.yml` |
+| B10 | Infra | `_common.sh` names; 9 APIs; lifecycle; public media bucket; 2 CORS templates; Firestore indexes; 14 IAM bindings; Cloud Run sizing (1 CPU, 512 Mi, 0–3 instances, concurrency 40); Pub/Sub retry 30 s / 10–600 s | Y: done, `infra/gcp/resources.yml` + `resources.py` (the `.tmpl` files are gone; scripts not run yet) |
 | B11 | Tools | codegen maps; local_hls sample settings; throttle proxy defaults; smoke test timeouts and payload; subset_fonts ranges and families | |
-| B12 | Convention test | `tests/config_validation/test_rule_files.py` checks file trios and `extra="forbid"`; it does **not** check for literals in services or engines | |
+| B12 | Convention test | `tests/config_validation/test_rule_files.py` checks file trios and `extra="forbid"`; it does **not** check for literals in services or engines | Y: done, `test_literal_lint.py`; the backend baseline is empty |
 
 **Duplicated facts to collapse:**
 

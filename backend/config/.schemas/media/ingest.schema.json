@@ -1,0 +1,22 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "probe_timeout_seconds": {
+      "exclusiveMinimum": 0,
+      "title": "Probe Timeout Seconds",
+      "type": "integer"
+    },
+    "error_text_max_chars": {
+      "exclusiveMinimum": 0,
+      "title": "Error Text Max Chars",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "probe_timeout_seconds",
+    "error_text_max_chars"
+  ],
+  "title": "IngestRules",
+  "type": "object",
+  "$comment": "GENERATED from the Pydantic schema by tools/export_rule_schemas.py for ingest.yml."
+}

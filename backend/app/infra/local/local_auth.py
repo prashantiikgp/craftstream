@@ -1,4 +1,4 @@
-"""Local stand-in for OIDC caller checks: there is no Eventarc or Pub/Sub, so /internal/* is open."""
+"""Local stand-in for OIDC caller checks: there is no Eventarc or Pub/Sub, so the internal routes are open."""
 
 from __future__ import annotations
 

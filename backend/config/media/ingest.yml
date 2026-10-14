@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=../.schemas/media/ingest.schema.json
+# Checking an upload before it is transcoded: how long ffprobe may take to measure it, and how much of its
+# error output is kept. Used by infra/ffprobe.py (an unreadable upload marks the product failed).
+
+# ffprobe reads only the container headers (over HTTPS on GCP), so this is generous.
+probe_timeout_seconds: 60
+
+# Keep the last N characters of ffprobe's error output in the log line and failure reason.
+error_text_max_chars: 200

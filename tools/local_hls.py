@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 
 from app.domain.media.ladder_engine import ffmpeg_args, master_playlist, sorted_rungs
 from app.domain.media.ladder_loader import load_ladder_rules
+from app.domain.media.storage_layout_engine import manifest_name
 from app.domain.media.upload_policy_engine import max_duration_seconds
 
 HTTP_HEADER_BYTES = 400  # typical GCS response headers per request (status line, cache, CORS, content-type)
@@ -84,18 +85,20 @@ def encode(src: Path, out: Path, only: str | None = None, quiet: bool = False) -
             print(f"encoding {r.name} ({r.width}x{r.height}@{r.fps}fps, {r.total_kbps} kbps) ...")
         subprocess.run(ffmpeg_args(r, str(src), str(rung_dir), rules, he_aac_available=fdk,
                                    max_duration_seconds=max_duration_seconds()), check=True)
-    (out / "manifest.m3u8").write_text(master_playlist(rungs))
+    (out / manifest_name()).write_text(master_playlist(rungs, rules))
     return [r.name for r in rungs]
 
 
 def measure(out: Path, rung: str) -> Measurement:
+    ff = load_ladder_rules().encoder.ffmpeg
     rung_dir = out / rung
-    playlist = (rung_dir / "index.m3u8").read_text()
+    playlist = (rung_dir / ff.playlist).read_text()
     durations = [float(d) for d in re.findall(r"#EXTINF:([\d.]+)", playlist)]
-    segment_files = re.findall(r"^(seg_\d+\.m4s)$", playlist, flags=re.MULTILINE)
+    segment_rx = re.sub(r"%0?\d*d", r"\\d+", re.escape(ff.segment_pattern))  # seg_%04d.m4s -> seg_\d+\.m4s
+    segment_files = re.findall(rf"^({segment_rx})$", playlist, flags=re.MULTILINE)
     seg_sizes = [(rung_dir / s).stat().st_size for s in segment_files]
-    payload = ((out / "manifest.m3u8").stat().st_size + (rung_dir / "index.m3u8").stat().st_size
-               + (rung_dir / "init.mp4").stat().st_size + sum(seg_sizes))
+    payload = ((out / manifest_name()).stat().st_size + (rung_dir / ff.playlist).stat().st_size
+               + (rung_dir / ff.init_segment).stat().st_size + sum(seg_sizes))
     peak = max(size * 8 / d / 1000 for size, d in zip(seg_sizes, durations, strict=True))
     return Measurement(rung=rung, seconds=sum(durations), segments=len(seg_sizes), payload_bytes=payload,
                        requests=3 + len(seg_sizes), peak_segment_kbps=peak)
@@ -128,6 +131,6 @@ if __name__ == "__main__":
     elif a.src and a.out:
         names = encode(a.src, a.out, a.only)
         print(report([measure(a.out, n) for n in names]))
-        print(f"\nplay: {a.out / 'manifest.m3u8'}")
+        print(f"\nplay: {a.out / manifest_name()}")
     else:
         ap.error("give SRC and OUT, or --sample PATH")

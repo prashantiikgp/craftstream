@@ -21,8 +21,11 @@ gen:             ## Regenerate code from models/*.yml + JSON Schemas for backend
 test:            ## Run all backend tests
 	cd backend && .venv/bin/python -m pytest -q
 
-lint:            ## Ruff on backend + tools
-	$(PY) -m ruff check backend tools
+lint:            ## Ruff on backend + tools + the infra reader
+	$(PY) -m ruff check backend tools infra/gcp/resources.py
+
+infra-print:     ## Dry run: print the gcloud commands infra/gcp/setup.sh would run (calls nothing)
+	$(PY) infra/gcp/resources.py --print
 
 api:             ## Run the API locally (in-memory, no GCP) on :8000
 	cd backend && .venv/bin/python -m uvicorn app.main:app --reload --port 8000
@@ -48,4 +51,4 @@ flutter-test:    ## Flutter analyze + tests
 flutter-gen:     ## Regenerate Dart schema code (json_serializable)
 	cd frontend && $(FLUTTER) pub run build_runner build --delete-conflicting-outputs
 
-.PHONY: help setup gen test lint api hls flutter-init web apk web-build flutter-test flutter-gen
+.PHONY: help setup gen test lint infra-print api hls flutter-init web apk web-build flutter-test flutter-gen

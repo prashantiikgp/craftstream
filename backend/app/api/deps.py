@@ -16,6 +16,7 @@ from app.core.errors import Unauthorized
 from app.core.settings import Settings
 from app.db.repositories.order_repo import FirestoreOrderRepo, InMemoryOrderRepo, OrderRepo
 from app.db.repositories.product_repo import FirestoreProductRepo, InMemoryProductRepo, ProductRepo
+from app.domain.catalog import listing_engine
 from app.domain.catalog.catalog_service import CatalogService
 from app.domain.media.media_service import MediaService, Storage, Transcoder
 from app.domain.orders.order_service import OrderService
@@ -50,8 +51,9 @@ def build_container(settings: Settings) -> Container:
 
         return Container(
             settings=settings,
-            products=FirestoreProductRepo(settings.gcp_project),
-            orders=FirestoreOrderRepo(settings.gcp_project),
+            products=FirestoreProductRepo(settings.gcp_project, listing_engine.products_collection(),
+                                          listing_engine.search_candidate_limit()),
+            orders=FirestoreOrderRepo(settings.gcp_project, listing_engine.orders_collection()),
             storage=GcsStorage(settings.gcp_project, settings.upload_bucket, settings.media_bucket),
             transcoder=GcpTranscoder(settings.gcp_project, settings.gcp_region,
                                      settings.upload_bucket, settings.media_bucket, settings.transcode_topic),
@@ -83,7 +85,7 @@ def get_orders(c: Annotated[Container, Depends(get_container)]) -> OrderService:
 
 def verify_internal_caller(c: Annotated[Container, Depends(get_container)],
                            authorization: Annotated[str | None, Header()] = None) -> str:
-    """Dependency for /internal/*: only our Eventarc trigger and Pub/Sub subscription get through."""
+    """Dependency for the internal routes: only our Eventarc trigger and Pub/Sub subscription get through."""
     from app.infra.gcp.auth import CallerRejected
 
     try:

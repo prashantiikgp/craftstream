@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=../.schemas/api/http.schema.json
+# How the API speaks HTTP: its name and version, the status of every error code, the default error messages,
+# CORS and compression. Used by main.py and core/errors.py. Routes and the base path live in
+# models/endpoints.yml; allowed origins are per environment (CORS_ORIGINS).
+
+title: CraftStream API
+version: 0.3.0
+
+errors:
+  # Every code the API sends in ErrorResponse.code, and its HTTP status. Services raise NotFound, Conflict,
+  # Unauthorized or DomainError (core/errors.py), each with a default code, or pass a more specific one.
+  # models/error_response.yml lists the same codes (a test checks).
+  status:
+    bad_request: 400
+    unauthorized: 401
+    forbidden: 403
+    not_found: 404
+    method_not_allowed: 405
+    conflict: 409
+    product_not_ready: 409      # an order for a product whose video isn't ready yet
+    unsupported_media_type: 415
+    validation_error: 422
+    internal_error: 500
+  # A framework error (wrong method, unknown path, ...) gets the first code above with its status,
+  # or this one when no code has it.
+  unlisted_status_code: error
+  validation:                   # the request body or query doesn't match the models
+    code: validation_error
+    message: The request is not valid.
+  internal:                     # an unexpected exception (logged with its traceback)
+    code: internal_error
+    message: Something went wrong on our side.
+
+cors:
+  allow_methods: ["*"]
+  allow_headers: ["*"]
+  expose_headers: [Range]       # the resumable uploader reads it from 308 responses
+
+# Responses at least this big are gzipped: search pages shrink ~4x; tiny bodies aren't worth it.
+gzip_minimum_bytes: 500

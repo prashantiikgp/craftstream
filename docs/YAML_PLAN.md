@@ -241,8 +241,9 @@ and the light and dark theme B match the canvas.
 - [ ] `models/endpoints.yml` becomes the single source for routes:
   - the API **mounts routes from it** (handlers by name), instead of hand-written decorators;
   - query params gain constraints (`max_length`, `minimum`);
-  - `base_path` is read from it; `/api/v1` disappears from code.
-- [ ] `config/api/http.yml`:
+  - `base_path` is read from it; `/api/v1` disappears from code. *(Done: `make gen` writes it to
+    `app/generated/api.py`, since `models/` is not in the server image.)*
+- [x] `config/api/http.yml`:
   - error code ↔ status map, default messages, the validation and internal error codes;
   - CORS methods, headers and expose list.
   - Add `product_not_ready` to `models/error_response.yml`.
@@ -252,31 +253,34 @@ and the light and dark theme B match the canvas.
       signatures, and the YAML maps path and method to a handler name.
 
 ### 2.2 Domain rules
-- [ ] `config/media/video_lifecycle.yml`:
+- [x] `config/media/video_lifecycle.yml`:
   - states (from `models/product.yml`), initial state, allowed transitions and the events behind them;
   - Transcoder terminal and success states;
   - the listable and orderable state.
   - This replaces the strings in `product_repo`, `media_service` and `order_rules_engine`.
-- [ ] `config/media/storage_layout.yml`: raw path template and regex, HLS prefix, manifest and thumbnail
+- [x] `config/media/storage_layout.yml`: raw path template and regex, HLS prefix, manifest and thumbnail
       names, public base URL, cache-control, Transcoder label key, local sample stream.
-- [ ] `config/media/ladder.yml` gains an `encoder:` block:
+- [x] `config/media/ladder.yml` gains an `encoder:` block:
   - Transcoder: codec key, rate control, container, H.264 profile threshold, sprite grid;
   - local FFmpeg: preset, maxrate and bufsize factors, playlist headroom, HLS version.
-- [ ] `config/media/ingest.yml`: ffprobe timeout, error text cap.
-- [ ] `config/catalog/listing.yml`: ID length and format, tag normalisation, tag sort, Firestore candidate
-      limit (500), cursor strategy, collection names.
-- [ ] `config/platform/events.yml`: internal path prefix, Pub/Sub envelope keys, accepted Eventarc event type.
+- [x] `config/media/ingest.yml`: ffprobe timeout, error text cap.
+- [x] `config/catalog/listing.yml`: ID length and format, tag normalisation, tag sort, Firestore candidate
+      limit (500), cursor strategy, collection names. (The cursor stays "the last id on the page": there is
+      only one strategy, so it is not a setting.)
+- [x] `config/platform/events.yml`: internal path prefix, Pub/Sub envelope keys, accepted Eventarc event type.
 
 ### 2.3 Infra and tools
-- [ ] `infra/gcp/resources.yml`: one place for:
+- [x] `infra/gcp/resources.yml`: one place for:
   - bucket, topic, subscription and trigger names; enabled APIs;
   - the 14 IAM bindings; lifecycle; CORS (replaces the two `.tmpl` files);
   - Cloud Run sizing; Pub/Sub retry; Firestore indexes.
-- [ ] The shell scripts read `resources.yml` through a small Python reader. `config.env` keeps only the 5
+- [x] The shell scripts read `resources.yml` through a small Python reader. `config.env` keeps only the 5
       environment values.
 - [ ] **Dry run before touching GCP:** the reader prints the gcloud commands. Compare them with the live project
       (`craftstream-qi0tvg` only) and get the user's OK before any IAM, bucket or Cloud Run change is applied.
-- [ ] A test cross-checks `resources.yml` against `storage_layout.yml` and the Firestore queries.
+      *(The printer is done: `make infra-print`. The comparison with the live project and the user's OK are
+      still to do; the rewritten scripts have not been run.)*
+- [x] A test cross-checks `resources.yml` against `storage_layout.yml` and the Firestore queries.
 - [ ] `tools/tools.yml`: smoke test, throttle proxy and local_hls defaults.
 
 **Done when:** the backend literal lint passes, routes come from `endpoints.yml`, and the inventory's duplicates

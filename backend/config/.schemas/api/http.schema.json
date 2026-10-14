@@ -1,0 +1,125 @@
+{
+  "$defs": {
+    "CorsRules": {
+      "additionalProperties": false,
+      "properties": {
+        "allow_methods": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Allow Methods",
+          "type": "array"
+        },
+        "allow_headers": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Allow Headers",
+          "type": "array"
+        },
+        "expose_headers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Expose Headers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "allow_methods",
+        "allow_headers"
+      ],
+      "title": "CorsRules",
+      "type": "object"
+    },
+    "DefaultError": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "minLength": 1,
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "DefaultError",
+      "type": "object"
+    },
+    "ErrorRules": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "minProperties": 1,
+          "title": "Status",
+          "type": "object"
+        },
+        "unlisted_status_code": {
+          "minLength": 1,
+          "title": "Unlisted Status Code",
+          "type": "string"
+        },
+        "validation": {
+          "$ref": "#/$defs/DefaultError"
+        },
+        "internal": {
+          "$ref": "#/$defs/DefaultError"
+        }
+      },
+      "required": [
+        "status",
+        "unlisted_status_code",
+        "validation",
+        "internal"
+      ],
+      "title": "ErrorRules",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "version": {
+      "minLength": 1,
+      "title": "Version",
+      "type": "string"
+    },
+    "errors": {
+      "$ref": "#/$defs/ErrorRules"
+    },
+    "cors": {
+      "$ref": "#/$defs/CorsRules"
+    },
+    "gzip_minimum_bytes": {
+      "minimum": 0,
+      "title": "Gzip Minimum Bytes",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "title",
+    "version",
+    "errors",
+    "cors",
+    "gzip_minimum_bytes"
+  ],
+  "title": "HttpRules",
+  "type": "object",
+  "$comment": "GENERATED from the Pydantic schema by tools/export_rule_schemas.py for http.yml."
+}

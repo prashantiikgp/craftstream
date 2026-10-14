@@ -1,0 +1,103 @@
+{
+  "$defs": {
+    "LocalLayout": {
+      "additionalProperties": false,
+      "properties": {
+        "upload_path": {
+          "title": "Upload Path",
+          "type": "string"
+        },
+        "sample_stream": {
+          "title": "Sample Stream",
+          "type": "string"
+        }
+      },
+      "required": [
+        "upload_path",
+        "sample_stream"
+      ],
+      "title": "LocalLayout",
+      "type": "object"
+    },
+    "ThumbnailName": {
+      "additionalProperties": false,
+      "properties": {
+        "prefix": {
+          "minLength": 1,
+          "title": "Prefix",
+          "type": "string"
+        },
+        "suffix": {
+          "minLength": 1,
+          "title": "Suffix",
+          "type": "string"
+        }
+      },
+      "required": [
+        "prefix",
+        "suffix"
+      ],
+      "title": "ThumbnailName",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "raw_object": {
+      "title": "Raw Object",
+      "type": "string"
+    },
+    "raw_object_pattern": {
+      "title": "Raw Object Pattern",
+      "type": "string"
+    },
+    "hls_prefix": {
+      "title": "Hls Prefix",
+      "type": "string"
+    },
+    "manifest": {
+      "minLength": 1,
+      "title": "Manifest",
+      "type": "string"
+    },
+    "thumbnail": {
+      "$ref": "#/$defs/ThumbnailName"
+    },
+    "object_url": {
+      "title": "Object Url",
+      "type": "string"
+    },
+    "gcs_uri": {
+      "title": "Gcs Uri",
+      "type": "string"
+    },
+    "hls_cache_control": {
+      "minLength": 1,
+      "title": "Hls Cache Control",
+      "type": "string"
+    },
+    "job_label": {
+      "minLength": 1,
+      "title": "Job Label",
+      "type": "string"
+    },
+    "local": {
+      "$ref": "#/$defs/LocalLayout"
+    }
+  },
+  "required": [
+    "raw_object",
+    "raw_object_pattern",
+    "hls_prefix",
+    "manifest",
+    "thumbnail",
+    "object_url",
+    "gcs_uri",
+    "hls_cache_control",
+    "job_label",
+    "local"
+  ],
+  "title": "StorageLayoutRules",
+  "type": "object",
+  "$comment": "GENERATED from the Pydantic schema by tools/export_rule_schemas.py for storage_layout.yml."
+}

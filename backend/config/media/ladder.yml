@@ -54,3 +54,47 @@ thumbnail:
 
 # Hard budget the test suite enforces for the lowest rung.
 max_lowest_rung_total_kbps: 50
+
+# How the ladder is encoded. The Transcoder job (GCP) and the FFmpeg command (tools/local_hls.py) are built from
+# the same rungs, so a local measurement predicts what GCP produces.
+encoder:
+  # H.264 profile per rung: the first entry whose max_height fits. Baseline for small rungs (cheapest to decode
+  # on old phones); the last entry has no max_height and catches the rest.
+  h264_profiles:
+    - {max_height: 240, profile: baseline}
+    - {profile: main}
+
+  transcoder:                   # Transcoder API JobConfig
+    rate_control: vbr
+    # fMP4 segments: ~14 kbps less container overhead than TS at these tiny bitrates
+    # (measured: 56.7 -> 42.0 kbps on the 144p rung). fMP4 mux streams hold one stream each.
+    container: fmp4
+    manifest_type: HLS
+    audio_codecs:               # rung audio_profile -> Transcoder codec
+      he-aac: aac-he
+      aac-lc: aac
+    # The API defaults to a stereo layout and rejects a channel count that doesn't match it.
+    channel_layouts:
+      1: [fc]
+      2: [fl, fr]
+    sprite_grid: {columns: 1, rows: 1, count: 1}   # one poster image (see storage_layout.yml thumbnail)
+    input_key: input0           # the raw upload
+    edit_atom_key: atom0        # the editList entry that caps the duration
+
+  ffmpeg:                       # local FFmpeg, one rung per run
+    video_codec: libx264
+    preset: veryslow            # slowest = smallest file for the bitrate; fine for local measurements
+    audio_codec: aac            # AAC-LC, also the fallback for HE-AAC rungs without libfdk_aac
+    he_aac: {codec: libfdk_aac, profile: aac_he}
+    maxrate_factor: 1.2         # peak video bitrate = video_kbps x this
+    bufsize_factor: 2           # rate-control buffer = video_kbps x this
+    log_level: error
+    playlist_type: vod
+    segment_type: fmp4
+    playlist: index.m3u8        # per-rung playlist, also what the master playlist links to
+    init_segment: init.mp4
+    segment_pattern: seg_%04d.m4s
+
+  master_playlist:              # written by tools/local_hls.py (the Transcoder writes its own)
+    hls_version: 7
+    bandwidth_headroom: 1.1     # BANDWIDTH = total kbps x this, so players don't pick a rung too eagerly

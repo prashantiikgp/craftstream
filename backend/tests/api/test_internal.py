@@ -159,3 +159,22 @@ def test_an_unreadable_upload_fails_without_a_job(settings: Settings, container:
     pid = _create(client)
     assert client.post("/internal/media/uploaded", json={"bucket": "b", "name": f"raw/{pid}/source"}).status_code == 204
     assert _status(client, pid)["video_status"] == "failed" and not transcoder.jobs
+
+
+def test_only_object_finalized_events_start_a_transcode(gcp_like):
+    pid = _create(gcp_like)
+    body = {"bucket": "b", "name": f"raw/{pid}/source"}
+    deleted = {"ce-type": "google.cloud.storage.object.v1.deleted"}
+    assert gcp_like.post("/internal/media/uploaded", json=body, headers=deleted).status_code == 204
+    assert _status(gcp_like, pid)["video_status"] == "awaiting_upload"
+    finalized = {"ce-type": "google.cloud.storage.object.v1.finalized"}
+    assert gcp_like.post("/internal/media/uploaded", json=body, headers=finalized).status_code == 204
+    assert _status(gcp_like, pid)["video_status"] == "processing"
+
+
+def test_a_redelivered_result_after_ready_changes_nothing(gcp_like):
+    pid = _create(gcp_like)
+    gcp_like.post("/internal/media/uploaded", json={"bucket": "b", "name": f"raw/{pid}/source"})
+    _notify(gcp_like, f"jobs/{pid}", "SUCCEEDED")
+    assert _notify(gcp_like, f"jobs/{pid}", "FAILED").status_code == 204
+    assert _status(gcp_like, pid)["video_status"] == "ready"

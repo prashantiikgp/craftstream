@@ -3,25 +3,12 @@
 The app uploads the raw video straight to Cloud Storage (not through our API), using a
 *resumable upload session*: if the network drops, the app asks GCS how many bytes arrived
 and continues from there. This is what makes large files on shaky networks possible.
+Object names, URLs and cache headers come from media/storage_layout.yml (storage_layout_engine).
 """
 
 from __future__ import annotations
 
-import re
-
-# HLS output never changes once written, so players and Google's edge may cache it for a year.
-IMMUTABLE = "public, max-age=31536000, immutable"
-_RAW_OBJECT = re.compile(r"^raw/(?P<product_id>[A-Za-z0-9_-]+)/source$")
-
-
-def raw_object_name(product_id: str) -> str:
-    return f"raw/{product_id}/source"
-
-
-def product_id_from_object(object_name: str) -> str | None:
-    """`raw/<id>/source` -> `<id>`; anything else (e.g. other uploads) -> None."""
-    m = _RAW_OBJECT.match(object_name)
-    return m["product_id"] if m else None
+from app.domain.media import storage_layout_engine as layout
 
 
 class GcsStorage:
@@ -31,7 +18,7 @@ class GcsStorage:
     def upload_url(self, product_id: str, origin: str | None, api_base_url: str) -> str:
         from google.cloud import storage  # imported lazily so local mode needs no GCP libs
 
-        blob = storage.Client(project=self._project).bucket(self._upload_bucket).blob(raw_object_name(product_id))
+        blob = storage.Client(project=self._project).bucket(self._upload_bucket).blob(layout.raw_object(product_id))
         # `origin` is required for browser (Flutter web) uploads so GCS sends CORS headers.
         return blob.create_resumable_upload_session(origin=origin)
 
@@ -44,22 +31,22 @@ class GcsStorage:
 
         creds, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/devstorage.read_only"])
         creds.refresh(Request())
-        url = f"https://storage.googleapis.com/{self._upload_bucket}/{raw_object_name(product_id)}"
+        url = layout.object_url(self._upload_bucket, layout.raw_object(product_id))
         return probe_duration(url, headers=f"Authorization: Bearer {creds.token}\r\n")
 
     def hls_url(self, product_id: str) -> str:
-        return f"https://storage.googleapis.com/{self._media_bucket}/hls/{product_id}/manifest.m3u8"
+        return layout.object_url(self._media_bucket, layout.manifest_object(product_id))
 
     def finalize_media(self, product_id: str) -> None:
         """Mark the finished HLS files as cacheable (the Transcoder writes them with default headers)."""
         from google.cloud import storage
 
+        cache_control = layout.hls_cache_control()
         bucket = storage.Client(project=self._project).bucket(self._media_bucket)
-        for blob in bucket.list_blobs(prefix=f"hls/{product_id}/"):
-            if blob.cache_control != IMMUTABLE:
-                blob.cache_control = IMMUTABLE
+        for blob in bucket.list_blobs(prefix=layout.hls_prefix(product_id)):
+            if blob.cache_control != cache_control:
+                blob.cache_control = cache_control
                 blob.patch()
 
     def thumbnail_url(self, product_id: str) -> str | None:
-        # The Transcoder sprite sheet with totalCount=1 writes one image named <prefix>0000000000.jpeg.
-        return f"https://storage.googleapis.com/{self._media_bucket}/hls/{product_id}/thumb0000000000.jpeg"
+        return layout.object_url(self._media_bucket, layout.thumbnail_object(product_id))

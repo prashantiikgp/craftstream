@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Request, Response
 
 from app.api.deps import CatalogDep, ContainerDep, MediaDep
+from app.domain.media import storage_layout_engine
 from app.generated.models import UploadPolicy
 
 router = APIRouter()
@@ -16,7 +17,7 @@ def get_upload_policy(media: MediaDep) -> UploadPolicy:
     return media.upload_policy()
 
 
-@local_router.put("/local-upload/{product_id}", status_code=200)
+@local_router.put(storage_layout_engine.local_upload_route(), status_code=200)
 async def local_upload(product_id: str, request: Request, c: ContainerDep, catalog: CatalogDep,
                        media: MediaDep) -> Response:
     """Fake GCS resumable target (see infra/local/local_storage.py). Only mounted in local mode."""

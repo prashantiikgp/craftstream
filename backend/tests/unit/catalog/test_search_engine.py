@@ -4,7 +4,7 @@ from app.domain.catalog import search_engine as se
 from app.domain.catalog.search_loader import load_search_rules
 
 MUG = {"title": "Hand-thrown Clay Mug", "description": "Glazed by hand, fired twice.",
-       "tags": ["Pottery", "kitchen ware"], "artisan_name": "Meera"}
+       "tags": ["pottery", "kitchen ware"], "artisan_name": "Meera"}
 
 
 def test_words_drop_stopwords_short_words_and_duplicates():
@@ -36,9 +36,9 @@ def test_query_terms_are_capped():
     assert len(se.query_terms(" ".join(f"word{i}" for i in range(20)))) == rules.max_query_terms
 
 
-def test_tag_terms_are_normalised():
-    assert se.tag_term("  Kitchen   Ware ") == "tag:kitchen ware"
-    assert se.tag_term("   ") is None
+def test_tag_terms():  # tags come in cleaned (listing_engine.normalize_tag)
+    assert se.tag_term("kitchen ware") == "tag:kitchen ware"
+    assert se.tag_term("") is None and se.tag_term(None) is None
 
 
 def test_most_selective_prefers_tag_then_longest_word():

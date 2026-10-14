@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
-# Enable the APIs CraftStream uses. Safe to re-run.
+# Enable the APIs CraftStream uses (resources.yml `apis`). Safe to re-run.
 source "$(dirname "$0")/_common.sh"
 
 step "Enabling APIs in $PROJECT_ID"
-gc services enable \
-  run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com \
-  storage.googleapis.com firestore.googleapis.com transcoder.googleapis.com \
-  eventarc.googleapis.com pubsub.googleapis.com iam.googleapis.com
+# shellcheck disable=SC2046  # one argument per API
+gc services enable $(res get apis)
 
 step "Checking the Transcoder API is offered in $REGION"
 gc transcoder jobs list --location "$REGION" --limit 1 >/dev/null || {

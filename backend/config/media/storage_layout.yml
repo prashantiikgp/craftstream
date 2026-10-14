@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=../.schemas/media/storage_layout.schema.json
+# Where video files live in Cloud Storage and what their URLs look like.
+# Used by infra/gcp (GCS and the Transcoder), infra/local and ladder_engine. Bucket names are per environment
+# and come from settings (UPLOAD_BUCKET, MEDIA_BUCKET); infra/gcp/resources.yml must agree with this file.
+
+# The raw upload: one object per product in the uploads bucket. The upload-finalized event fires for every
+# object in the bucket, so `raw_object_pattern` picks ours out and must match `raw_object` for any product id.
+raw_object: "raw/{product_id}/source"
+raw_object_pattern: "^raw/(?P<product_id>[A-Za-z0-9_-]+)/source$"
+
+# HLS output: everything for one product sits under this prefix in the media bucket.
+hls_prefix: "hls/{product_id}/"
+manifest: manifest.m3u8               # the master playlist the player opens
+# The poster: a Transcoder sprite sheet with one image is written as <prefix><suffix>.
+thumbnail:
+  prefix: thumb
+  suffix: "0000000000.jpeg"
+
+# URLs. The media bucket is public-read; the uploads bucket is read with our own token.
+object_url: "https://storage.googleapis.com/{bucket}/{object}"
+gcs_uri: "gs://{bucket}/{object}"     # how the Transcoder names its input and output
+# HLS output never changes once written, so players and Google's edge may cache it for a year.
+hls_cache_control: "public, max-age=31536000, immutable"
+# Transcoder job label that holds the product id (the job result on Pub/Sub only names the job).
+job_label: product_id
+
+# Local mode (CRAFTSTREAM_MODE=local): no buckets, no transcoding.
+local:
+  upload_path: "/local-upload/{product_id}"   # the fake resumable upload target served by the API
+  sample_stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"   # public stream every product plays

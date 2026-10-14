@@ -1,0 +1,82 @@
+{
+  "$defs": {
+    "Collections": {
+      "additionalProperties": false,
+      "properties": {
+        "products": {
+          "minLength": 1,
+          "title": "Products",
+          "type": "string"
+        },
+        "orders": {
+          "minLength": 1,
+          "title": "Orders",
+          "type": "string"
+        }
+      },
+      "required": [
+        "products",
+        "orders"
+      ],
+      "title": "Collections",
+      "type": "object"
+    },
+    "TagRules": {
+      "additionalProperties": false,
+      "properties": {
+        "lowercase": {
+          "title": "Lowercase",
+          "type": "boolean"
+        },
+        "collapse_spaces": {
+          "title": "Collapse Spaces",
+          "type": "boolean"
+        },
+        "order": {
+          "enum": [
+            "most_used",
+            "alphabetical"
+          ],
+          "title": "Order",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lowercase",
+        "collapse_spaces",
+        "order"
+      ],
+      "title": "TagRules",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "id_length": {
+      "maximum": 32,
+      "minimum": 8,
+      "title": "Id Length",
+      "type": "integer"
+    },
+    "tags": {
+      "$ref": "#/$defs/TagRules"
+    },
+    "search_candidate_limit": {
+      "exclusiveMinimum": 0,
+      "title": "Search Candidate Limit",
+      "type": "integer"
+    },
+    "collections": {
+      "$ref": "#/$defs/Collections"
+    }
+  },
+  "required": [
+    "id_length",
+    "tags",
+    "search_candidate_limit",
+    "collections"
+  ],
+  "title": "ListingRules",
+  "type": "object",
+  "$comment": "GENERATED from the Pydantic schema by tools/export_rule_schemas.py for listing.yml."
+}

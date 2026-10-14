@@ -19,6 +19,7 @@ def test_generated_code_matches_models():
     api = cg.load_api(models)
     expected = {
         "backend/app/generated/models.py": cg.build_python(models),
+        "backend/app/generated/api.py": cg.build_python_api(api),
         "frontend/lib/data/generated/models.dart": cg.build_dart_models(models),
         "frontend/lib/data/generated/api_client.dart": cg.build_dart_client(api, models),
         "frontend/lib/data/generated/limits.dart": cg.build_dart_limits(models),
