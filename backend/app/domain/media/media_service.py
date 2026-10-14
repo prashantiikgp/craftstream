@@ -11,10 +11,9 @@ from typing import Protocol
 
 from app.core.errors import UnreadableVideo
 from app.db.repositories.product_repo import ProductRepo
-from app.domain.media import upload_policy_engine
+from app.domain.media import storage_layout_engine, upload_policy_engine
 from app.domain.media import video_lifecycle_engine as lifecycle
 from app.generated.models import Product, UploadPolicy, UploadTicket
-from app.infra.gcp.gcs import product_id_from_object
 from app.schemas.media.video_lifecycle_schema import Event
 
 log = logging.getLogger(__name__)
@@ -55,7 +54,7 @@ class MediaService:
 
     def on_object_finalized(self, object_name: str) -> None:
         """A file landed in the uploads bucket. Only raw-video objects (storage_layout.yml) are ours."""
-        product_id = product_id_from_object(object_name)
+        product_id = storage_layout_engine.product_id_from_object(object_name)
         if product_id:
             self.on_uploaded(product_id)
 

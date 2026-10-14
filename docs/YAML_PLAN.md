@@ -257,7 +257,7 @@ and the light and dark theme B match the canvas.
   - Transcoder terminal and success states;
   - the listable and orderable state.
   - This replaces the strings in `product_repo`, `media_service` and `order_rules_engine`.
-- [ ] `config/media/storage_layout.yml`: raw path template and regex, HLS prefix, manifest and thumbnail
+- [x] `config/media/storage_layout.yml`: raw path template and regex, HLS prefix, manifest and thumbnail
       names, public base URL, cache-control, Transcoder label key, local sample stream.
 - [ ] `config/media/ladder.yml` gains an `encoder:` block:
   - Transcoder: codec key, rate control, container, H.264 profile threshold, sprite grid;

@@ -4,14 +4,16 @@ Two outputs from the same rules, so local measurements predict what GCP produces
   build_job_config(...)  -> Transcoder API JobConfig (submitted by app/infra/gcp/transcoder.py)
   ffmpeg_args(...)       -> FFmpeg command for one rung (run by tools/local_hls.py)
 
-GCP input:  gs://$UPLOAD_BUCKET/raw/<product_id>/source
-GCP output: gs://$MEDIA_BUCKET/hls/<product_id>/manifest.m3u8 (+ one playlist and chunks per rung)
+GCP input and output object names, the manifest name and the thumbnail prefix come from
+media/storage_layout.yml (storage_layout_engine).
 """
 
 from __future__ import annotations
 
+from app.domain.media import storage_layout_engine as layout
 from app.domain.media.ladder_loader import load_ladder_rules
 from app.schemas.media.ladder_schema import LadderRules, Rung
+from app.schemas.media.storage_layout_schema import StorageLayoutRules
 
 
 def sorted_rungs(rules: LadderRules | None = None) -> list[Rung]:
@@ -31,6 +33,7 @@ def build_job_config(
     input_uri: str | None = None,
     max_duration_seconds: int | None = None,
     pubsub_topic: str | None = None,
+    storage: StorageLayoutRules | None = None,
 ) -> dict:
     """Return the Transcoder API JobConfig as a plain dict (easy to inspect and test).
 
@@ -80,9 +83,10 @@ def build_job_config(
     config: dict = {
         "elementaryStreams": elementary,
         "muxStreams": mux,
-        "manifests": [{"fileName": "manifest.m3u8", "type": "HLS", "muxStreams": [m["key"] for m in mux]}],
+        "manifests": [{"fileName": layout.manifest_name(storage), "type": "HLS",
+                       "muxStreams": [m["key"] for m in mux]}],
         "spriteSheets": [{
-            "filePrefix": "thumb",
+            "filePrefix": layout.thumbnail_prefix(storage),
             "spriteWidthPixels": rules.thumbnail.width,
             "spriteHeightPixels": rules.thumbnail.height,
             "quality": rules.thumbnail.jpeg_quality,
@@ -90,7 +94,7 @@ def build_job_config(
         }],
     }
     if pubsub_topic:
-        config["pubsubDestination"] = {"topic": pubsub_topic}  # job result -> /internal/media/transcoded
+        config["pubsubDestination"] = {"topic": pubsub_topic}  # the job result goes to the API via Pub/Sub
     if input_uri:
         config["inputs"] = [{"key": "input0", "uri": input_uri}]
     if max_duration_seconds is not None:

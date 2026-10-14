@@ -12,7 +12,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-SAMPLE_HLS = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"  # public sample stream
+from app.domain.media import storage_layout_engine as layout
 
 _CONTENT_RANGE = re.compile(r"bytes (?:(?P<start>\d+)-(?P<end>\d+)|\*)/(?P<total>\d+|\*)")
 
@@ -32,13 +32,13 @@ class LocalStorage:
         self._received: dict[str, int] = {}
 
     def upload_url(self, product_id: str, origin: str | None, api_base_url: str) -> str:
-        return f"{api_base_url.rstrip('/')}/local-upload/{product_id}"
+        return api_base_url.rstrip("/") + layout.local_upload_path(product_id)
 
     def duration_seconds(self, product_id: str) -> float | None:
         return None  # bytes are counted, not kept, so the length is unknown
 
     def hls_url(self, product_id: str) -> str:
-        return SAMPLE_HLS
+        return layout.local_sample_stream()  # one public sample stream for every product
 
     def thumbnail_url(self, product_id: str) -> str | None:
         return None
