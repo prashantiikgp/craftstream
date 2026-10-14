@@ -341,7 +341,8 @@ Widget _topBar(BuildContext context, BrickNode n) {
 Widget _crumbs(BuildContext context, BrickStyle s, List<BrickNode> crumbs, RoleSchema? role) {
   final scope = BrickScope.of(context);
   final t = context.tokens;
-  final shown = crumbs.where(scope.shows).toList();
+  // A crumb whose data has not loaded yet (a product title) waits rather than leaving a gap in the trail.
+  final shown = crumbs.where((c) => scope.shows(c) && crumbText(context, c).isNotEmpty).toList();
   final link = role == null ? t.tone('brand').ink : t.accent(role.accent).ink;
   return Row(
     mainAxisSize: MainAxisSize.min,
