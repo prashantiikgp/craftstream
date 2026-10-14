@@ -1,0 +1,99 @@
+{
+  "$defs": {
+    "Transition": {
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "enum": [
+            "upload_unreadable",
+            "transcode_started",
+            "transcode_succeeded",
+            "transcode_failed"
+          ],
+          "title": "Event",
+          "type": "string"
+        },
+        "from": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "From",
+          "type": "array"
+        },
+        "to": {
+          "title": "To",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event",
+        "from",
+        "to"
+      ],
+      "title": "Transition",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "states": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "States",
+      "type": "array"
+    },
+    "initial": {
+      "title": "Initial",
+      "type": "string"
+    },
+    "transitions": {
+      "items": {
+        "$ref": "#/$defs/Transition"
+      },
+      "minItems": 1,
+      "title": "Transitions",
+      "type": "array"
+    },
+    "transcoder_results": {
+      "additionalProperties": {
+        "enum": [
+          "upload_unreadable",
+          "transcode_started",
+          "transcode_succeeded",
+          "transcode_failed"
+        ],
+        "type": "string"
+      },
+      "minProperties": 1,
+      "title": "Transcoder Results",
+      "type": "object"
+    },
+    "listable": {
+      "title": "Listable",
+      "type": "string"
+    },
+    "orderable": {
+      "title": "Orderable",
+      "type": "string"
+    },
+    "playable": {
+      "title": "Playable",
+      "type": "string"
+    }
+  },
+  "required": [
+    "states",
+    "initial",
+    "transitions",
+    "transcoder_results",
+    "listable",
+    "orderable",
+    "playable"
+  ],
+  "title": "VideoLifecycleRules",
+  "type": "object",
+  "$comment": "GENERATED from the Pydantic schema by tools/export_rule_schemas.py for video_lifecycle.yml."
+}

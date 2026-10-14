@@ -6,10 +6,10 @@ from app.schemas.orders.order_rules_schema import TotalRounding
 
 
 def test_only_ready_products_can_be_ordered():
-    assert ore.can_order("ready")
-    assert not ore.can_order("processing")
+    assert ore.can_order(video_orderable=True)
+    assert not ore.can_order(video_orderable=False)
     relaxed = load_order_rules().model_copy(update={"require_ready_video": False})
-    assert ore.can_order("processing", relaxed)
+    assert ore.can_order(video_orderable=False, rules=relaxed)
 
 
 def test_total_avoids_float_errors():

@@ -3,10 +3,8 @@
 app/api/deps.py: {path: 1}
 app/api/routers/internal.py: {path: 1}
 app/db/repositories/order_repo.py: {collection: 1}
-app/db/repositories/product_repo.py: {status: 6, tunable: 1, collection: 1}
+app/db/repositories/product_repo.py: {tunable: 1, collection: 1}
 app/domain/media/ladder_engine.py: {path: 6}
-app/domain/media/media_service.py: {path: 1, status: 8}
-app/domain/orders/order_rules_engine.py: {status: 1}
 app/infra/gcp/auth.py: {path: 1}
 app/infra/gcp/gcs.py: {path: 7}
 app/infra/gcp/transcoder.py: {path: 2}

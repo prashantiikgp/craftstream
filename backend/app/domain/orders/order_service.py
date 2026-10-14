@@ -11,6 +11,7 @@ from app.core.errors import Conflict, NotFound
 from app.core.ids import new_id, now
 from app.db.repositories.order_repo import OrderRepo
 from app.db.repositories.product_repo import ProductRepo
+from app.domain.media import video_lifecycle_engine as lifecycle
 from app.domain.orders import order_rules_engine
 from app.generated.models import Order, OrderCreate
 
@@ -25,7 +26,7 @@ class OrderService:
         product = self._products.get(body.product_id)
         if product is None:
             raise NotFound(f"Product {body.product_id} not found")
-        if not order_rules_engine.can_order(product.video_status):
+        if not order_rules_engine.can_order(lifecycle.is_orderable(product.video_status)):
             raise Conflict("This product is not available to order yet.", code="product_not_ready")
         order = Order(id=new_id(), created_at=now(), total=order_rules_engine.total(product.price, body.quantity),
                       currency=product.currency, **body.model_dump())

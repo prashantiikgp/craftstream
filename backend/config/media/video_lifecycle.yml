@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=../.schemas/media/video_lifecycle.schema.json
+# The life of a product's process video: its states, the events that move it on, and what each state allows.
+# Used by media_service (upload and transcode events), catalog search and order rules.
+# `states` must be exactly the `video_status` values in models/product.yml (a test checks).
+
+states: [awaiting_upload, processing, ready, failed]
+initial: awaiting_upload       # a new listing waits for its video
+
+# What moves a video on. An event in any state not listed under `from` is ignored, so a redelivered
+# upload or transcode event is harmless.
+transitions:
+  - event: upload_unreadable      # the upload is not a video we can measure
+    from: [awaiting_upload]
+    to: failed
+  - event: transcode_started      # the upload landed and a Transcoder job was submitted
+    from: [awaiting_upload]
+    to: processing
+  - event: transcode_succeeded
+    from: [processing]
+    to: ready
+  - event: transcode_failed
+    from: [processing]
+    to: failed
+
+# Transcoder job states (Job.state in the Transcoder API) that end a job, and the event each one fires.
+# Other job states (PENDING, RUNNING) change nothing.
+transcoder_results:
+  SUCCEEDED: transcode_succeeded
+  FAILED: transcode_failed
+
+listable: ready     # the only state search and tags show (also the Firestore query and its indexes)
+orderable: ready    # buyers may order in this state (when order_rules.yml requires a ready video)
+playable: ready     # the HLS stream exists: the product gets its hls_url and thumbnail_url

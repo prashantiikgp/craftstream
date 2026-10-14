@@ -252,7 +252,7 @@ and the light and dark theme B match the canvas.
       signatures, and the YAML maps path and method to a handler name.
 
 ### 2.2 Domain rules
-- [ ] `config/media/video_lifecycle.yml`:
+- [x] `config/media/video_lifecycle.yml`:
   - states (from `models/product.yml`), initial state, allowed transitions and the events behind them;
   - Transcoder terminal and success states;
   - the listable and orderable state.

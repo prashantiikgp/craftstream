@@ -2,22 +2,21 @@
 
 `InMemoryProductRepo` is used locally and in tests; `FirestoreProductRepo` is the GCP version.
 Both store the search `keywords` (from catalog search_engine) and can narrow a listing to one keyword.
+Which video status is listed is a rule (media/video_lifecycle.yml); the catalog passes it in.
 """
 
 from __future__ import annotations
 
-from typing import Literal, Protocol
+from typing import Protocol
 
 from app.generated.models import Product
-
-VideoStatus = Literal["awaiting_upload", "processing", "ready", "failed"]
 
 
 class ProductRepo(Protocol):
     def save(self, product: Product, keywords: list[str]) -> None: ...
     def get(self, product_id: str) -> Product | None: ...
-    def list_ready(self, contains: str | None = None) -> list[Product]: ...
-    def update_video(self, product_id: str, status: VideoStatus, hls_url: str | None = None,
+    def list_with_status(self, status: str, contains: str | None = None) -> list[Product]: ...
+    def update_video(self, product_id: str, status: str, hls_url: str | None = None,
                      thumbnail_url: str | None = None) -> None: ...
 
 
@@ -34,12 +33,12 @@ class InMemoryProductRepo:
         p = self._products.get(product_id)
         return p.model_copy(deep=True) if p else None
 
-    def list_ready(self, contains: str | None = None) -> list[Product]:
-        ready = [p for p in self._products.values()
-                 if p.video_status == "ready" and (contains is None or contains in self.keywords.get(p.id, ()))]
-        return [p.model_copy(deep=True) for p in sorted(ready, key=lambda p: (p.created_at, p.id), reverse=True)]
+    def list_with_status(self, status: str, contains: str | None = None) -> list[Product]:
+        found = [p for p in self._products.values()
+                 if p.video_status == status and (contains is None or contains in self.keywords.get(p.id, ()))]
+        return [p.model_copy(deep=True) for p in sorted(found, key=lambda p: (p.created_at, p.id), reverse=True)]
 
-    def update_video(self, product_id: str, status: VideoStatus, hls_url: str | None = None,
+    def update_video(self, product_id: str, status: str, hls_url: str | None = None,
                      thumbnail_url: str | None = None) -> None:
         p = self._products[product_id]
         self._products[product_id] = p.model_copy(
@@ -64,19 +63,19 @@ class FirestoreProductRepo:
         doc = self._col.document(product_id).get()
         return _to_product(doc.to_dict()) if doc.exists else None
 
-    def list_ready(self, contains: str | None = None) -> list[Product]:
+    def list_with_status(self, status: str, contains: str | None = None) -> list[Product]:
         from google.cloud import firestore
         from google.cloud.firestore_v1.base_query import FieldFilter
 
         # Needs composite indexes: (video_status, created_at desc) and (video_status, keywords array, created_at desc).
-        query = self._col.where(filter=FieldFilter("video_status", "==", "ready"))
+        query = self._col.where(filter=FieldFilter("video_status", "==", status))
         if contains is not None:
             query = query.where(filter=FieldFilter("keywords", "array_contains", contains))
         docs = (query.order_by("created_at", direction=firestore.Query.DESCENDING)
                 .limit(self.LIST_LIMIT).stream())
         return [_to_product(d.to_dict()) for d in docs]
 
-    def update_video(self, product_id: str, status: VideoStatus, hls_url: str | None = None,
+    def update_video(self, product_id: str, status: str, hls_url: str | None = None,
                      thumbnail_url: str | None = None) -> None:
         # Partial update: never overwrites the listing fields or keywords.
         self._col.document(product_id).update(

@@ -1,4 +1,5 @@
-"""Catalog: create listings, search ready products, list tags. Search rules come from search_engine."""
+"""Catalog: create listings, search listed products, list tags. Search rules come from search_engine;
+which video state is listed comes from the media video_lifecycle_engine."""
 
 from __future__ import annotations
 
@@ -9,6 +10,7 @@ from app.core.errors import NotFound
 from app.core.ids import new_id, now
 from app.db.repositories.product_repo import ProductRepo
 from app.domain.catalog import search_engine
+from app.domain.media import video_lifecycle_engine as lifecycle
 from app.generated.models import Product, ProductCreate, ProductPage, ProductSummary, TagList
 
 log = logging.getLogger(__name__)
@@ -28,7 +30,7 @@ class CatalogService:
     def create_listing(self, body: ProductCreate) -> Product:
         data = body.model_dump()
         data["tags"] = list(dict.fromkeys(search_engine.normalize_tag(t) for t in data["tags"] if t.strip()))
-        product = Product(id=new_id(), created_at=now(), **data)
+        product = Product(id=new_id(), created_at=now(), video_status=lifecycle.initial_state(), **data)
         self._products.save(product, keywords=_keywords(product))
         log.info("listing created", extra={"product_id": product.id})
         return product
@@ -46,7 +48,7 @@ class CatalogService:
             terms.append(tag_term)
 
         # The database narrows by one term; the engine checks the rest.
-        candidates = self._products.list_ready(contains=search_engine.most_selective(terms))
+        candidates = self._products.list_with_status(lifecycle.listable_state(), contains=search_engine.most_selective(terms))
         results = [p for p in candidates if search_engine.matches(_keywords(p), terms)]
 
         if cursor:
@@ -58,5 +60,5 @@ class CatalogService:
                            next_cursor=page[-1].id if len(results) > size else None)
 
     def tags(self) -> TagList:
-        counts = Counter(t for p in self._products.list_ready() for t in p.tags)
+        counts = Counter(t for p in self._products.list_with_status(lifecycle.listable_state()) for t in p.tags)
         return TagList(tags=[t for t, _ in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))])

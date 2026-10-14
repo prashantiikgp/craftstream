@@ -14,8 +14,9 @@ def _rules(rules: OrderRules | None) -> OrderRules:
     return rules or load_order_rules()
 
 
-def can_order(video_status: str, rules: OrderRules | None = None) -> bool:
-    return video_status == "ready" or not _rules(rules).require_ready_video
+def can_order(video_orderable: bool, rules: OrderRules | None = None) -> bool:
+    """`video_orderable`: the video is in the orderable state (media video_lifecycle_engine.is_orderable)."""
+    return video_orderable or not _rules(rules).require_ready_video
 
 
 def total(unit_price: float, quantity: int, rules: OrderRules | None = None) -> float:
