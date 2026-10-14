@@ -7,6 +7,7 @@ Status: **S0 + S1 done** (2026-10-13). Next: B1 (backend core) and F1 (Flutter s
 | **PLAN.md** (this file) | requirements, architecture rule, top-level layout, shared phases, timeline, risks, tooling |
 | [BACKEND_PLAN.md](BACKEND_PLAN.md) | server folders, rule files, API, GCP video pipeline, backend phases B1–B5 |
 | [FRONTEND_PLAN.md](FRONTEND_PLAN.md) | Flutter folders, rule files, screens, low-bandwidth player, uploader, frontend phases F1–F6 |
+| [YAML_PLAN.md](YAML_PLAN.md) | V2: everything YAML-driven (screens, bricks, routes, tokens, backend rules, infra) and theme B, phases 0–3; inventory in [YAML_INVENTORY.md](YAML_INVENTORY.md) |
 
 ---
 
