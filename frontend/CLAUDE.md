@@ -89,8 +89,14 @@ If any YAML fails to load, the app shows an error screen at startup. It never ru
 - Use the Linux Flutter SDK (`~/development/flutter`), never the Windows one under `/mnt/d`.
 - **Web:** `make web ENV=dev` (web-server on :8080), then open it in Windows Chrome.
 - **Android emulator:** use the same `env/dev.json`; `AppEnv.apiHostFor` maps `localhost` to `10.0.2.2` in dev.
+  WSL has no `/dev/kvm`, so the emulator runs on Windows: `/mnt/c/Users/<you>/AppData/Local/Android/Sdk/emulator/emulator.exe`
+  and `platform-tools/adb.exe` (the Windows adb, not a Linux one). Gotchas on this 8 GB machine: launch headless with
+  `-no-window -no-snapshot -no-audio -memory 1536`; a Linux `adb` server also bound to :5037 (mirrored networking) blocks
+  the Windows one, so kill it first; the Play Store image shows "Allow USB debugging?", which the emulator console can
+  answer without adb (`adb.exe emu screenrecord screenshot <dir>` to look, `adb.exe emu event mouse x y 0 1` / `... 0 0` to tap).
 - Schemas changed? `make flutter-gen` (json_serializable). Tests: `make flutter-test`.
 - **Throttled demo:** load the app first, then switch on the 45 kbps throttle. The hosted web shell is about 3.2 MB compressed (CanvasKit).
+- **Throttled Android:** not `-netspeed` (it runs far below its setting). Run `tools/throttle_proxy.py --kbps 45` and start the emulator with `-http-proxy http://127.0.0.1:8045`.
 
 ## Style
 

@@ -14,6 +14,13 @@ max_buffer_seconds: 30           # never fetch further ahead than this (saves da
 # Switching up: only move to a bigger rung once the measured bandwidth beats its bitrate by this factor.
 upswitch_safety_factor: 1.4
 
+# Android (ExoPlayer) has no "start level" setting: it picks the first rung from its own bandwidth guess (several
+# Mbps on Wi-Fi) and starves on a slow link. So the app hands it a copy of the master playlist with the lowest
+# rung only, and swaps in the full ladder once the buffer proves the link is fast: at least this many seconds
+# buffered ahead, reached within the first seconds of playback. A slow link never gets that far, so it never swaps.
+native_upswitch_when_buffered_seconds: 20
+native_upswitch_within_seconds: 60
+
 poster:
   show_until_first_frame: true   # keep the poster on screen until the first frame is decoded
   buffering_indicator_after_ms: 300

@@ -99,10 +99,16 @@ Same flow as video 3, on the Android emulator (phone, then a tablet AVD for a fe
 
 1. Build and install: `make apk ENV=prod` (output `frontend/build/app/outputs/flutter-apk/app-release.apk`), then
    `adb install -r <apk>`.
-2. Start the emulator **with the throttle**: `emulator -avd <name> -netspeed 45:45 -netdelay 300:300` (up:down in
-   kbps, delay in ms). To make the first screens and the upload faster, start at full speed, do the upload, then open
-   Extended controls → **Cellular** and set *Network type* to the slowest option, or restart with `-netspeed 45:45`
-   before the watch step.
+2. Start the throttle and the emulator. The emulator's own `-netspeed` shaper is unusable at these rates (at
+   45 kbps it delivered about 2 kbps and the catalog request timed out), so all of the emulator's traffic goes through
+   a capped proxy instead. It prints the measured kbps every 10 s, which is worth keeping on screen:
+   ```bash
+   python3 tools/throttle_proxy.py --kbps 45 --rtt-ms 300          # WSL or any terminal; listens on 127.0.0.1:8045
+   emulator -avd <name> -http-proxy http://127.0.0.1:8045 -no-snapshot
+   ```
+   Before recording, stop background downloads that would share the 45 kbps: Google's speech-voice download
+   (`adb shell pm disable-user --user 0 com.google.android.tts`) filled the link on a fresh Play Store image.
+   The 20 s test clip uploads in about 3.5 minutes at 45 kbps, so a short clip keeps the video short.
 3. Sell → New listing → pick a video from the device → upload (toggle airplane mode on and off mid-upload to show the
    resume) → wait for live.
 4. Buy → search + tag → product → play (rung pill shows 144p) → Buy → Order placed → Orders.

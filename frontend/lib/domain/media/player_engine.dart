@@ -27,6 +27,10 @@ class PlayerEngine {
       throw const PlayerRulesError('need 0 < min_buffer_to_start_seconds < max_buffer_seconds');
     }
     if (rules.upswitchSafetyFactor < 1) throw const PlayerRulesError('upswitch_safety_factor must be >= 1');
+    if (rules.nativeUpswitchWhenBufferedSeconds <= rules.minBufferToStartSeconds || rules.nativeUpswitchWithinSeconds <= 0) {
+      throw const PlayerRulesError(
+          'native_upswitch_when_buffered_seconds must exceed min_buffer_to_start_seconds and native_upswitch_within_seconds must be > 0');
+    }
     if (rules.autoplayInGrids) throw const PlayerRulesError('autoplay_in_grids must be false (grids show posters only)');
     final sample = Uri.tryParse(rules.sampleStreamUrl);
     if (sample == null || sample.scheme != 'https' || !sample.path.endsWith('.m3u8')) {
@@ -62,6 +66,12 @@ class PlayerEngine {
   /// Should the player step up to a rung of [rungBps] given the measured bandwidth?
   bool canUpswitch({required int measuredBps, required int rungBps}) =>
       measuredBps >= rungBps * rules.upswitchSafetyFactor;
+
+  /// Android: leave the lowest-rung-only playlist for the full ladder? Only when the buffer is well ahead early
+  /// in playback, which a link slower than the lowest rung can never manage (see player.yml).
+  bool shouldUpswitchNative({required Duration bufferedAhead, required Duration position}) =>
+      position <= _seconds(rules.nativeUpswitchWithinSeconds) &&
+      bufferedAhead >= _seconds(rules.nativeUpswitchWhenBufferedSeconds);
 
   static Duration _seconds(double s) => Duration(milliseconds: (s * 1000).round());
 }

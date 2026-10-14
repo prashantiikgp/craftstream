@@ -1,15 +1,17 @@
 /// Android (and any non-web build): video_player, which is ExoPlayer on Android.
 ///
-/// Starting low: video_player has no API for ExoPlayer's track selection, so the initial bitrate cannot be
-/// capped from Dart. ExoPlayer loads the first variant of the master playlist first, and our ladder lists the
-/// lowest rung first (backend ladder_engine), so playback starts on it. ExoPlayer then only steps up once it
-/// has 10 s buffered, which a sub-50 kbps link never builds.
+/// Starting low: video_player exposes none of ExoPlayer's track selection or bandwidth settings, and ExoPlayer
+/// picks its first rung from its own bandwidth guess (several Mbps on Wi-Fi), not from playlist order. So the
+/// session fetches the master playlist itself, hands ExoPlayer a `data:` copy that lists only the lowest rung
+/// (`lowestRungOnly`), and swaps in the real master once the buffer proves the link is fast
+/// (`PlayerEngine.shouldUpswitchNative`). On a slow link the swap never happens and playback stays on 144p.
 ///
-/// The rung overlay: ExoPlayer reports only the picture size, so we fetch the master playlist (a few hundred
-/// bytes) and look the bitrate up by height.
+/// The rung overlay: ExoPlayer reports only the picture size, so the bitrate is looked up by height in the
+/// master playlist already fetched.
 library;
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -20,44 +22,63 @@ import '../../domain/media/player_engine.dart';
 import 'master_playlist.dart';
 import 'playback.dart';
 
-Playback createPlayback(Uri stream, PlayerEngine rules) => NativePlayback(stream);
+Playback createPlayback(Uri stream, PlayerEngine rules) => NativePlayback(stream, rules);
 
 class NativePlayback implements Playback {
   final Uri stream;
-  final VideoPlayerController _c;
+  final PlayerEngine rules;
+  final ValueNotifier<VideoPlayerController?> _ctrl = ValueNotifier(null);
   final _state = ValueNotifier(const PlaybackState());
   List<Variant> _variants = const [];
   bool _disposed = false;
+  bool _fullLadder = false; // true once ExoPlayer has the real master (or the lowest-only copy was not needed)
+  bool _switching = false;
 
-  NativePlayback(this.stream)
-      : _c = VideoPlayerController.networkUrl(stream, formatHint: VideoFormat.hls);
+  NativePlayback(this.stream, this.rules);
 
   @override
   ValueListenable<PlaybackState> get state => _state;
 
+  VideoPlayerController? get _c => _ctrl.value;
+
   @override
   Future<void> start() async {
-    unawaited(_loadVariants());
-    _c.addListener(_onValue);
+    final first = await _startUri();
+    if (_disposed) return;
+    final c = VideoPlayerController.networkUrl(first, formatHint: VideoFormat.hls);
+    _ctrl.value = c;
+    c.addListener(_onValue);
     try {
-      await _c.initialize();
-      if (!_disposed) await _c.play();
+      await c.initialize();
+      if (!_disposed) await c.play();
     } catch (_) {
       _set(_state.value.copyWith(phase: PlaybackPhase.error, buffering: false));
     }
   }
 
-  Future<void> _loadVariants() async {
+  /// The lowest-rung-only copy of the master playlist as a `data:` URI, or the stream itself when the master
+  /// cannot be fetched or has a single rung (then ExoPlayer has nothing to get wrong).
+  Future<Uri> _startUri() async {
     try {
       final res = await http.get(stream).timeout(const Duration(seconds: 20));
-      if (res.statusCode == 200) _variants = parseMasterPlaylist(res.body);
+      if (res.statusCode == 200) {
+        _variants = parseMasterPlaylist(res.body);
+        final lowest = lowestRungOnly(res.body, stream);
+        if (lowest != null) {
+          return Uri.dataFromString(lowest, mimeType: 'application/vnd.apple.mpegurl', encoding: utf8, base64: true);
+        }
+      }
     } catch (_) {
-      // The overlay then shows the height alone.
+      // Fall through: the overlay then shows the height alone.
     }
+    _fullLadder = true;
+    return stream;
   }
 
   void _onValue() {
-    final v = _c.value;
+    final c = _c;
+    if (c == null) return;
+    final v = c.value;
     if (v.hasError) {
       _set(_state.value.copyWith(phase: PlaybackPhase.error, buffering: false));
       return;
@@ -79,6 +100,46 @@ class NativePlayback implements Playback {
       duration: v.duration,
       rung: height > 0 ? Rung(height: variant?.height ?? height, bitrateBps: variant?.bandwidthBps ?? 0) : null,
     ));
+    if (!_fullLadder && !_switching && v.isInitialized && v.isPlaying) {
+      final ahead = bufferedAhead(v);
+      if (rules.shouldUpswitchNative(bufferedAhead: ahead, position: v.position)) unawaited(_upswitch(c));
+    }
+  }
+
+  /// How far the buffer reaches past the play position.
+  static Duration bufferedAhead(VideoPlayerValue v) {
+    var end = Duration.zero;
+    for (final r in v.buffered) {
+      if (r.end > end) end = r.end;
+    }
+    return end > v.position ? end - v.position : Duration.zero;
+  }
+
+  /// The link is fast: hand ExoPlayer the real master so it can climb the ladder. ExoPlayer's bandwidth meter is
+  /// process-wide, so the new session already knows the measured throughput and picks a fitting rung. The old
+  /// session keeps playing until the new one is ready; on any failure playback simply stays on the lowest rung.
+  Future<void> _upswitch(VideoPlayerController old) async {
+    _switching = true;
+    final next = VideoPlayerController.networkUrl(stream, formatHint: VideoFormat.hls);
+    try {
+      await next.initialize();
+      await next.seekTo(old.value.position);
+      if (_disposed) {
+        await next.dispose();
+        return;
+      }
+      old.removeListener(_onValue);
+      await old.pause();
+      next.addListener(_onValue);
+      _ctrl.value = next;
+      await next.play();
+      await old.dispose();
+    } catch (_) {
+      await next.dispose();
+    } finally {
+      _fullLadder = true;
+      _switching = false;
+    }
   }
 
   void _set(PlaybackState s) {
@@ -87,29 +148,37 @@ class NativePlayback implements Playback {
 
   @override
   Future<void> play() async {
-    if (_state.value.phase == PlaybackPhase.ended) await _c.seekTo(Duration.zero);
-    await _c.play();
+    final c = _c;
+    if (c == null) return;
+    if (_state.value.phase == PlaybackPhase.ended) await c.seekTo(Duration.zero);
+    await c.play();
   }
 
   @override
-  Future<void> pause() => _c.pause();
+  Future<void> pause() async => _c?.pause();
 
   @override
-  Future<void> seekTo(Duration position) => _c.seekTo(position);
+  Future<void> seekTo(Duration position) async => _c?.seekTo(position);
 
   @override
   Widget view() => ValueListenableBuilder(
-        valueListenable: _c,
-        builder: (_, v, _) => v.isInitialized
-            ? Center(child: AspectRatio(aspectRatio: v.aspectRatio, child: VideoPlayer(_c)))
-            : const SizedBox.expand(),
+        valueListenable: _ctrl,
+        builder: (_, c, _) => c == null
+            ? const SizedBox.expand()
+            : ValueListenableBuilder(
+                valueListenable: c,
+                builder: (_, v, _) => v.isInitialized
+                    ? Center(child: AspectRatio(aspectRatio: v.aspectRatio, child: VideoPlayer(c)))
+                    : const SizedBox.expand(),
+              ),
       );
 
   @override
   void dispose() {
     _disposed = true;
-    _c.removeListener(_onValue);
-    _c.dispose();
+    _c?.removeListener(_onValue);
+    _c?.dispose();
+    _ctrl.dispose();
     _state.dispose();
   }
 }

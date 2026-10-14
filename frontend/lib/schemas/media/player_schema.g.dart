@@ -20,6 +20,8 @@ PlayerSchema _$PlayerSchemaFromJson(
         'min_buffer_to_start_seconds',
         'max_buffer_seconds',
         'upswitch_safety_factor',
+        'native_upswitch_when_buffered_seconds',
+        'native_upswitch_within_seconds',
         'poster',
         'autoplay_in_grids',
         'autoplay_on_product_page',
@@ -47,6 +49,14 @@ PlayerSchema _$PlayerSchemaFromJson(
         'upswitch_safety_factor',
         (v) => (v as num).toDouble(),
       ),
+      nativeUpswitchWhenBufferedSeconds: $checkedConvert(
+        'native_upswitch_when_buffered_seconds',
+        (v) => (v as num).toDouble(),
+      ),
+      nativeUpswitchWithinSeconds: $checkedConvert(
+        'native_upswitch_within_seconds',
+        (v) => (v as num).toDouble(),
+      ),
       poster: $checkedConvert(
         'poster',
         (v) => PosterSchema.fromJson(v as Map<String, dynamic>),
@@ -66,6 +76,9 @@ PlayerSchema _$PlayerSchemaFromJson(
     'minBufferToStartSeconds': 'min_buffer_to_start_seconds',
     'maxBufferSeconds': 'max_buffer_seconds',
     'upswitchSafetyFactor': 'upswitch_safety_factor',
+    'nativeUpswitchWhenBufferedSeconds':
+        'native_upswitch_when_buffered_seconds',
+    'nativeUpswitchWithinSeconds': 'native_upswitch_within_seconds',
     'autoplayInGrids': 'autoplay_in_grids',
     'autoplayOnProductPage': 'autoplay_on_product_page',
     'sampleStreamUrl': 'sample_stream_url',

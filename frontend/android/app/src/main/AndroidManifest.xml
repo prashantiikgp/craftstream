@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Release builds need this too: the app talks to the API on Cloud Run and streams HLS from GCS. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="craftstream"
         android:name="${applicationName}"

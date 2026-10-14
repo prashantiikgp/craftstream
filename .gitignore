@@ -20,3 +20,4 @@ docs/Technical_Assignment.pdf
 infra/gcp/config.env
 .playwright-mcp/
 frontend/.firebase/
+frontend/android/build/

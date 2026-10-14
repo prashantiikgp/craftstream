@@ -113,17 +113,17 @@ Upload limits (15 min, file types) are **not** a frontend YAML. The app reads th
 - [x] **catalog**: search box (debounced) + tag chips + responsive grid + "Show more" paging with the API's cursor (on mock data; real data is F3)
 - [x] **product**: player + details + Buy (on mock data, which plays the sample stream from `player.yml`; real data is F3)
 - [x] **checkout**: name + quantity → "Order placed" (on mock data; real data is F3)
-- [x] **upload**: form → picker → duration check → resumable upload with progress → poll until ready (checked in Chrome against the local backend, with a real connection reset mid-chunk; Android path not yet run on an emulator)
-- [ ] Done when the full artisan → buyer → order flow works on Chrome and the Android emulator against the local backend
+- [x] **upload**: form → picker → duration check → resumable upload with progress → poll until ready (checked in Chrome against the local backend, with a real connection reset mid-chunk; Android: system picker → 0:20 duration check → 1.2 MB upload in ~210 s at 45 kbps → live)
+- [x] Done when the full artisan → buyer → order flow works on Chrome and the Android emulator (both run against the deployed GCP backend, which is stricter than the local one; Android: upload → live → tag search → watch → order `3129d7a45f42` stored in Firestore)
 
 ### F5: Low-bandwidth player
 - [x] `player_engine` start-low settings on web (hls.js) and Android (ExoPlayer)
   - Web: our own `<video>` + bundled hls.js (`web/vendor/`), every setting from `player.yml` (`startLevel: 0`, 40 kbps first guess, 30 s buffer cap); rung pill shows e.g. "144p · 47 kbps".
-  - Android: video_player has no track-selection API, so the bitrate cap cannot be set from Dart. ExoPlayer starts on the first variant of the master playlist, which our ladder lists lowest first. Confirmed on real GCP output: the 256x144 variant (31 kbps video) is listed first and its 12 kbps HE-AAC audio is the default track (44.9 kbps on the wire in total).
+  - Android: video_player exposes none of ExoPlayer's track selection or bandwidth settings, and ExoPlayer picks its first rung from its own bandwidth guess (several Mbps on Wi-Fi), not from playlist order: on the emulator at 45 kbps it started high and timed out. So the app fetches the master playlist, hands ExoPlayer a `data:` copy with only the lowest rung and its default audio (`lowestRungOnly`), and swaps in the real master once the buffer is 20 s ahead within the first minute (`native_upswitch_*` in `player.yml`), which a slow link never manages.
 - [x] Chrome under a 45 kbps / 300 ms throttle against the live backend: starts on 256×144, 0 mid-playback stalls over 2 minutes, buffer grows ahead of playback, 13.6 s tap-to-first-frame
-- [ ] Android emulator under `-netspeed 45:45`
+- [x] Android emulator at 45 kbps against the live backend: starts on 144p (32 kbps rung), plays in real time (58 s of video in 59 s of wall time) with no stalls over 6 minutes, ≤ 14 s from tap to playing. The emulator's `-netspeed` shaper delivered ~2 kbps at that setting, so the cap comes from `tools/throttle_proxy.py` via `-http-proxy` (measured 43–45 kbps).
 - [x] Fallback low-band manifest: not needed (the real ladder's lowest rung plays without stalling at 45 kbps)
-- [ ] Done when a video plays without stalling under throttle on both platforms
+- [x] Done when a video plays without stalling under throttle on both platforms
 
 ### F6: Builds + demo
 - [x] Point at the Cloud Run URL (`env/prod.json`); web build → Firebase Hosting: https://craftstream-qi0tvg.web.app (upload → live → search verified on the hosted build against GCP)

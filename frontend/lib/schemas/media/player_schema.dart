@@ -12,6 +12,8 @@ class PlayerSchema {
   final double minBufferToStartSeconds;
   final double maxBufferSeconds;
   final double upswitchSafetyFactor;
+  final double nativeUpswitchWhenBufferedSeconds;
+  final double nativeUpswitchWithinSeconds;
   final PosterSchema poster;
   final bool autoplayInGrids;
   final bool autoplayOnProductPage;
@@ -23,6 +25,8 @@ class PlayerSchema {
     required this.minBufferToStartSeconds,
     required this.maxBufferSeconds,
     required this.upswitchSafetyFactor,
+    required this.nativeUpswitchWhenBufferedSeconds,
+    required this.nativeUpswitchWithinSeconds,
     required this.poster,
     required this.autoplayInGrids,
     required this.autoplayOnProductPage,
