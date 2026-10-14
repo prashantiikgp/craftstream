@@ -8,6 +8,8 @@ import '../../features/checkout/checkout_source.dart';
 import '../../features/discover/discover_source.dart';
 import '../../features/orders/orders_source.dart';
 import '../../features/product/product_source.dart';
+import '../../features/studio/studio_source.dart';
+import '../../features/upload/upload_source.dart';
 import 'screen_scope.dart';
 
 typedef ScreenSource = ScreenData Function(WidgetRef ref, Map<String, String> params);
@@ -27,4 +29,6 @@ const Map<String, SourceDef> screenSources = {
   'discover': SourceDef(discoverSource, calls: discoverCalls),
   'product': SourceDef(productSource, calls: productCalls),
   'checkout': SourceDef(checkoutSource, calls: checkoutCalls),
+  'studio': SourceDef(studioSource, calls: studioCalls),
+  'upload': SourceDef(uploadSource, calls: uploadCalls),
 };

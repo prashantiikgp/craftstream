@@ -24,7 +24,6 @@ class RouteSchema {
 
   /// A v1 Dart screen, registered in core/router.dart, until it moves to YAML.
   final String? legacy;
-  final bool shell;
   final bool devOnly;
   final List<RouteSchema> routes;
 
@@ -32,7 +31,6 @@ class RouteSchema {
     required this.path,
     this.screen,
     this.legacy,
-    this.shell = false,
     this.devOnly = false,
     this.routes = const [],
   });

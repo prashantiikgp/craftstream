@@ -18,7 +18,8 @@ void main() {
   final screens = <String, List<String> Function(AppConfig)>{
     '/discover': (c) => [str(c, 'discover.title'), 'Hand-thrown clay mug'],
     '/orders': (c) => [str(c, 'orders.empty_title')],
-    '/studio': (c) => [str(c, 'studio.title'), 'Glazed serving bowl', str(c, 'status.failed')],
+    // Status tags use the eyebrow style, which theme.yml shows in capitals.
+    '/studio': (c) => [str(c, 'studio.title'), 'Glazed serving bowl', str(c, 'status.failed').toUpperCase()],
     '/studio/new': (c) => [str(c, 'upload.video_empty_title'), str(c, 'upload.publish')],
     '/product/p_01': (c) => ['Hand-thrown clay mug', str(c, 'product.about')],
     '/product/p_01/buy': (c) => [str(c, 'checkout.title'), str(c, 'checkout.place_order')],
@@ -43,23 +44,11 @@ void main() {
     }
   }
 
-  // The v1 shell (bottom bar / rail and the Buy/Sell switch) now wraps only the Sell screens still in v1.
-  testWidgets('v1 Sell screens: phones get a bottom bar, desktops a rail', (tester) async {
-    await pumpApp(tester, light, size: const Size(390, 844), location: '/studio');
-    expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.byType(NavigationRail), findsNothing);
-    await pumpApp(tester, light, size: const Size(1280, 900), location: '/studio');
-    expect(find.byType(NavigationRail), findsOneWidget);
-  });
-
-  testWidgets('Buy and Sell: the home doors and the v1 switch move between the two sides', (tester) async {
+  testWidgets('Buy and Sell: the home doors lead to each side', (tester) async {
     final container = await pumpApp(tester, light, location: '/');
     await tester.tap(find.text(str(light, 'home.sell_title')));
     await settle(tester);
     expect(find.text(str(light, 'studio.title')), findsOneWidget);
-    await tester.tap(find.text(str(light, 'shell.role_buyer')));
-    await settle(tester);
-    expect(find.text(str(light, 'discover.title')), findsOneWidget);
     container.read(routerProvider).go('/');
     await settle(tester);
     await tester.tap(find.text(str(light, 'home.buy_title')));

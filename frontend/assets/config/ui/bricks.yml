@@ -168,6 +168,7 @@ bricks:
     style:
       height: 54
       gap: sm
+      padding: lg                                # inside the button, around a long label
       icon: 18
       radius: sharp
       label: title
@@ -498,6 +499,11 @@ bricks:
       hint: { type: text, required: true }
       bind: { type: bind, required: true }       # the current text
       error: { type: bind }                      # {key, args} from the source, or null
+      lines: { type: number, default: 1 }        # more than 1: a multi-line box
+      prefix: { type: text }                     # shown inside the box before the text (e.g. ₹)
+      helper: { type: text }                     # a hint under the box
+      helper_args: { type: args }
+      keyboard: { type: enum, options: [text, decimal], default: text }
       action: { type: action, required: true }   # a {call: …}; gets the text
     style:
       gap: sm
@@ -512,6 +518,8 @@ bricks:
       error: caption
       error_color: danger.ink
       radius: sharp
+      prefix_style: price_sm
+      prefix_color: marigold.ink
 
   stepper:
     about: − value + within limits (the buttons stop at min and max), with an optional limit note beside it.
@@ -551,6 +559,115 @@ bricks:
       label_color: text_muted
       amount: price
       amount_color: marigold.ink
+
+  listing_card:
+    about: >-
+      One of the artisan's products: poster, title, price and its video status from ui/status.yml (tag, hint,
+      a progress bar while processing, "Upload again" when it failed). Opens the product once it is live.
+    props:
+      bind: { type: bind, default: item }        # a product (models/product.yml fields)
+      role: { type: role, required: true }       # its accent colours the card
+      open: { type: action }                     # e.g. {go: /product/{item.id}}; only when orderable
+      retry: { type: action }                    # e.g. {go: /studio/new}; only when status.yml says retry
+      retry_label: { type: text, required: true }
+    style:
+      padding: md
+      gap: md
+      poster: 72
+      background: surface
+      border: line
+      title: title
+      title_lines: 2
+      tag: eyebrow
+      price: price_sm
+      price_color: marigold.ink
+      hint: caption
+      hint_color: text_muted
+      bar: 4
+      bar_track: line
+      retry_style: label
+
+  tag_picker:
+    about: Tags to choose for a product; several can be on. Each passes its value to `action` as item.value.
+    props:
+      bind: { type: bind, required: true }       # list of {value, selected}
+      role: { type: role, required: true }
+      action: { type: action, required: true }
+    style:
+      gap: xs
+      height: 34
+      padding: sm
+      label: price_sm
+      background: surface
+      border: line_strong
+
+  video_pick:
+    about: >-
+      Choose the process video. Before: a big area with Choose video and the length limit; after: its name, size
+      and length with Change. The length check is shown by notices in the screen YAML.
+    props:
+      bind: { type: bind, required: true }       # {picked, missing, name, details, max}
+      role: { type: role, required: true }
+      label: { type: text, required: true }
+      empty_title: { type: text, required: true }
+      empty_message: { type: text, required: true }   # "Up to {max} long …"
+      empty_loading: { type: text, required: true }   # before the limit is known
+      choose: { type: text, required: true }
+      change: { type: text, required: true }
+      required: { type: text, required: true }        # shown when Publish is tapped without a video
+      action: { type: action, required: true }        # a {call: …} that opens the picker
+    style:
+      gap: sm
+      padding: md
+      area_padding: xl
+      label_style: eyebrow
+      label_color: text_muted
+      icon: video
+      icon_size: 32
+      title: title
+      message: caption
+      message_color: text_muted
+      details: mono
+      button: label
+      background: surface
+      border: line_strong
+      file_box: 44
+      file_icon: 22
+      file_accent: purple
+
+  progress_bar:
+    about: A bar for a bound fraction (0–1). With `indeterminate` true it moves without a value.
+    props:
+      bind: { type: bind, required: true }
+      indeterminate: { type: bind }
+      role: { type: role }                       # colour from the role's accent, else from tone
+      tone: { type: tone, default: brand }
+      size: { type: enum, options: [thin, thick], default: thick }
+    style:
+      thin: 4
+      thick: 8
+      track: line
+
+  steps:
+    about: Numbered steps. Done ones get a check, the current one is filled in the role's colour.
+    props:
+      items: { type: steps, required: true }     # [{title, note}] strings keys
+      bind: { type: bind, required: true }       # index of the current step
+      role: { type: role, required: true }
+    style:
+      dot: 24
+      icon: 14
+      line: 1
+      gap: md
+      row_gap: md
+      number: eyebrow
+      title: title
+      note: caption
+      note_color: text_muted
+      background: ground
+      border: line_strong
+      done_tone: success
+      done_icon: check
 
   spacer:
     about: "Takes the free height, pushing what follows to the bottom (only inside a screen with `fill: true`)."

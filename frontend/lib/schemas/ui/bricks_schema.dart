@@ -28,7 +28,7 @@ class BrickSchema {
 }
 
 @JsonEnum(fieldRename: FieldRename.snake)
-enum PropType { text, args, bind, action, icon, role, tone, color, style, space, doorArt, enumeration, bool, number, node, nodes, rows }
+enum PropType { text, args, bind, action, icon, role, tone, color, style, space, doorArt, enumeration, bool, number, node, nodes, rows, steps }
 
 @JsonSerializable()
 class PropSchema {

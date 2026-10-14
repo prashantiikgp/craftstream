@@ -76,6 +76,8 @@ class _TextFieldState extends State<_TextField> {
           borderRadius: BorderRadius.circular(s.radius('radius')),
           borderSide: BorderSide(color: c, width: t.focusRingWidth / 2),
         );
+    final lines = (n.prop<num>('lines') ?? 1).toInt();
+    final prefix = n.prop<String>('prefix'), helper = n.prop<String>('helper');
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       StyledText(say(context, n.need('label')), style: s.name('label'), color: s.color('label_color')),
       SizedBox(height: s.space('gap')),
@@ -83,7 +85,22 @@ class _TextFieldState extends State<_TextField> {
         controller: _text,
         onChanged: (v) => scope.act(context, n.prop<ActionSpec>('action'), v),
         style: s.text('text'),
+        minLines: lines,
+        maxLines: lines,
+        keyboardType: switch (n.need<String>('keyboard')) {
+          'decimal' => const TextInputType.numberWithOptions(decimal: true),
+          _ => lines > 1 ? TextInputType.multiline : TextInputType.text,
+        },
         decoration: InputDecoration(
+          prefixIcon: prefix == null
+              ? null
+              : Align(widthFactor: 1, child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: s.space('padding')),
+                  child: StyledText(say(context, prefix), style: s.name('prefix_style'), color: s.color('prefix_color')),
+                )),
+          helperText: helper == null ? null : say(context, helper, args: n.prop('helper_args')),
+          helperStyle: s.text('error').copyWith(color: s.color('label_color')),
+          helperMaxLines: lines + 1,
           hintText: say(context, n.need('hint')),
           hintStyle: s.text('text').copyWith(color: s.color('hint')),
           filled: true,

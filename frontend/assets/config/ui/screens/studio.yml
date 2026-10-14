@@ -1,0 +1,56 @@
+about: The artisan's side. Their products with each video's status (live, processing, failed) and a way to add one.
+data: studio
+width: narrow
+gap: md
+backdrop: sell
+
+top:
+  - brick: top_bar
+    leading: home
+    label: common.home
+    role: sell
+    action: { go: / }
+
+body:
+  - brick: text
+    text: studio.title
+    style: h1
+
+  - brick: text
+    text: studio.subtitle
+    color: text_muted
+
+  - brick: link_row
+    icon: plus
+    label: studio.new_product
+    tone: danger
+    action: { go: /studio/new }
+
+  - brick: list
+    bind: studio.items
+    gap: md
+    item:
+      brick: listing_card
+      role: sell
+      open: { go: "/product/{item.id}" }
+      retry: { go: /studio/new }
+      retry_label: studio.upload_again
+
+empty:
+  - brick: text
+    text: studio.title
+    style: h1
+  - brick: empty_state
+    icon: video
+    title: studio.empty_title
+    message: studio.empty_message
+    button: studio.new_product
+    action: { go: /studio/new }
+
+error:
+  - brick: empty_state
+    icon: info
+    title: common.error_title
+    message: common.error_message
+    button: common.retry
+    action: { call: refresh }

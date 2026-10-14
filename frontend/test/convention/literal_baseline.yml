@@ -1,14 +1,6 @@
 # Literals still in UI code, per file and kind (see literal_lint_test.dart).
 # This list may only shrink. Move the value to YAML, then lower or delete the entry.
 lib/features/design_catalog/design_catalog_screen.dart: {icon: 8, route: 1, size: 30, inset: 1}
-lib/features/shell/app_shell.dart: {icon: 1, route: 1}
-lib/features/shell/shell_controller.dart: {icon: 8}
-lib/features/studio/studio_screen.dart: {icon: 3, route: 4, size: 1, status: 1}
-lib/features/studio/widgets/listing_card.dart: {status: 5, size: 1, icon: 1}
-lib/features/upload/upload_controller.dart: {status: 2}
-lib/features/upload/upload_screen.dart: {size: 1, icon: 1}
-lib/features/upload/widgets/upload_progress.dart: {icon: 10, size: 2, route: 2}
-lib/features/upload/widgets/video_pick_card.dart: {icon: 3, size: 1}
 lib/shared/widgets/app_button.dart: {size: 2}
 lib/shared/widgets/indicators.dart: {size: 3, icon: 1}
 lib/shared/widgets/page.dart: {icon: 1}

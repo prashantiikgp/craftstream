@@ -1,0 +1,297 @@
+about: >-
+  New product. The form (title, description, price, tags, name and the process video, checked against the server's
+  length limit), then, after Publish, the upload: resumable, pausable, it survives a dropped connection, then waits
+  for processing until the product is live.
+data: upload
+width: narrow
+gap: lg
+backdrop: sell
+
+top:
+  - brick: top_bar
+    leading: back
+    label: studio.title
+    role: sell
+    action: { go: /studio }
+
+body:
+  # ── The form ───────────────────────────────────────────────────────────────────────────────────────────────
+  - brick: text
+    when: upload.editing
+    text: upload.title
+    style: h1
+
+  - brick: text
+    when: upload.editing
+    text: upload.subtitle
+    color: text_muted
+
+  - brick: text_field
+    when: upload.editing
+    label: upload.title_label
+    hint: upload.title_hint
+    bind: upload.title
+    error: upload.errors.title
+    action: { call: set_title }
+
+  - brick: text_field
+    when: upload.editing
+    label: upload.description_label
+    hint: upload.description_hint
+    bind: upload.description
+    error: upload.errors.description
+    lines: 3
+    action: { call: set_description }
+
+  - brick: text_field
+    when: upload.editing
+    label: upload.price_label
+    hint: upload.price_hint
+    bind: upload.price
+    error: upload.errors.price
+    prefix: upload.currency_symbol
+    keyboard: decimal
+    action: { call: set_price }
+
+  - brick: text
+    when: upload.editing
+    text: upload.tags_label
+    style: eyebrow
+    color: text_muted
+
+  - brick: tag_picker
+    when: upload.editing
+    bind: upload.tags
+    role: sell
+    action: { call: toggle_tag, with: item.value }
+
+  - brick: text_field
+    when: upload.editing
+    label: upload.other_tags_label
+    hint: upload.other_tags_hint
+    bind: upload.other_tags
+    error: upload.errors.tags
+    helper: upload.tags_helper
+    helper_args: { max: upload.tags_max }
+    action: { call: set_other_tags }
+
+  - brick: text_field
+    when: upload.editing
+    label: upload.artisan_label
+    hint: upload.artisan_hint
+    bind: upload.artisan
+    error: upload.errors.artisan
+    helper: upload.artisan_helper
+    action: { call: set_artisan }
+
+  - brick: video_pick
+    when: upload.editing
+    bind: upload.video
+    role: sell
+    label: upload.video_label
+    empty_title: upload.video_empty_title
+    empty_message: upload.video_empty_message
+    empty_loading: upload.video_empty_message_loading
+    choose: upload.choose_video
+    change: upload.change_video
+    required: upload.video_required
+    action: { call: pick_video }
+
+  # The picked video against the server's limit (GET /upload-policy).
+  - brick: notice
+    when: upload.check.ok
+    tone: success
+    icon: check
+    title: upload.check_ok_title
+    message: upload.check_ok
+    args: { duration: upload.check.duration, max: upload.check.max }
+  - brick: notice
+    when: upload.check.too_long
+    tone: danger
+    icon: info
+    title: upload.check_too_long_title
+    message: upload.check_too_long
+    args: { duration: upload.check.duration, max: upload.check.max }
+  - brick: notice
+    when: upload.check.unknown
+    tone: info
+    icon: info
+    title: upload.check_unknown_title
+    message: upload.check_unknown
+    args: { max: upload.check.max }
+  - brick: notice
+    when: upload.check.bad_type
+    tone: danger
+    icon: info
+    title: upload.check_bad_type_title
+    message: upload.check_bad_type
+
+  - brick: notice
+    when: upload.show_fix
+    tone: danger
+    icon: info
+    title: upload.fix_title
+    message: upload.fix_message
+
+  - brick: button
+    when: upload.editing
+    label: upload.publish
+    tone: danger
+    action: { call: publish }
+
+  - brick: text
+    when: upload.editing
+    text: upload.publish_note
+    color: text_muted
+    align: center
+
+  # ── After Publish ──────────────────────────────────────────────────────────────────────────────────────────
+  - brick: value
+    when: upload.busy
+    bind: upload.title
+    style: h2
+
+  - brick: text
+    when: upload.busy
+    text: upload.progress_subtitle
+    args: { price: upload.summary_price, artisan: upload.artisan }
+    style: mono
+    color: text_muted
+
+  - brick: text
+    when: upload.creating
+    text: upload.creating
+    style: title
+  - brick: text
+    when: upload.sending
+    text: upload.uploading_file
+    args: { name: upload.file }
+    style: title
+  - brick: text
+    when: upload.arrived
+    text: upload.uploaded_file
+    args: { name: upload.file }
+    style: title
+
+  - brick: progress_bar
+    when: upload.busy
+    bind: upload.fraction
+    indeterminate: upload.creating
+    role: sell
+
+  - brick: text
+    when: upload.busy
+    text: upload.progress_bytes
+    args: { sent: upload.sent, total: upload.total, percent: upload.percent }
+    style: mono
+    color: text_muted
+
+  - brick: text
+    when: upload.chunk
+    unless: upload.live
+    text: upload.chunk_note
+    args: { chunk: upload.chunk }
+    color: text_muted
+
+  - brick: button
+    when: upload.paused
+    label: upload.resume
+    icon: play
+    tone: danger
+    action: { call: resume }
+  - brick: button
+    when: upload.transferring
+    unless: upload.paused
+    label: upload.pause
+    variant: ghost
+    action: { call: pause }
+  - brick: button
+    when: upload.drop_demo
+    label: upload.simulate_drop
+    variant: ghost
+    action: { call: simulate_drop }
+
+  - brick: steps
+    when: upload.busy
+    bind: upload.step
+    role: sell
+    items:
+      - { title: upload.step_listing, note: upload.step_listing_note }
+      - { title: upload.step_upload, note: upload.step_upload_note }
+      - { title: upload.step_processing, note: upload.step_processing_note }
+      - { title: upload.step_live, note: upload.step_live_note }
+
+  # What is happening now, and what the artisan can do.
+  - brick: notice
+    when: upload.keep_open
+    tone: info
+    title: upload.keep_open_title
+    message: upload.keep_open_message
+  - brick: notice
+    when: upload.reconnecting
+    tone: warning
+    title: upload.reconnecting_title
+    message: upload.reconnecting
+    args: { sent: upload.sent, attempt: upload.retries }
+  - brick: notice
+    when: upload.paused
+    tone: info
+    title: upload.paused_title
+    message: upload.paused_message
+  - brick: notice
+    when: upload.processing
+    unless: upload.poll_slow
+    tone: info
+    title: upload.processing_title
+    message: upload.processing_message
+  - brick: notice
+    when: upload.poll_slow
+    tone: info
+    title: upload.processing_title
+    message: upload.processing_slow
+  - brick: button
+    when: upload.processing
+    label: upload.go_to_products
+    variant: ghost
+    action: { go: /studio }
+
+  - brick: notice
+    when: upload.live
+    tone: success
+    icon: check
+    title: upload.live_title
+    message: upload.live_message
+    args: { title: upload.title }
+  - brick: button
+    when: upload.live
+    label: upload.view_product
+    action: { go: "/product/{upload.product_id}" }
+  - brick: button
+    when: upload.live
+    label: upload.add_another
+    variant: ghost
+    action: { call: reset }
+
+  - brick: notice
+    when: upload.can_resume
+    tone: danger
+    title: upload.failed_title
+    message: upload.failed_message
+    detail: upload.failure
+  - brick: notice
+    when: upload.cannot_resume
+    tone: danger
+    title: upload.processing_failed_title
+    message: upload.processing_failed_message
+    detail: upload.failure
+  - brick: button
+    when: upload.can_resume
+    label: upload.resume
+    icon: retry
+    tone: danger
+    action: { call: resume }
+  - brick: button
+    when: upload.failed
+    label: upload.start_over
+    variant: ghost
+    action: { call: reset }

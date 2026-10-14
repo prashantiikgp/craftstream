@@ -4,7 +4,6 @@
 #
 #   path      absolute at the top level (`/orders`), relative under `routes:` (`buy` -> /product/:id/buy)
 #   :name     a path parameter, passed to the screen (`/placed/:order_id` -> params.order_id)
-#   shell     v1 screens shown inside the v1 navigation bar
 #   dev_only  hidden unless DEV_TOOLS is on (env/*.json)
 
 initial: /
@@ -18,6 +17,10 @@ routes:
     screen: placed
   - path: /discover
     screen: discover
+  - path: /studio
+    screen: studio
+  - path: /studio/new
+    screen: upload
   - path: /product/:id
     screen: product
     routes:
@@ -25,12 +28,6 @@ routes:
         screen: checkout
 
   # v1 screens, until each becomes a screen YAML
-  - path: /studio
-    legacy: studio
-    shell: true
-  - path: /studio/new
-    legacy: upload
-    shell: true
   - path: /catalog
     legacy: design_catalog
     dev_only: true

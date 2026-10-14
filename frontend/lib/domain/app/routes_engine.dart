@@ -16,10 +16,10 @@ class RoutesRulesError implements Exception {
 class RouteEntry {
   final String path, parent;
   final String? screen, legacy;
-  final bool shell, devOnly;
+  final bool devOnly;
   final List<String> params;
   const RouteEntry(this.path,
-      {this.parent = '', this.screen, this.legacy, this.shell = false, this.devOnly = false, this.params = const []});
+      {this.parent = '', this.screen, this.legacy, this.devOnly = false, this.params = const []});
 
   /// [path] relative to [parent], as GoRouter wants nested routes.
   String get relativePath => parent.isEmpty ? path : path.substring(parent.length + 1);
@@ -53,7 +53,6 @@ class RoutesEngine {
           parent: parent,
           screen: r.screen,
           legacy: r.legacy,
-          shell: r.shell,
           devOnly: r.devOnly,
           params: [for (final s in segments) if (s.startsWith(':')) s.substring(1)],
         ));

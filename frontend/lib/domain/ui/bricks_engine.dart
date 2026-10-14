@@ -43,6 +43,12 @@ class CallAction extends ActionSpec {
   const CallAction(this.name, [this.withPath, this.then]);
 }
 
+/// One step of a `steps` list: strings keys for its title and the note under it.
+class StepRow {
+  final String title, note;
+  const StepRow(this.title, this.note);
+}
+
 /// One receipt line: a strings key for the label and a field of the bound record.
 class ReceiptRow {
   final String label, field;
@@ -110,7 +116,7 @@ class BricksEngine {
           PropType.enumeration => p.options!.contains(d),
           PropType.bool => d is bool,
           PropType.number => d is num,
-          PropType.node || PropType.nodes || PropType.rows || PropType.action || PropType.args => false,
+          PropType.node || PropType.nodes || PropType.rows || PropType.steps || PropType.action || PropType.args => false,
           _ => d is String,
         };
         if (!ok) throw BricksRulesError('$at: default "$d" does not fit type ${p.type.name}');
@@ -130,6 +136,7 @@ class BricksEngine {
       final v = n.props[prop];
       if (p.type == PropType.text && v is String) yield v;
       if (p.type == PropType.rows && v is List<ReceiptRow>) yield* v.map((r) => r.label);
+      if (p.type == PropType.steps && v is List<StepRow>) yield* v.expand((r) => [r.title, r.note]);
     }
   }
 
@@ -223,6 +230,18 @@ class BricksEngine {
       case PropType.nodes:
         if (value is! List) throw BricksRulesError('$at: expected a list of bricks');
         return [for (final (i, v) in value.indexed) parse(v, '$at[$i]', refs)];
+      case PropType.steps:
+        if (value is! List) throw BricksRulesError('$at: expected a list of {title, note}');
+        return [
+          for (final (i, r) in value.indexed)
+            if (r is Map && r.keys.every({'title', 'note'}.contains) && r['title'] is String && r['note'] is String)
+              StepRow(
+                refs.hasText(r['title'] as String) ? r['title'] as String : throw BricksRulesError('$at[$i]: "${r['title']}" is not in strings.yml'),
+                refs.hasText(r['note'] as String) ? r['note'] as String : throw BricksRulesError('$at[$i]: "${r['note']}" is not in strings.yml'),
+              )
+            else
+              throw BricksRulesError('$at[$i]: expected {title: strings.key, note: strings.key}'),
+        ];
       case PropType.rows:
         if (value is! List) throw BricksRulesError('$at: expected a list of {label, field}');
         return [

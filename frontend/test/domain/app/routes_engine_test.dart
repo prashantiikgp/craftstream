@@ -40,6 +40,6 @@ void main() {
         throwsA(isA<RoutesRulesError>()));
     expect(() => RoutesEngine(rules((y) => y.replaceFirst('path: /orders', 'path: /'))),
         throwsA(isA<RoutesRulesError>()));
-    expect(() => rules((y) => y.replaceFirst('shell: true', 'shel: true')), throwsA(isA<ConfigError>()));
+    expect(() => rules((y) => y.replaceFirst('dev_only: true', 'devonly: true')), throwsA(isA<ConfigError>()));
   });
 }

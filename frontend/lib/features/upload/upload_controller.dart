@@ -274,10 +274,12 @@ class UploadController extends Notifier<UploadState> {
       if (!ref.mounted) return;
       final p = await _repo.status(productId);
       if (!ref.mounted) return;
-      if (p.videoStatus == 'ready') {
+      // status.yml says which status is live (orderable) and which one asks for the video again (retry).
+      final status = ref.read(appConfigProvider).status;
+      if (status.orderable(p.videoStatus)) {
         state = state.copyWith(phase: UploadPhase.live);
         ref.invalidate(myProductsProvider);
-      } else if (p.videoStatus == 'failed') {
+      } else if (status.look('video', p.videoStatus).retry) {
         state = state.copyWith(phase: UploadPhase.failed, error: () => null);
         ref.invalidate(myProductsProvider);
       }

@@ -13,6 +13,7 @@ import 'browse_bricks.dart';
 import 'form_bricks.dart';
 import 'kit.dart';
 import 'product_bricks.dart';
+import 'sell_bricks.dart';
 
 typedef BrickBuild = Widget Function(BuildContext context, BrickNode node);
 
@@ -55,6 +56,11 @@ const brickBuilders = <String, BrickBuilder>{
   'text_field': BrickBuilder(textFieldBrick),
   'stepper': BrickBuilder(stepperBrick),
   'amount_row': BrickBuilder(amountRowBrick),
+  'listing_card': BrickBuilder(listingCardBrick),
+  'tag_picker': BrickBuilder(tagPickerBrick),
+  'video_pick': BrickBuilder(videoPickBrick),
+  'progress_bar': BrickBuilder(progressBarBrick),
+  'steps': BrickBuilder(stepsBrick),
   'spacer': BrickBuilder(_spacer, flexes: true),
 };
 
@@ -359,10 +365,13 @@ Widget _button(BuildContext context, BrickNode n) {
               dimension: s.number('spinner'),
               child: CircularProgressIndicator(strokeWidth: s.number('spinner_stroke'), color: ink),
             )
-          : Row(mainAxisSize: MainAxisSize.min, children: [
-              StyledText(label, style: s.name('label'), color: ink),
-              if (icon != null) ...[SizedBox(width: s.space('gap')), YamlIcon(icon, size: s.number('icon'), color: ink)],
-            ]),
+          : Padding(
+              padding: EdgeInsets.symmetric(horizontal: s.space('padding')),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Flexible(child: StyledText(label, style: s.name('label'), color: ink, maxLines: 1)),
+                if (icon != null) ...[SizedBox(width: s.space('gap')), YamlIcon(icon, size: s.number('icon'), color: ink)],
+              ]),
+            ),
     ),
   );
 }

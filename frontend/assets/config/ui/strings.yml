@@ -16,19 +16,11 @@ strings:
     error_title: Something went wrong
     error_message: We couldn't load this. Check your connection and try again.
 
-  shell:
-    role_buyer: Buy
-    role_artisan: Sell
-    design_system: Design system
 
   nav:
     buy: Buy
     sell: Sell
     role_tag: "{number} / {label}"
-    discover: Discover
-    orders: Orders
-    my_products: My products
-    new_product: New product
 
   status:
     ready: Live
@@ -138,7 +130,6 @@ strings:
     title: Your products
     subtitle: Listings created from this device, with their video status.
     new_product: New product
-    refresh: Refresh
     hint_ready: Live. Buyers can find it and order.
     hint_processing: Making the 144p to 720p versions. Usually a few minutes.
     hint_failed: The video couldn't be processed. Upload it again.
@@ -198,7 +189,6 @@ strings:
     chunk_note: Sent in {chunk} pieces, so a dropped connection only loses the last piece.
     pause: Pause
     resume: Resume
-    paused_badge: Paused
     simulate_drop: Simulate a dropped connection
     reconnecting_title: Connection lost
     reconnecting: Asking how much arrived, then resuming from {sent} (attempt {attempt}).
@@ -219,3 +209,11 @@ strings:
     processing_failed_title: Processing failed
     processing_failed_message: The video couldn't be processed. Start over and pick the video again.
     start_over: Start over
+    step_listing: Listing created
+    step_listing_note: Title, price and tags saved.
+    step_upload: Uploading the video
+    step_upload_note: Straight to storage, never through the API.
+    step_processing: Processing
+    step_processing_note: A 144p version for slow networks, sharper ones for fast.
+    step_live: Live
+    step_live_note: Buyers can find it and order.
