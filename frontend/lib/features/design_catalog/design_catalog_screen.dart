@@ -71,19 +71,11 @@ class _ThemeSwitcher extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final engine = ref.watch(appConfigProvider).theme;
-    final choice = ref.watch(themeChoiceProvider);
+    final mode = ref.watch(themeChoiceProvider);
     final controller = ref.read(themeChoiceProvider.notifier);
     return AppCard(
       variant: CardVariant.elevated,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Palette', style: context.type.label),
-        SizedBox(height: t.space.sm),
-        Wrap(spacing: t.space.sm, runSpacing: t.space.sm, children: [
-          for (final name in engine.paletteNames)
-            TagChip(engine.labelOf(name), selected: name == choice.palette, onSelected: (_) => controller.setPalette(name)),
-        ]),
-        SizedBox(height: t.space.lg),
         Text('Mode', style: context.type.label),
         SizedBox(height: t.space.sm),
         SegmentedButton<ThemeMode>(
@@ -92,36 +84,37 @@ class _ThemeSwitcher extends ConsumerWidget {
             ButtonSegment(value: ThemeMode.dark, label: Text('Dark'), icon: Icon(Icons.dark_mode_outlined)),
             ButtonSegment(value: ThemeMode.system, label: Text('System'), icon: Icon(Icons.brightness_auto_outlined)),
           ],
-          selected: {choice.mode},
+          selected: {mode},
           onSelectionChanged: (s) => controller.setMode(s.first),
         ),
         SizedBox(height: t.space.md),
         Text('Edit assets/config/ui/theme.yml and hot-restart to try new colours. '
-            'Production builds start on THEME_PALETTE from env/prod.json and hide this page.',
+            'Production builds hide this page.',
             style: context.type.caption.copyWith(color: t.sub)),
       ]),
     );
   }
 }
 
-class _Readability extends StatelessWidget {
+class _Readability extends ConsumerWidget {
   const _Readability();
 
   @override
-  Widget build(BuildContext context) {
-    final failures = ThemeEngine.checkContrast(context.tokens);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final engine = ref.watch(appConfigProvider).theme;
+    final failures = engine.checkContrast(context.tokens);
     if (failures.isEmpty) {
       return Notice(
         tone: Tone.success,
-        title: 'All ${contrastRules.length + 4} readability checks pass',
-        message: 'Text on every surface meets WCAG AA for this palette and mode.',
+        title: 'All ${engine.contrastCheckCount} readability checks pass',
+        message: 'Text on every surface meets WCAG AA in this mode.',
       );
     }
     return Notice(
       tone: Tone.danger,
       title: '${failures.length} readability problem${failures.length == 1 ? '' : 's'}',
-      message: failures.map((f) => '${f.rule.fg} on ${f.rule.bg}: ${f.actual.toStringAsFixed(2)}:1 '
-          '(needs ${f.rule.min}:1, ${f.rule.why})').join('\n'),
+      message: failures.map((f) => '${f.fg} on ${f.bg}: ${f.actual.toStringAsFixed(2)}:1 '
+          '(needs ${f.min}:1, ${f.why})').join('\n'),
     );
   }
 }
@@ -144,10 +137,11 @@ class _Colors extends StatelessWidget {
           ]),
         );
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      SectionHeader('Colour', subtitle: '${t.paletteLabel} · ${t.brightness.name}'),
-      group('Brand', ['brand', 'brand_d', 'brand_dd', 'brand_ink', 'brand_l', 'brand_ll', 'brand_line', 'on_brand']),
-      group('Secondary', ['secondary', 'secondary_ink', 'secondary_l', 'on_secondary']),
-      group('Surfaces and text', ['bg', 'card', 'surface_soft', 'hair', 'hair_soft', 'ink', 'sub', 'faint', 'scrim']),
+      SectionHeader('Colour', subtitle: 'Theme B · ${t.brightness.name}'),
+      group('Ground and text',
+          ['ground', 'surface', 'surface_alt', 'line', 'line_strong', 'text', 'text_muted', 'text_faint', 'scrim']),
+      for (final name in t.accents.keys)
+        group('Accent: $name', [for (final part in t.accents[name]!.parts.keys) '$name.$part']),
       Text('Status', style: context.type.title),
       SizedBox(height: t.space.sm),
       Wrap(spacing: t.space.md, runSpacing: t.space.md, children: [
@@ -213,19 +207,10 @@ class _Typography extends StatelessWidget {
     final t = context.tokens;
     final ty = context.type;
     final rows = <(String, TextStyle, String)>[
-      ('display', ty.display, 'Made by hand, shown in full'),
-      ('h1', ty.h1, 'Hand-thrown clay mug'),
-      ('h2', ty.h2, 'Watch how it was made'),
-      ('h3', ty.h3, 'From the same artisan'),
-      ('title', ty.title, 'Meera · Khurja, Uttar Pradesh'),
-      ('body', ty.body, 'Wheel-thrown, glazed by hand and fired twice. Each piece is a little different.'),
-      ('body_strong', ty.bodyStrong, 'Ships in 3–5 days'),
-      ('label', ty.label, 'Add to order'),
-      ('caption', ty.caption, '12 min process video · 144p on slow networks'),
-      ('price', ty.price, formatMoney(120000, 'INR')),
+      for (final name in t.styles.keys) (name, ty.named(name), ty.isUpper(name) ? '01 / BUY' : 'Hand-thrown clay mug ₹450'),
     ];
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const SectionHeader('Type', subtitle: 'Poppins for headings, Inter for text. Bundled, Latin + ₹ only.'),
+      const SectionHeader('Type', subtitle: 'Space Grotesk for text, Space Mono for labels and prices. Bundled, Latin + ₹ only.'),
       for (final (name, style, sample) in rows)
         Padding(
           padding: EdgeInsets.only(bottom: t.space.md),

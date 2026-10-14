@@ -11,22 +11,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
-Map<String, Object?> testEnvValues(
-        {String mode = 'light', String palette = 'saffron', bool devTools = true, bool mockData = true}) =>
+Map<String, Object?> testEnvValues({String mode = 'light', bool devTools = true, bool mockData = true}) =>
     {
       'APP_ENV': 'dev',
       'API_HOST': 'http://localhost:8000',
-      'THEME_PALETTE': palette,
       'THEME_MODE': mode,
       'DEV_TOOLS': devTools,
       'MOCK_DATA': mockData,
       'LOG_LEVEL': 'debug',
     };
 
-Future<AppConfig> testConfig(
-        {String mode = 'light', String palette = 'saffron', bool devTools = true, bool mockData = true}) =>
+Future<AppConfig> testConfig({String mode = 'light', bool devTools = true, bool mockData = true}) =>
     loadAppConfig(
-        env: AppEnv.parse(testEnvValues(mode: mode, palette: palette, devTools: devTools, mockData: mockData)));
+        env: AppEnv.parse(testEnvValues(mode: mode, devTools: devTools, mockData: mockData)));
 
 /// Pumps the whole app at [size] and opens [location]. Returns the provider container.
 Future<ProviderContainer> pumpApp(

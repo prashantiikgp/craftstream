@@ -2,7 +2,7 @@
 /// If any part fails, main.dart shows ConfigErrorApp instead of running with half the config.
 library;
 
-import 'package:flutter/material.dart' show ThemeMode;
+import 'package:flutter/material.dart' show Brightness, ThemeMode;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -42,9 +42,6 @@ class AppConfig {
 Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
   final e = env ?? AppEnv.fromCompiledValues();
   final theme = ThemeEngine(await loadThemeRules(bundle: bundle));
-  if (!theme.paletteNames.contains(e.themePalette)) {
-    throw EnvError(['THEME_PALETTE "${e.themePalette}" is not in theme.yml (have: ${theme.paletteNames.join(', ')})']);
-  }
   return AppConfig(
     env: e,
     theme: theme,
@@ -59,32 +56,21 @@ Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
 /// Overridden in main.dart with the loaded config.
 final appConfigProvider = Provider<AppConfig>((ref) => throw StateError('appConfigProvider not initialised'));
 
-/// Which palette and brightness the app shows. Starts from the environment; changeable only with DEV_TOOLS.
-class ThemeChoice {
-  final String palette;
-  final ThemeMode mode;
-  const ThemeChoice(this.palette, this.mode);
-}
-
-class ThemeChoiceController extends Notifier<ThemeChoice> {
+/// Light or dark. Starts from the environment (`system` follows the device); the theme toggle switches it.
+class ThemeChoiceController extends Notifier<ThemeMode> {
   @override
-  ThemeChoice build() {
+  ThemeMode build() {
     final env = ref.watch(appConfigProvider).env;
-    final mode = ThemeMode.values.firstWhere((m) => m.name == env.themeMode, orElse: () => ThemeMode.system);
-    return ThemeChoice(env.themePalette, mode);
+    return ThemeMode.values.firstWhere((m) => m.name == env.themeMode, orElse: () => ThemeMode.system);
   }
 
-  bool get canChange => ref.read(appConfigProvider).env.devTools;
+  void setMode(ThemeMode mode) => state = mode;
 
-  void setPalette(String palette) {
-    if (canChange && ref.read(appConfigProvider).theme.paletteNames.contains(palette)) {
-      state = ThemeChoice(palette, state.mode);
-    }
-  }
-
-  void setMode(ThemeMode mode) {
-    if (canChange) state = ThemeChoice(state.palette, mode);
+  /// Flip to the other mode; [platform] is what `system` currently shows.
+  void toggle(Brightness platform) {
+    final dark = state == ThemeMode.dark || (state == ThemeMode.system && platform == Brightness.dark);
+    state = dark ? ThemeMode.light : ThemeMode.dark;
   }
 }
 
-final themeChoiceProvider = NotifierProvider<ThemeChoiceController, ThemeChoice>(ThemeChoiceController.new);
+final themeChoiceProvider = NotifierProvider<ThemeChoiceController, ThemeMode>(ThemeChoiceController.new);

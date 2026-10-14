@@ -15,48 +15,76 @@ ThemeSchema rules([String Function(String yaml)? edit]) {
 void main() {
   final engine = ThemeEngine(rules());
 
-  test('theme.yml loads and every palette resolves in light and dark', () {
-    expect(engine.paletteNames, containsAll(['saffron', 'terracotta', 'marigold']));
-    for (final p in engine.paletteNames) {
-      for (final b in Brightness.values) {
-        expect(engine.resolve(p, b).palette, p);
-      }
-    }
+  test('theme B: light is #F5F5F5 grey, dark is near-black purple, accents are the same fills', () {
+    expect(hexOf(engine.light.ground), '#F5F5F5');
+    expect(hexOf(engine.dark.ground), '#0F0B18');
+    expect(hexOf(engine.light.accent('orange').fill), '#FF6A2B');
+    expect(hexOf(engine.dark.accent('orange').fill), '#FF6A2B');
+    expect(engine.light.accents.keys, containsAll(['orange', 'pink', 'purple', 'marigold', 'neutral']));
   });
 
-  test('saffron light is the Fluno orange', () {
-    final t = engine.resolve('saffron', Brightness.light);
-    expect(hexOf(t.brand), '#FE5722');
-    expect(hexOf(t.brandInk), '#C2410C');
-    expect(hexOf(t.bg), '#FAF6F4');
+  test('tones name an accent', () {
+    expect(engine.dark.tone('success').fill, engine.dark.accent('marigold').fill);
+    expect(engine.dark.tone('danger').fill, engine.dark.accent('pink').fill);
+    expect(() => engine.dark.tone('nope'), throwsA(isA<ThemeRulesError>()));
   });
 
-  test('every palette is readable in light and dark (WCAG)', () {
+  test('colour references resolve: plain names, accent parts and tone parts', () {
+    final t = engine.light;
+    expect(t.color('text_muted'), t.textMuted);
+    expect(t.color('purple.ink'), t.accent('purple').ink);
+    expect(t.color('success.fill'), t.tone('success').fill);
+    expect(() => t.color('purple.glow'), throwsA(isA<ThemeRulesError>()));
+  });
+
+  test('both modes are readable (every check in theme.yml contrast)', () {
     final failures = engine.contrastFailures();
     expect(failures, isEmpty, reason: failures.join('\n'));
+    expect(engine.contrastCheckCount, greaterThan(20));
   });
 
-  test('a palette that makes text unreadable is caught', () {
-    final bad = ThemeEngine(rules((y) => y.replaceFirst('brand_ink: "#C2410C"', 'brand_ink: "#FF9966"')));
-    final failures = bad.contrastFailures().map((f) => f.toString()).join('\n');
-    expect(failures, contains('saffron/light: brand_ink on bg'));
+  test('an unreadable colour is caught', () {
+    final bad = ThemeEngine(rules((y) => y.replaceFirst('text_muted: "#57506A"', 'text_muted: "#B0B0B0"')));
+    expect(bad.contrastFailures().map((f) => '$f').join('\n'), contains('light: text_muted on ground'));
   });
 
-  test('bad colours, unknown keys and a missing default palette fail at load', () {
-    expect(() => ThemeEngine(rules((y) => y.replaceFirst('brand: "#FE5722"', 'brand: "orange"'))),
-        throwsA(isA<ThemeRulesError>().having((e) => e.message, 'message', contains('palettes.saffron.light.brand'))));
-    expect(() => rules((y) => y.replaceFirst('brand_d: "#E64A19"', 'brand_d: "#E64A19"\n      brand_x: "#000000"')),
+  test('bad colours, unknown keys, unknown tones and broken legacy names fail at load', () {
+    expect(() => ThemeEngine(rules((y) => y.replaceFirst('ground: "#F5F5F5"', 'ground: "grey"'))),
+        throwsA(isA<ThemeRulesError>().having((e) => e.message, 'message', contains('colors.light.ground'))));
+    expect(() => rules((y) => y.replaceFirst('ground: "#F5F5F5"', 'ground: "#F5F5F5"\n    glow: "#000000"')),
         throwsA(isA<ConfigError>()));
-    expect(() => ThemeEngine(rules((y) => y.replaceFirst('default_palette: saffron', 'default_palette: neon'))),
+    expect(() => ThemeEngine(rules((y) => y.replaceFirst('success: marigold', 'success: gold'))),
+        throwsA(isA<ThemeRulesError>()));
+    expect(() => ThemeEngine(rules((y) => y.replaceFirst('brand_ink: orange.ink', 'brand_ink: orange.glow'))),
         throwsA(isA<ThemeRulesError>()));
   });
 
-  test('type scale resolves families, weights and tracking in px', () {
-    final t = engine.resolve('saffron', Brightness.light);
-    expect(t.text['h1']!.family, 'Poppins');
-    expect(t.text['body']!.family, 'Inter');
-    expect(t.text['h1']!.weight, FontWeight.w700);
-    expect(t.text['display']!.letterSpacing, closeTo(-0.68, 0.001));
+  test('type: Space Grotesk for text, Space Mono for eyebrows and prices, tracking in px', () {
+    final t = engine.light;
+    expect(t.styles['h1']!.family, 'SpaceGrotesk');
+    expect(t.styles['eyebrow']!.family, 'SpaceMono');
+    expect(t.styles['eyebrow']!.upper, isTrue);
+    expect(t.styles['price']!.family, 'SpaceMono');
+    expect(t.styles['h1']!.weight, FontWeight.w700);
+    expect(t.styles['hero']!.letterSpacing, closeTo(-1.68, 0.001));
+  });
+
+  test('the key-card lift shadow takes the colour of what casts it', () {
+    final pink = engine.dark.accent('pink').fill;
+    final lift = engine.dark.lift(pink);
+    expect(lift, hasLength(3));
+    expect(lift.first.color.withValues(alpha: 1), pink);
+    expect(engine.light.shadowRest, isEmpty);
+  });
+
+  test('sharp corners, and v1 names point at theme B values', () {
+    final t = engine.light;
+    expect(t.radius.sharp, 2);
+    expect(t.radius.card, 4);
+    expect(t.radius.pill, t.radius.sharp);
+    expect(t.brand, t.accent('orange').fill);
+    expect(t.bg, t.ground);
+    expect(t.success.wash, t.tone('success').wash);
   });
 
   test('contrast maths matches WCAG reference values', () {

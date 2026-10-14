@@ -1,4 +1,4 @@
-/// The app shell: theme from tokens (palette + light/dark from ThemeChoice) and the router.
+/// The app shell: theme B tokens (light/dark from ThemeChoice) and the router.
 library;
 
 import 'package:flutter/material.dart';
@@ -14,13 +14,13 @@ class CraftStreamApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(appConfigProvider);
-    final choice = ref.watch(themeChoiceProvider);
+    final mode = ref.watch(themeChoiceProvider);
     return MaterialApp.router(
       title: 'CraftStream',
       debugShowCheckedModeBanner: false,
-      theme: buildTheme(config.theme.resolve(choice.palette, Brightness.light)),
-      darkTheme: buildTheme(config.theme.resolve(choice.palette, Brightness.dark)),
-      themeMode: choice.mode,
+      theme: buildTheme(config.theme.light),
+      darkTheme: buildTheme(config.theme.dark),
+      themeMode: mode,
       routerConfig: ref.watch(routerProvider),
     );
   }

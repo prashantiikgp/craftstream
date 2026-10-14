@@ -1,184 +1,120 @@
-# CraftStream design tokens. Read by theme_engine; nothing in a screen may hard-code a colour, size or radius.
+# CraftStream design tokens: theme B ("two doors"). Sharp corners, Space Grotesk + Space Mono, artistic accents
+# (orange, pink, purple, marigold) on a near-black purple (dark) or #F5F5F5 grey (light) ground.
+# Read by theme_engine; nothing in a brick or screen may hard-code a colour, size, radius or duration.
 #
-# Built on the Fluno client design system (hotel_agent/frontend/shared/design/tokens): same names, same orange,
-# same warm surfaces. Fixes carried over: one naming layer, a real type + spacing scale, dark values for everything.
-#
-# Palettes are swappable: env/<name>.json picks one (THEME_PALETTE); with DEV_TOOLS on, /catalog switches live.
-# Every palette is checked by test/domain/ui/theme_engine_test.dart for WCAG contrast, so experiment freely:
-# a combination that makes text hard to read fails the build.
-#
-# Colour names (from the Fluno system):
-#   brand        fills (buttons, active pills)       brand_d / brand_dd  hover / pressed
-#   brand_ink    orange TEXT (fill orange fails AA)  brand_l / brand_ll  tint / wash backgrounds
-#   brand_line   hairline in brand colour            on_brand            text/icons placed on a brand fill
-#   secondary*   the second colour (tags, highlights, illustrations); same suffix rules
+# Every colour pair under `contrast:` is checked for WCAG contrast in both modes by theme_engine_test, so a
+# combination that makes text hard to read fails the build.
 
-default_palette: saffron
-
-palettes:
-  saffron:
-    label: Saffron (Fluno orange)
-    light:
-      brand: "#FE5722"
-      brand_d: "#E64A19"
-      brand_dd: "#BF360C"
-      brand_ink: "#C2410C"
-      brand_l: "#FFE3D9"
-      brand_ll: "#FFF4F0"
-      brand_line: "#FFCDBC"
-      on_brand: "#FFFFFF"
-      secondary: "#F32B86"
-      secondary_ink: "#B4145F"
-      secondary_l: "#FDE1EE"
-      on_secondary: "#FFFFFF"
-    dark:
-      brand: "#FF7043"
-      brand_d: "#FE5722"
-      brand_dd: "#FFAB91"
-      brand_ink: "#FE9776"
-      brand_l: "#3A2418"
-      brand_ll: "#241A16"
-      brand_line: "#6E301F"
-      on_brand: "#16181D"
-      secondary: "#F76BAA"
-      secondary_ink: "#FAA0C9"
-      secondary_l: "#471C34"
-      on_secondary: "#16181D"
-
-  terracotta:
-    label: Terracotta + indigo dye
-    light:
-      brand: "#C8553D"
-      brand_d: "#B44C37"
-      brand_dd: "#96402E"
-      brand_ink: "#9A3A26"
-      brand_l: "#F6E4E0"
-      brand_ll: "#FCF5F3"
-      brand_line: "#EECCC5"
-      on_brand: "#FFFFFF"
-      secondary: "#3B4BA0"
-      secondary_ink: "#2F3C86"
-      secondary_l: "#E4E6F2"
-      on_secondary: "#FFFFFF"
-    dark:
-      brand: "#D27460"
-      brand_d: "#C8553D"
-      brand_dd: "#E4AA9E"
-      brand_ink: "#DD9687"
-      brand_l: "#3A2423"
-      brand_ll: "#281E20"
-      brand_line: "#5A2F29"
-      on_brand: "#16181D"
-      secondary: "#7681BC"
-      secondary_ink: "#A7AED4"
-      secondary_l: "#1E233A"
-      on_secondary: "#16181D"
-
-  marigold:
-    label: Marigold + peacock teal
-    light:
-      brand: "#F28C18"
-      brand_d: "#DA7E16"
-      brand_dd: "#B66912"
-      brand_ink: "#A45708"
-      brand_l: "#FDEDDA"
-      brand_ll: "#FEF8F1"
-      brand_line: "#FBDCBA"
-      on_brand: "#241A16"   # white on marigold is only 2.5:1
-      secondary: "#0F766E"
-      secondary_ink: "#0B5E57"
-      secondary_l: "#DDECEB"
-      on_secondary: "#FFFFFF"
-    dark:
-      brand: "#F4A142"
-      brand_d: "#F28C18"
-      brand_dd: "#F8C68C"
-      brand_ink: "#F7B870"
-      brand_l: "#422F1C"
-      brand_ll: "#2C241C"
-      brand_line: "#6A441B"
-      on_brand: "#16181D"
-      secondary: "#579F9A"
-      secondary_ink: "#93C1BE"
-      secondary_l: "#142D2F"
-      on_secondary: "#16181D"
-
-# Surfaces and text: shared by every palette (warm paper in light, warm charcoal in dark).
-surfaces:
+# ── Colours ──────────────────────────────────────────────────────────────────────────────────────────────────
+# Ground and text, per mode.
+#   ground        page background            surface       cards, fields, bars
+#   surface_alt   skeletons, inset areas      line / line_strong   hairlines / field borders and outlines
+#   text          main text                   text_muted    secondary text (AA on ground and surface)
+#   text_faint    placeholders only (decorative, never the only carrier of meaning)
+#   scrim         behind the video and dialogs
+colors:
   light:
-    bg: "#FAF6F4"           # page
-    card: "#FFFFFF"
-    surface_soft: "#F4EEEA" # inset areas, skeletons
-    hair: "#E7DFDA"         # borders, dividers
-    hair_soft: "#F0EAE6"
-    ink: "#383838"          # main text
-    sub: "#707070"          # secondary text (AA on bg and card)
-    faint: "#A8A8A8"        # placeholders, disabled: decorative only, never the only carrier of meaning
-    scrim: "#15110F"        # behind dialogs and the video player
+    ground: "#F5F5F5"
+    surface: "#FFFFFF"
+    surface_alt: "#ECEAF0"
+    line: "#DEDAE5"
+    line_strong: "#C9C3D4"
+    text: "#150F20"
+    text_muted: "#57506A"
+    text_faint: "#7A7290"
+    scrim: "#150F20"
   dark:
-    bg: "#16181D"
-    card: "#1E212A"
-    surface_soft: "#1B1E25"
-    hair: "#332B27"
-    hair_soft: "#272C38"
-    ink: "#ECEAE6"
-    sub: "#A99E97"
-    faint: "#6E7482"
+    ground: "#0F0B18"
+    surface: "#19132A"
+    surface_alt: "#221B36"
+    line: "#33294D"
+    line_strong: "#4A3F66"
+    text: "#F6F2FC"
+    text_muted: "#B4AACB"
+    text_faint: "#8E84A6"
     scrim: "#000000"
 
-# Status colours: fill / border / ink (text) / wash (background tint). In dark, wash and ink swap roles.
-semantic:
+# Accents, per mode. Each has:
+#   fill     shapes, filled buttons and badges     on_fill  text and icons placed on the fill
+#   ink      coloured text on ground or surface    wash     tinted backgrounds (badges, notices)
+#   line     outlines and focus rings
+# Fills stay the same in both modes; inks are darker in light mode so coloured text stays readable.
+accents:
   light:
-    success: { fill: "#22C55E", border: "#16A34A", ink: "#15803D", wash: "#DCFCE7" }
-    danger:  { fill: "#EF4444", border: "#FECACA", ink: "#991B1B", wash: "#FEE2E2" }
-    info:    { fill: "#3B82F6", border: "#BFDBFE", ink: "#1E40AF", wash: "#DBEAFE" }
-    warning: { fill: "#F59E0B", border: "#F4B68C", ink: "#805500", wash: "#FFE7AE" }
+    orange:   { fill: "#FF6A2B", on_fill: "#150F20", ink: "#B83D0B", wash: "#FFE6DA", line: "#FF6A2B" }
+    pink:     { fill: "#FF4D94", on_fill: "#150F20", ink: "#B4145F", wash: "#FFE0EC", line: "#FF4D94" }
+    purple:   { fill: "#9D6BFF", on_fill: "#150F20", ink: "#6D28D9", wash: "#EDE4FF", line: "#9D6BFF" }
+    marigold: { fill: "#FFB627", on_fill: "#150F20", ink: "#8A5A00", wash: "#FFF1D1", line: "#FFB627" }
+    neutral:  { fill: "#C9C3D4", on_fill: "#150F20", ink: "#57506A", wash: "#ECEAF0", line: "#C9C3D4" }
   dark:
-    success: { fill: "#2ECC71", border: "#1F5133", ink: "#6EE7A0", wash: "#13291D" }
-    danger:  { fill: "#F26060", border: "#5C2626", ink: "#FCA5A5", wash: "#2C1618" }
-    info:    { fill: "#5B96F7", border: "#25406B", ink: "#93C0FD", wash: "#15213A" }
-    warning: { fill: "#F0B429", border: "#5A431C", ink: "#F0CE7A", wash: "#3A2F14" }
+    orange:   { fill: "#FF6A2B", on_fill: "#0F0B18", ink: "#FF8A57", wash: "#2E1A16", line: "#FF6A2B" }
+    pink:     { fill: "#FF4D94", on_fill: "#0F0B18", ink: "#FF7AAE", wash: "#2E1424", line: "#FF4D94" }
+    purple:   { fill: "#9D6BFF", on_fill: "#0F0B18", ink: "#BFA0FF", wash: "#211A3A", line: "#9D6BFF" }
+    marigold: { fill: "#FFB627", on_fill: "#0F0B18", ink: "#FFC75A", wash: "#2B2212", line: "#FFB627" }
+    neutral:  { fill: "#4A3F66", on_fill: "#F6F2FC", ink: "#B4AACB", wash: "#221B36", line: "#4A3F66" }
 
-# Fonts are bundled (assets/fonts, Latin + ₹ subset, ~170 KB total); nothing is fetched at runtime.
-typography:
-  heading_family: Poppins
-  body_family: Inter
-  # size px, weight, line height (multiple), letter spacing (em)
-  styles:
-    display:  { family: heading, size: 34, weight: 700, height: 1.15, tracking: -0.02 }
-    h1:       { family: heading, size: 28, weight: 700, height: 1.2, tracking: -0.01 }
-    h2:       { family: heading, size: 22, weight: 600, height: 1.25, tracking: 0 }
-    h3:       { family: heading, size: 18, weight: 600, height: 1.3, tracking: 0 }
-    title:    { family: body, size: 16, weight: 600, height: 1.4, tracking: 0 }
-    body:     { family: body, size: 15, weight: 400, height: 1.5, tracking: 0 }
-    body_strong: { family: body, size: 15, weight: 500, height: 1.5, tracking: 0 }
-    label:    { family: body, size: 14, weight: 600, height: 1.3, tracking: 0.01 }
-    caption:  { family: body, size: 12, weight: 500, height: 1.4, tracking: 0.02 }
-    price:    { family: heading, size: 20, weight: 700, height: 1.2, tracking: 0 }
+# What each meaning looks like. Bricks, notices and status badges ask for a tone, never a colour.
+tones:
+  brand: orange       # the main action (Buy, Place order)
+  success: marigold   # live, placed, done
+  danger: pink        # failed, errors
+  info: purple        # processing, hints
+  warning: orange     # connection lost, paused
+  neutral: neutral    # waiting, disabled
 
+# ── Type ─────────────────────────────────────────────────────────────────────────────────────────────────────
+# Bundled and subset by tools/subset_fonts.sh (Latin + ₹); nothing is fetched at runtime.
+fonts:
+  sans: SpaceGrotesk   # UI text
+  mono: SpaceMono      # eyebrows, prices, order numbers, counts (400 and 700 only)
+
+# size px, weight, line height (multiple), letter spacing (em); upper: shown in capitals.
+styles:
+  hero:        { font: sans, size: 56, weight: 700, height: 1.0, tracking: -0.03 }  # the Buy / Sell words
+  display:     { font: sans, size: 44, weight: 700, height: 1.0, tracking: -0.03 }  # "Order placed"
+  h1:          { font: sans, size: 34, weight: 700, height: 1.05, tracking: -0.02 } # screen titles
+  h2:          { font: sans, size: 26, weight: 700, height: 1.1, tracking: -0.02 }
+  h3:          { font: sans, size: 18, weight: 700, height: 1.25, tracking: 0 }
+  title:       { font: sans, size: 15, weight: 700, height: 1.3, tracking: 0 }      # card titles
+  body:        { font: sans, size: 15, weight: 400, height: 1.5, tracking: 0 }
+  body_strong: { font: sans, size: 15, weight: 600, height: 1.5, tracking: 0 }
+  label:       { font: sans, size: 14, weight: 600, height: 1.3, tracking: 0 }      # buttons, field labels
+  caption:     { font: sans, size: 13, weight: 400, height: 1.4, tracking: 0 }
+  eyebrow:     { font: mono, size: 12, weight: 700, height: 1.2, tracking: 0.12, upper: true }  # 01 / BUY
+  mono:        { font: mono, size: 12, weight: 400, height: 1.3, tracking: 0 }      # ids, dates, file sizes
+  price:       { font: mono, size: 26, weight: 700, height: 1.1, tracking: 0 }
+  price_sm:    { font: mono, size: 14, weight: 700, height: 1.2, tracking: 0 }
+
+# ── Space, shape, depth, motion ──────────────────────────────────────────────────────────────────────────────
 # 4-point spacing scale (logical pixels).
 spacing: { xxs: 2, xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48, section: 64 }
 
-radius: { tag: 7, sm: 8, md: 14, lg: 22, pill: 999 }
+# Sharp: buttons, chips, fields and badges use `sharp`; cards and doors use `card`.
+radius: { none: 0, sharp: 2, card: 4 }
 
-# Warm-tinted shadows (light) and plain black (dark). Each level is a list of layers.
-elevation:
+# Shadow layers. `accent` as a colour means the colour of the thing casting it (an orange door glows orange).
+#   rest   cards at rest (flat: theme B separates with hairlines, not shadows)
+#   lift   hover and press: the key-card shadow from the client dashboard (--sh-ant), tinted by the accent
+#   float  menus and dialogs
+shadows:
   light:
-    sm:
-      - { x: 0, y: 1, blur: 2, spread: 0, color: "#32190F", opacity: 0.05 }
-      - { x: 0, y: 6, blur: 20, spread: 0, color: "#32190F", opacity: 0.06 }
-    lg:
-      - { x: 0, y: 2, blur: 6, spread: 0, color: "#32190F", opacity: 0.07 }
-      - { x: 0, y: 18, blur: 50, spread: 0, color: "#32190F", opacity: 0.11 }
+    rest: []
+    lift:
+      - { x: 0, y: 3, blur: 6, spread: -4, color: accent, opacity: 0.30 }
+      - { x: 0, y: 6, blur: 16, spread: 0, color: accent, opacity: 0.16 }
+      - { x: 0, y: 9, blur: 28, spread: 8, color: "#1F2A3D", opacity: 0.06 }
+    float:
+      - { x: 0, y: 8, blur: 24, spread: 0, color: "#150F20", opacity: 0.18 }
   dark:
-    sm:
-      - { x: 0, y: 1, blur: 2, spread: 0, color: "#000000", opacity: 0.30 }
-      - { x: 0, y: 6, blur: 20, spread: 0, color: "#000000", opacity: 0.35 }
-    lg:
-      - { x: 0, y: 2, blur: 6, spread: 0, color: "#000000", opacity: 0.40 }
-      - { x: 0, y: 18, blur: 50, spread: 0, color: "#000000", opacity: 0.50 }
+    rest: []
+    lift:
+      - { x: 0, y: 3, blur: 6, spread: -4, color: accent, opacity: 0.35 }
+      - { x: 0, y: 6, blur: 16, spread: 0, color: accent, opacity: 0.22 }
+      - { x: 0, y: 9, blur: 28, spread: 8, color: "#9D6BFF", opacity: 0.12 }
+    float:
+      - { x: 0, y: 8, blur: 24, spread: 0, color: "#000000", opacity: 0.45 }
 
-# Durations in ms; curves are cubic-bezier control points. Reduced motion = shorter, not none.
+# Durations in ms; curves are cubic-bezier control points. Reduced motion = shorter, and no lift or press scale.
 motion:
   durations: { fast: 150, medium: 350, slow: 600 }
   curves:
@@ -187,3 +123,55 @@ motion:
     in: [0.7, 0.0, 0.84, 0.0]
     spring: [0.34, 1.56, 0.64, 1.0]
   reduced_motion_factor: 0.3
+  hover_lift: 2         # px a card rises on hover
+  door_hover_lift: 3    # the Buy / Sell doors rise a little more
+  press_scale: 0.985    # how far a pressed card sinks
+  skeleton_pulse_ms: 1100
+  skeleton_min_opacity: 0.55
+
+# Focus and touch: keyboard focus ring and the smallest tap target (WCAG 2.5.8 / Android guidance).
+focus: { ring_width: 2, ring_tone: brand, min_target: 44 }
+
+# ── Readability checks ───────────────────────────────────────────────────────────────────────────────────────
+# fg / bg name a colour (`text`, `ground`…) or, under each_accent, a part of every accent (`ink`, `wash`…).
+# min: 7.0 body text (AAA), 4.5 normal text (AA), 3.0 large text and UI parts.
+contrast:
+  pairs:
+    - { fg: text, bg: ground, min: 7.0, why: body text }
+    - { fg: text, bg: surface, min: 7.0, why: body text on cards }
+    - { fg: text_muted, bg: ground, min: 4.5, why: secondary text }
+    - { fg: text_muted, bg: surface, min: 4.5, why: secondary text on cards }
+    - { fg: text_muted, bg: surface_alt, min: 4.5, why: secondary text on inset areas }
+    - { fg: line_strong, bg: surface, min: 1.4, why: field borders stay visible }
+  each_accent:
+    - { fg: ink, bg: ground, min: 4.5, why: coloured text }
+    - { fg: ink, bg: surface, min: 4.5, why: coloured text on cards }
+    - { fg: ink, bg: wash, min: 4.5, why: badge and notice text on its tint }
+    - { fg: on_fill, bg: fill, min: 4.5, why: label on a filled button or badge }
+
+# ── Temporary: v1 token names ────────────────────────────────────────────────────────────────────────────────
+# The v1 widgets still ask for these names. Each points at a theme B colour, so v1 screens already look like
+# theme B. Delete this block when the last v1 screen is replaced by a screen YAML (YAML_PLAN.md 1.4).
+legacy:
+  colors:
+    brand: orange.fill
+    brand_d: orange.fill
+    brand_dd: orange.ink
+    brand_ink: orange.ink
+    brand_l: orange.wash
+    brand_ll: orange.wash
+    brand_line: orange.line
+    on_brand: orange.on_fill
+    secondary: purple.fill
+    secondary_ink: purple.ink
+    secondary_l: purple.wash
+    on_secondary: purple.on_fill
+    bg: ground
+    card: surface
+    surface_soft: surface_alt
+    hair: line
+    hair_soft: line
+    ink: text
+    sub: text_muted
+    faint: text_faint
+  radius: { tag: sharp, sm: sharp, md: card, lg: card, pill: sharp }

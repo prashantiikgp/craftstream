@@ -14,7 +14,7 @@ class ProductCard extends StatelessWidget {
   static double infoHeight(BuildContext context) {
     final type = context.type, t = context.tokens;
     double line(TextStyle s) => MediaQuery.textScalerOf(context).scale(s.fontSize!) * (s.height ?? 1.3);
-    return 2 * t.space.md + 2 * line(type.title) + t.space.xs + line(type.caption) + t.space.sm + line(type.price);
+    return 2 * t.space.md + 2 * line(type.title) + t.space.xs + line(type.caption) + t.space.sm + line(type.named('price_sm'));
   }
 
   @override
@@ -63,7 +63,7 @@ class ProductCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: t.space.sm),
-                  PriceText(product.price, currency: product.currency),
+                  PriceText(product.price, currency: product.currency, style: context.type.named('price_sm')),
                 ],
               ),
             ),

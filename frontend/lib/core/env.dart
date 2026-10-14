@@ -20,7 +20,6 @@ class EnvError implements Exception {
 class AppEnv {
   final AppEnvName name;
   final Uri apiHost;
-  final String themePalette;
   final String themeMode; // light | dark | system
   final bool devTools;
   final bool mockData; // true = in-app fake data, no API calls (lib/data/mock/)
@@ -29,7 +28,6 @@ class AppEnv {
   const AppEnv({
     required this.name,
     required this.apiHost,
-    required this.themePalette,
     required this.themeMode,
     required this.devTools,
     required this.mockData,
@@ -41,7 +39,6 @@ class AppEnv {
   /// Values compiled in with --dart-define-from-file. Defaults only apply to debug runs without an env file.
   static const _rawName = String.fromEnvironment('APP_ENV');
   static const _rawApiHost = String.fromEnvironment('API_HOST', defaultValue: 'http://localhost:8000');
-  static const _rawPalette = String.fromEnvironment('THEME_PALETTE', defaultValue: 'saffron');
   static const _rawMode = String.fromEnvironment('THEME_MODE', defaultValue: 'system');
   static const _rawDevTools = bool.fromEnvironment('DEV_TOOLS', defaultValue: true);
   static const _rawMockData = bool.fromEnvironment('MOCK_DATA', defaultValue: true);
@@ -52,7 +49,6 @@ class AppEnv {
         {
           'APP_ENV': _rawName,
           'API_HOST': _rawApiHost,
-          'THEME_PALETTE': _rawPalette,
           'THEME_MODE': _rawMode,
           'DEV_TOOLS': _rawDevTools,
           'MOCK_DATA': _rawMockData,
@@ -87,9 +83,6 @@ class AppEnv {
     final mode = (raw['THEME_MODE'] as String?) ?? '';
     if (!const {'light', 'dark', 'system'}.contains(mode)) problems.add('THEME_MODE must be light, dark or system');
 
-    final palette = (raw['THEME_PALETTE'] as String?) ?? '';
-    if (palette.isEmpty) problems.add('THEME_PALETTE is required');
-
     final devTools = raw['DEV_TOOLS'];
     if (devTools is! bool) problems.add('DEV_TOOLS must be true or false');
     if (name == AppEnvName.prod && devTools == true) problems.add('DEV_TOOLS must be false in prod');
@@ -106,7 +99,6 @@ class AppEnv {
     return AppEnv(
       name: name!,
       apiHost: host!.replace(path: ''),
-      themePalette: palette,
       themeMode: mode,
       devTools: devTools as bool,
       mockData: mockData as bool,

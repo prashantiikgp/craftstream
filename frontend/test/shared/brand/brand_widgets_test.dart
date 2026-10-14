@@ -1,4 +1,4 @@
-// Every brand widget paints in every palette and mode, and poster looks are stable per tag.
+// Every brand widget paints in both modes, and poster looks are stable per tag.
 import 'package:craftstream/domain/ui/theme_engine.dart';
 import 'package:craftstream/domain/ui/theme_loader.dart';
 import 'package:craftstream/shared/brand/brand.dart';
@@ -15,14 +15,14 @@ void main() {
     engine = ThemeEngine(await loadThemeRules());
   });
 
-  for (final palette in ['saffron', 'terracotta', 'marigold']) {
+  {
     for (final brightness in Brightness.values) {
-      testWidgets('brand widgets: $palette ${brightness.name}', (tester) async {
+      testWidgets('brand widgets: ${brightness.name}', (tester) async {
         tester.view.physicalSize = const Size(1280, 1600);
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
         await tester.pumpWidget(MaterialApp(
-          theme: buildTheme(engine.resolve(palette, brightness)),
+          theme: buildTheme(engine.resolve(brightness)),
           home: Scaffold(
             body: SingleChildScrollView(
               child: Wrap(spacing: 16, runSpacing: 16, children: [

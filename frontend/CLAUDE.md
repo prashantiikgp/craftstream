@@ -33,16 +33,22 @@ API client. Screens and controllers only see the repository interfaces.
 
 ## Design system
 
-- Tokens: `assets/config/ui/theme.yml` (palettes with brand + secondary ramps, surfaces, status quartets, type scale,
-  spacing, radius, elevation, motion). Built on the Fluno client system (same names, same orange `#FE5722`).
-- In widgets: `final t = context.tokens;` for colours/space/radius/shadows, `context.type.h1` etc. for text.
-  Components live in `lib/shared/widgets/` (import `shared/widgets/ds.dart`): `AppButton`, `AppCard`, `StatusBadge`,
-  `TagChip`, `AppTextField`, `Notice`, `PriceText` (₹1,20,000), `SectionHeader`, `EmptyState`, `Skeleton`.
-- Colour names: `brand` = fills only; `brand_ink` = orange **text**; `brand_l/ll` = tints; `on_brand` = text on a brand
-  fill. Status colours come as `fill / border / ink / wash`. Never use a raw `Color(0x…)` in a screen.
-- New palette: add it under `palettes:` in theme.yml. `theme_engine_test` fails if any text pair drops below WCAG AA.
-- `/catalog` (DEV_TOOLS only) shows every token and component and switches palette + light/dark live.
-- Fonts are bundled and subset (`tools/subset_fonts.sh`, ~170 KB). Never add `google_fonts` runtime fetching.
+- **Theme B** ("two doors"; canvas "CraftStream new look"): sharp corners, Space Grotesk and Space Mono, accents
+  orange, pink, purple and marigold. Light mode uses a `#F5F5F5` ground, dark mode `#0F0B18`.
+- Tokens live in `assets/config/ui/theme.yml`:
+  - `colors` (ground, surface, line, text…, per mode);
+  - `accents` (fill / on_fill / ink / wash / line, per mode) and `tones` (success → marigold …);
+  - `styles` (type, by name), `spacing`, `radius` (none / sharp / card), `shadows`, `motion`, `focus`;
+  - `contrast` (the WCAG pairs `theme_engine_test` checks in both modes).
+- In code:
+  - `context.tokens` gives colours, space, radius and shadows;
+  - `t.tone('danger')` gives a meaning's colours;
+  - `t.lift(accentFill)` gives the key-card hover shadow;
+  - `context.type.named('eyebrow')` gives a text style. Styles with `upper: true` are shown in capitals.
+- **v1 names** (`brand`, `brand_ink`, `card`, `hair`, `sub` …) still work through theme.yml's temporary `legacy:` block
+  until the last v1 screen is replaced. New bricks use the theme B names.
+- `/catalog` (DEV_TOOLS only) shows every token and switches light/dark live. Users switch with the theme toggle.
+- Fonts are bundled and subset (`tools/subset_fonts.sh`, ~137 KB). Never add `google_fonts` runtime fetching.
 
 ## Environments (security)
 

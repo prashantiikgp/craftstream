@@ -8,10 +8,13 @@ import 'package:flutter/material.dart';
 
 import '../../domain/ui/theme_engine.dart';
 
-/// Text styles from the type scale, coloured with `ink` by default.
+/// Text styles from the type scale, coloured with `text` by default. Bricks look styles up by their theme.yml
+/// name with [named]; v1 widgets use the fields.
 class TypeStyles {
   final TextStyle display, h1, h2, h3, title, body, bodyStrong, label, caption, price;
-  const TypeStyles({
+  final Map<String, TextStyle> _all;
+  final Set<String> _upper;
+  const TypeStyles._(this._all, this._upper, {
     required this.display,
     required this.h1,
     required this.h2,
@@ -25,23 +28,34 @@ class TypeStyles {
   });
 
   factory TypeStyles.from(DesignTokens t) {
-    TextStyle s(String name) {
-      final spec = t.text[name]!;
-      return TextStyle(
-        fontFamily: spec.family,
-        fontSize: spec.size,
-        fontWeight: spec.weight,
-        height: spec.height,
-        letterSpacing: spec.letterSpacing,
-        color: t.ink,
-      );
-    }
-
-    return TypeStyles(
-      display: s('display'), h1: s('h1'), h2: s('h2'), h3: s('h3'), title: s('title'), body: s('body'),
-      bodyStrong: s('body_strong'), label: s('label'), caption: s('caption'), price: s('price'),
+    final all = {
+      for (final MapEntry(key: name, value: spec) in t.styles.entries)
+        name: TextStyle(
+          fontFamily: spec.family,
+          fontSize: spec.size,
+          fontWeight: spec.weight,
+          height: spec.height,
+          letterSpacing: spec.letterSpacing,
+          color: t.text,
+        ),
+    };
+    final upper = {for (final e in t.styles.entries) if (e.value.upper) e.key};
+    return TypeStyles._(
+      all, upper,
+      display: all['display']!, h1: all['h1']!, h2: all['h2']!, h3: all['h3']!, title: all['title']!,
+      body: all['body']!, bodyStrong: all['body_strong']!, label: all['label']!, caption: all['caption']!,
+      price: all['price']!,
     );
   }
+
+  /// A style by its theme.yml name (`eyebrow`, `price_sm` …).
+  TextStyle named(String name) =>
+      _all[name] ?? (throw ArgumentError('unknown text style "$name" (have: ${_all.keys.join(', ')})'));
+
+  bool has(String name) => _all.containsKey(name);
+
+  /// Whether theme.yml shows this style in capitals (`upper: true`).
+  bool isUpper(String name) => _upper.contains(name);
 }
 
 class AppTokens extends ThemeExtension<AppTokens> {

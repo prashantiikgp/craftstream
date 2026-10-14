@@ -1,4 +1,4 @@
-// The whole catalog renders in every palette and mode without layout errors, from the real YAML files.
+// The whole catalog renders in both modes without layout errors, from the real YAML files.
 import 'package:craftstream/core/config.dart';
 import 'package:craftstream/core/env.dart';
 import 'package:craftstream/features/design_catalog/design_catalog_screen.dart';
@@ -13,23 +13,22 @@ void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     final env = AppEnv.parse({
-      'APP_ENV': 'dev', 'API_HOST': 'http://localhost:8000', 'THEME_PALETTE': 'saffron',
-      'THEME_MODE': 'light', 'DEV_TOOLS': true, 'MOCK_DATA': true, 'LOG_LEVEL': 'debug',
+      'APP_ENV': 'dev', 'API_HOST': 'http://localhost:8000', 'THEME_MODE': 'light', 'DEV_TOOLS': true, 'MOCK_DATA': true, 'LOG_LEVEL': 'debug',
     });
     config = await loadAppConfig(env: env);
   });
 
-  for (final palette in ['saffron', 'terracotta', 'marigold']) {
+  {
     for (final brightness in Brightness.values) {
       for (final size in [const Size(390, 844), const Size(1280, 900)]) {
-        testWidgets('catalog: $palette ${brightness.name} ${size.width.toInt()}px', (tester) async {
+        testWidgets('catalog: ${brightness.name} ${size.width.toInt()}px', (tester) async {
           tester.view.physicalSize = size;
           tester.view.devicePixelRatio = 1;
           addTearDown(tester.view.reset);
           await tester.pumpWidget(ProviderScope(
             overrides: [appConfigProvider.overrideWithValue(config)],
             child: MaterialApp(
-              theme: buildTheme(config.theme.resolve(palette, brightness)),
+              theme: buildTheme(config.theme.resolve(brightness)),
               home: const DesignCatalogScreen(),
             ),
           ));
@@ -40,12 +39,4 @@ void main() {
       }
     }
   }
-
-  test('an env palette that is not in theme.yml stops startup', () async {
-    final env = AppEnv.parse({
-      'APP_ENV': 'dev', 'API_HOST': 'http://localhost:8000', 'THEME_PALETTE': 'neon',
-      'THEME_MODE': 'light', 'DEV_TOOLS': true, 'MOCK_DATA': true, 'LOG_LEVEL': 'debug',
-    });
-    expect(() => loadAppConfig(env: env), throwsA(isA<EnvError>()));
-  });
 }

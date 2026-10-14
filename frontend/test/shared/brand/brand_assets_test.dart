@@ -19,8 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 const write = bool.fromEnvironment('WRITE_BRAND');
 const previewDir = '../.playwright-mcp/brand';
 
-/// Icons are always the default palette in light mode: the launcher can't follow the in-app palette switch.
-const iconPalette = 'saffron';
+/// Launcher icons use the light-mode colours: the launcher can't follow the in-app light/dark switch.
 
 void main() {
   late ThemeEngine engine;
@@ -29,8 +28,8 @@ void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     engine = ThemeEngine(await loadThemeRules());
-    light = engine.resolve(iconPalette, Brightness.light);
-    dark = engine.resolve(iconPalette, Brightness.dark);
+    light = engine.light;
+    dark = engine.dark;
   });
 
   Map<String, String> textFiles(DesignTokens t) {

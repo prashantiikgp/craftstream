@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 Map<String, Object?> base([Map<String, Object?> changes = const {}]) => {
       'APP_ENV': 'prod',
       'API_HOST': 'https://api.example.com',
-      'THEME_PALETTE': 'saffron',
       'THEME_MODE': 'light',
       'DEV_TOOLS': false,
       'MOCK_DATA': false,
