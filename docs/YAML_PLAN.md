@@ -222,7 +222,10 @@ per size class.
       out of `mock_products.dart`).
 
 ### 1.6 Responsive check
-- [ ] Phone, tablet portrait, tablet landscape and desktop for every screen, in light and dark. Breakpoints and
+- [ ] Phone, tablet portrait, tablet landscape and desktop for every screen, in light and dark.
+      Progress: screen_render_test draws every screen at 360/390/820/1280 px in both modes; Product, New product /
+      Uploading go side by side and Your products shows card columns on wide screens (`width: auto`, `split`,
+      `list layout: cards`). Left: a screenshot pass against the canvas at each size (Phase 3). Breakpoints and
       per-class layouts stay in `layout.yml`; screens refer to size classes by name.
 
 **Done when:** the literal lint passes for `lib/features` and `lib/shared/bricks`, every screen is a YAML file,
