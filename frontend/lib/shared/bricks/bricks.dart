@@ -6,10 +6,12 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../domain/ui/bricks_engine.dart';
+import '../../schemas/app/navigation_schema.dart';
 import '../format/money.dart';
 import '../screens/screen_scope.dart';
 import '../theme/app_theme.dart';
 import 'browse_bricks.dart';
+import 'burst_brick.dart';
 import 'form_bricks.dart';
 import 'kit.dart';
 import 'product_bricks.dart';
@@ -61,6 +63,8 @@ const brickBuilders = <String, BrickBuilder>{
   'video_pick': BrickBuilder(videoPickBrick),
   'progress_bar': BrickBuilder(progressBarBrick),
   'steps': BrickBuilder(stepsBrick),
+  'crumb': BrickBuilder(_crumb),
+  'burst': BrickBuilder(burstBrick),
   'spacer': BrickBuilder(_spacer, flexes: true),
 };
 
@@ -103,21 +107,36 @@ Widget _text(BuildContext context, BrickNode n) {
 Widget _wordmark(BuildContext context, BrickNode n) {
   final s = BrickStyle.of(context, 'wordmark');
   final lg = n.need<String>('size') == 'lg';
+  // On phones the large wordmark sits in one row (stripes beside the name) so Home fits one screen.
+  final compact = lg && s.names('compact_on').contains(BrickScope.of(context).sizeClass);
   final name = StyledText(
     configOf(context).strings.get('brand.name'),
-    style: s.name(lg ? 'lg_name' : 'sm_name'),
+    style: s.name(compact ? 'compact_name' : (lg ? 'lg_name' : 'sm_name')),
   );
   final mark = Stripes(
-    size: s.number(lg ? 'lg_mark' : 'sm_mark'),
+    size: s.number(compact ? 'compact_mark' : (lg ? 'lg_mark' : 'sm_mark')),
     accents: s.names('stripes'),
   );
   final tagline = n.prop<String>('tagline');
-  if (!lg) {
-    return Row(
+  if (!lg || compact) {
+    final row = Row(
+      mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
       children: [
         mark,
         SizedBox(width: s.space('gap')),
         name,
+      ],
+    );
+    if (!compact || tagline == null) return row;
+    return Column(
+      children: [
+        row,
+        SizedBox(height: s.space('gap')),
+        StyledText(
+          say(context, tagline),
+          style: s.name('tagline'),
+          color: s.color('tagline_color'),
+        ),
       ],
     );
   }
@@ -219,6 +238,7 @@ Widget _door(BuildContext context, BrickNode n) {
   final title = _say(context, n, 'title');
   final body = n.prop<String>('body');
   final radius = BorderRadius.circular(s.radius('radius'));
+  final compact = s.names('compact_on').contains(BrickScope.of(context).sizeClass);
   return Pressable(
     accent: accent.fill,
     lift: t.doorHoverLift,
@@ -240,7 +260,7 @@ Widget _door(BuildContext context, BrickNode n) {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(s.space('padding')),
+            padding: EdgeInsets.all(s.space(compact ? 'compact_padding' : 'padding')),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -270,7 +290,7 @@ Widget _door(BuildContext context, BrickNode n) {
                   ],
                 ),
                 SizedBox(height: s.space('gap')),
-                StyledText(title, style: s.name('title')),
+                StyledText(title, style: s.name(compact ? 'compact_title' : 'title')),
                 if (body != null) ...[
                   SizedBox(height: s.space('gap')),
                   // A share of the door's width, so the text scales with the door and stays clear of its art.
@@ -281,6 +301,7 @@ Widget _door(BuildContext context, BrickNode n) {
                       say(context, body),
                       style: s.name('body'),
                       color: s.color('body_color'),
+                      maxLines: s.number('body_lines').toInt(),
                     ),
                   ),
                 ],
@@ -384,20 +405,59 @@ Widget _topBar(BuildContext context, BrickNode n) {
                   ),
                 ),
         ),
-        const Spacer(),
-        if (role != null)
-          StyledText(
-            config.strings.get('nav.role_tag', {
-              'number': role.number,
-              'label': config.strings.get(role.label),
-            }),
-            style: s.name('role_tag'),
-            color: t.accent(role.accent).ink,
+        SizedBox(width: s.space('padding')),
+        Expanded(
+          child: Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: _crumbs(context, s, n.prop<List<BrickNode>>('crumbs') ?? const [], role),
           ),
+        ),
       ],
     ),
   );
 }
+
+/// The trail on the right of the top bar: crumbs joined by the separator. Crumbs with an action lead back (in the
+/// role's colour); the last one is where you are. Long crumbs shorten with an ellipsis.
+Widget _crumbs(BuildContext context, BrickStyle s, List<BrickNode> crumbs, RoleSchema? role) {
+  final scope = BrickScope.of(context);
+  final t = context.tokens;
+  final shown = crumbs.where(scope.shows).toList();
+  final link = role == null ? t.tone('brand').ink : t.accent(role.accent).ink;
+  return Row(mainAxisSize: MainAxisSize.min, children: [
+    for (final (i, c) in shown.indexed) ...[
+      if (i > 0) StyledText(s.name('separator'), style: s.name('crumb'), color: s.color('separator_color')),
+      Flexible(
+        child: c.prop<ActionSpec>('action') == null
+            ? StyledText(crumbText(context, c), style: s.name('crumb'), color: s.color('crumb_current'), maxLines: 1)
+            : Pressable(
+                accent: link,
+                semanticLabel: crumbText(context, c),
+                onTap: () => scope.act(context, c.prop<ActionSpec>('action')),
+                builder: (context, active) => StyledText(crumbText(context, c),
+                    style: s.name('crumb'), color: active ? t.text : link, maxLines: 1),
+              ),
+      ),
+    ],
+  ]);
+}
+
+/// A crumb's words: its role ("01 / BUY"), its strings key, or its data.
+String crumbText(BuildContext context, BrickNode c) {
+  final config = configOf(context);
+  final role = c.prop<String>('role');
+  if (role != null) {
+    final r = config.navigation.role(role);
+    return config.strings.get('nav.role_tag', {'number': r.number, 'label': config.strings.get(r.label)});
+  }
+  final text = c.prop<String>('text');
+  if (text != null) return config.strings.get(text);
+  return '${BrickScope.of(context).lookup(c.need('bind')) ?? ''}';
+}
+
+/// A crumb on its own (outside a top bar): just its words.
+Widget _crumb(BuildContext context, BrickNode n) =>
+    StyledText(crumbText(context, n), style: BrickStyle.of(context, 'top_bar').name('crumb'));
 
 Widget _mark(BuildContext context, BrickNode n) {
   final s = BrickStyle.of(context, 'mark');

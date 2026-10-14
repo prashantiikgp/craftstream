@@ -59,17 +59,20 @@ void main() {
     }
   });
 
-  // What the user sees when the site opens on a laptop or desktop: Home fits without scrolling (so the name and
-  // tagline stay in view), and the door text has room for whole words. The test font is wider than Space
+  // What the user sees when the app opens: Home fits one screen at every size (no scrolling, Your orders in view),
+  // and the door text (two lines at most) has room for whole words. The test font is wider than Space
   // Grotesk, so passing here leaves a margin on real screens.
-  for (final size in const [Size(1280, 720), Size(1366, 657), Size(1440, 900), Size(1920, 880), Size(820, 1180)]) {
+  for (final size in const [
+    Size(360, 640), Size(390, 844), Size(820, 1180), // phones, tablet portrait
+    Size(1280, 720), Size(1366, 657), Size(1440, 900), Size(1920, 880), // laptops and desktops
+  ]) {
     testWidgets('home fits and reads well at ${size.width.toInt()}×${size.height.toInt()}', (tester) async {
       final config = configs['light']!;
       await pumpApp(tester, config, size: size, location: '/');
       final scroll = tester.state<ScrollableState>(find.byType(Scrollable).first).position;
-      if (size.width >= 1280) expect(scroll.maxScrollExtent, 0, reason: 'Home should fit without scrolling');
+      expect(scroll.maxScrollExtent, 0, reason: 'Home must fit one screen: Your orders visible without scrolling');
       for (final key in ['home.buy_body', 'home.sell_body']) {
-        expect(tester.getSize(find.text(config.strings.get(key))).width, greaterThanOrEqualTo(180),
+        expect(tester.getSize(find.text(config.strings.get(key))).width, greaterThanOrEqualTo(150),
             reason: '$key is squeezed into a narrow column');
       }
       expect(tester.takeException(), isNull);

@@ -9,6 +9,9 @@ top:
     label: common.home
     role: buy
     action: { go: / }
+    crumbs:
+      - { brick: crumb, role: buy, action: { go: /discover } }
+      - { brick: crumb, text: orders.title }
 
 body:
   - brick: text

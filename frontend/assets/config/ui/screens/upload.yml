@@ -13,6 +13,9 @@ top:
     label: studio.title
     role: sell
     action: { go: /studio }
+    crumbs:
+      - { brick: crumb, role: sell, action: { go: /studio } }
+      - { brick: crumb, text: upload.title }
 
 
 body:

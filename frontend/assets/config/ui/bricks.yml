@@ -35,6 +35,9 @@ bricks:
       lg_name: h1
       sm_mark: 20
       sm_name: title
+      compact_on: [compact]              # size classes where the large wordmark sits in one row to save height
+      compact_mark: 30
+      compact_name: h2
       gap: md
       tagline: eyebrow
       tagline_color: text_muted
@@ -73,17 +76,21 @@ bricks:
       padding: xl
       gap: sm
       radius: card
-      min_height: 180
+      min_height: 150
       background: surface
       border: line
       number: eyebrow
       title: hero
       body: body
+      body_lines: 2                      # the text never takes more than two lines
       body_color: text_muted
       body_width: 0.62                   # share of the door the text may use (keeps it clear of the door art)
       arrow_box: 36
       arrow_icon: 18
       arrow: arrow                       # icons.yml name
+      compact_on: [compact]              # phones: a smaller title and padding so Home fits one screen
+      compact_title: h1
+      compact_padding: lg
 
   link_row:
     about: A full-width row that leads somewhere, with an icon and an optional count (Your orders · 3 →).
@@ -104,24 +111,38 @@ bricks:
       count: price_sm
 
   top_bar:
-    about: The bar at the top of an inner screen. Home or back on the left; the role's "01 / BUY" on the right.
+    about: >-
+      The bar at the top of an inner screen. Home or back on the left; on the right, where you are: a trail of
+      crumbs (Buy / Hand-thrown clay mug / Checkout). Every crumb but the last leads back.
     props:
       leading: { type: enum, options: [home, back], default: home }
       action: { type: action, required: true }
-      label: { type: text }              # next to the leading control (e.g. HOME)
-      role: { type: role }
+      label: { type: text }              # next to the leading control (e.g. Home)
+      role: { type: role }               # colours the crumbs that lead somewhere
+      crumbs: { type: nodes }            # crumb bricks, outermost first
     style:
-      height: 44
+      height: 52
       padding: sm
-      mark: 20
+      mark: 28
       icon: 22
       box: 44
       border: line
-      label: eyebrow
-      label_color: text_muted
-      role_tag: eyebrow
+      label: h3
+      label_color: text
       back_icon: back
       stripes: [orange, pink, purple]
+      crumb: label
+      crumb_current: text_muted
+      separator: " / "
+      separator_color: text_faint
+
+  crumb:
+    about: One step of the top bar's trail. Its text is a strings key, a role ("01 / BUY") or data (a title).
+    props:
+      text: { type: text }
+      role: { type: role }
+      bind: { type: bind }
+      action: { type: action }           # none on the last crumb (where you are)
 
   mark:
     about: A filled square with an icon, used as a big status mark (the check on Order placed).
@@ -669,6 +690,20 @@ bricks:
       border: line_strong
       done_tone: success
       done_icon: check
+
+  burst:
+    about: >-
+      A one-shot celebration (the client portal's celebration_burst): small squares in the accent colours fly out
+      from behind its item and fade. Plays once when the screen opens; skipped when the device asks for less motion.
+    props:
+      item: { type: node, required: true }
+    style:
+      pieces: 28
+      piece: 7                           # px, a square piece
+      distance: [60, 150]                # px each piece flies, min and max
+      spin: 340                          # degrees each piece turns
+      duration_ms: 900
+      accents: [orange, pink, purple, marigold]
 
   spacer:
     about: "Takes the free height, pushing what follows to the bottom (only inside a screen with `fill: true`)."

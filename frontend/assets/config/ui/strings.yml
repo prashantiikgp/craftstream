@@ -42,7 +42,6 @@ strings:
     to_dark: Switch to the dark theme
 
   discover:
-    title: Find a craft
     search_hint: Search pottery, ikat, brass…
     clear_search: Clear search
     all_tags: All
@@ -81,12 +80,11 @@ strings:
     about: How it's made
     not_ready_title: The video is still processing
     not_ready_message: You can buy this once the process video is ready to watch.
-    after_order_title: What happens after you order
-    after_order_message: "{artisan} gets your order and contacts you to arrange delivery. No payment is taken in the app."
     load_error: We couldn't load this product. Check your connection and try again.
 
   checkout:
     title: Place your order
+    crumb: Checkout
     each: "{price} each"
     name_label: Your name
     name_hint: How the artisan should address you

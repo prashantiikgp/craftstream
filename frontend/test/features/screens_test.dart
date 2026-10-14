@@ -16,7 +16,7 @@ void main() {
   });
 
   final screens = <String, List<String> Function(AppConfig)>{
-    '/discover': (c) => [str(c, 'discover.title'), 'Hand-thrown clay mug'],
+    '/discover': (c) => [str(c, 'discover.search_hint'), 'Hand-thrown clay mug'],
     '/orders': (c) => [str(c, 'orders.empty_title')],
     // Status tags use the eyebrow style, which theme.yml shows in capitals.
     '/studio': (c) => [str(c, 'studio.title'), 'Glazed serving bowl', str(c, 'status.failed').toUpperCase()],
@@ -53,6 +53,6 @@ void main() {
     await settle(tester);
     await tester.tap(find.text(str(light, 'home.buy_title')));
     await settle(tester);
-    expect(find.text(str(light, 'discover.title')), findsOneWidget);
+    expect(find.text(str(light, 'discover.search_hint')), findsOneWidget);
   });
 }

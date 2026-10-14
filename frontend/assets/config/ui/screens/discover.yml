@@ -9,12 +9,10 @@ top:
     label: common.home
     role: buy
     action: { go: / }
+    crumbs:
+      - { brick: crumb, role: buy }
 
 body:
-  - brick: text
-    text: discover.title
-    style: h1
-
   - brick: search_field
     bind: discover.text
     hint: discover.search_hint

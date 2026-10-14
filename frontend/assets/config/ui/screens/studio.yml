@@ -10,6 +10,8 @@ top:
     label: common.home
     role: sell
     action: { go: / }
+    crumbs:
+      - { brick: crumb, role: sell }
 
 body:
   - brick: text

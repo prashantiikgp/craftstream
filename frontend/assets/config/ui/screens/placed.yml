@@ -6,9 +6,12 @@ gap: lg
 backdrop: placed
 
 body:
-  - brick: mark
-    icon: check
-    tone: brand
+  # The celebration: confetti in the accent colours bursts from behind the check, once.
+  - brick: burst
+    item:
+      brick: mark
+      icon: check
+      tone: brand
 
   - brick: text
     text: placed.step

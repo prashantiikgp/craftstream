@@ -11,6 +11,9 @@ top:
     label: common.back
     role: buy
     action: { back: true }
+    crumbs:
+      - { brick: crumb, role: buy, action: { go: /discover } }
+      - { brick: crumb, bind: product.title }
 
 body:
   - brick: split
@@ -52,13 +55,6 @@ body:
 
       - brick: value
         bind: product.description
-
-      - brick: notice
-        tone: info
-        icon: info
-        title: product.after_order_title
-        message: product.after_order_message
-        args: { artisan: product.artisan_name }
 
 bottom:
   - brick: buy_bar

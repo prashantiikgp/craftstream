@@ -11,6 +11,10 @@ top:
     label: common.back
     role: buy
     action: { back: true }
+    crumbs:
+      - { brick: crumb, role: buy, action: { go: /discover } }
+      - { brick: crumb, bind: checkout.product.title, action: { go: "/product/{checkout.product.id}" } }
+      - { brick: crumb, text: checkout.crumb }
 
 body:
   - brick: text
