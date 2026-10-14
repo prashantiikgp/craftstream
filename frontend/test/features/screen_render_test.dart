@@ -59,6 +59,23 @@ void main() {
     }
   });
 
+  // What the user sees when the site opens on a laptop or desktop: Home fits without scrolling (so the name and
+  // tagline stay in view), and the door text has room for whole words. The test font is wider than Space
+  // Grotesk, so passing here leaves a margin on real screens.
+  for (final size in const [Size(1280, 720), Size(1366, 657), Size(1440, 900), Size(1920, 880), Size(820, 1180)]) {
+    testWidgets('home fits and reads well at ${size.width.toInt()}×${size.height.toInt()}', (tester) async {
+      final config = configs['light']!;
+      await pumpApp(tester, config, size: size, location: '/');
+      final scroll = tester.state<ScrollableState>(find.byType(Scrollable).first).position;
+      if (size.width >= 1280) expect(scroll.maxScrollExtent, 0, reason: 'Home should fit without scrolling');
+      for (final key in ['home.buy_body', 'home.sell_body']) {
+        expect(tester.getSize(find.text(config.strings.get(key))).width, greaterThanOrEqualTo(180),
+            reason: '$key is squeezed into a narrow column');
+      }
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   const sizes = {'phone': Size(390, 844), 'small phone': Size(360, 640), 'tablet': Size(820, 1180), 'desktop': Size(1280, 900)};
 
   for (final mode in ['light', 'dark']) {

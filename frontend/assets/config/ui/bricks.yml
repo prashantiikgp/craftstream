@@ -59,7 +59,7 @@ bricks:
       items: { type: nodes, required: true }
     style:
       gap: lg
-      side_by_side_from: medium          # a size class from ui/layout.yml
+      side_by_side_from: expanded        # a size class from ui/layout.yml (where screens with width: auto go wide)
 
   door:
     about: A big tappable box for one role. Lifts and glows in the role's colour on hover and press.
@@ -80,7 +80,7 @@ bricks:
       title: hero
       body: body
       body_color: text_muted
-      body_inset_end: 140                # keeps the text clear of the door art
+      body_width: 0.62                   # share of the door the text may use (keeps it clear of the door art)
       arrow_box: 36
       arrow_icon: 18
       arrow: arrow                       # icons.yml name

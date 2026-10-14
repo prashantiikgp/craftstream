@@ -273,10 +273,10 @@ Widget _door(BuildContext context, BrickNode n) {
                 StyledText(title, style: s.name('title')),
                 if (body != null) ...[
                   SizedBox(height: s.space('gap')),
-                  Padding(
-                    padding: EdgeInsetsDirectional.only(
-                      end: s.number('body_inset_end'),
-                    ),
+                  // A share of the door's width, so the text scales with the door and stays clear of its art.
+                  FractionallySizedBox(
+                    alignment: AlignmentDirectional.centerStart,
+                    widthFactor: s.number('body_width'),
                     child: StyledText(
                       say(context, body),
                       style: s.name('body'),

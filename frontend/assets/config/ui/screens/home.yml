@@ -1,6 +1,6 @@
 about: The front door. The company name, then one door to buy and one to sell, then the buyer's orders.
 data: home
-width: narrow
+width: auto              # phones: one column; wide screens: the doors side by side at full width
 fill: true
 gap: lg
 backdrop: home
