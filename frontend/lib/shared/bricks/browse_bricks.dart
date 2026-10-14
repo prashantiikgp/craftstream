@@ -82,8 +82,7 @@ class _SearchFieldState extends State<_SearchField> {
           border: border(s.color('border')),
           enabledBorder: border(s.color('border')),
           focusedBorder: border(s.color('focus')),
-          prefixIcon: Padding(
-            padding: EdgeInsets.symmetric(horizontal: s.space('padding')),
+          prefixIcon: Center(
             child: YamlIcon(s.name('search_icon'), size: s.number('icon'), color: s.color('icon_color')),
           ),
           prefixIconConstraints: BoxConstraints.tight(Size(s.number('icon') + 2 * s.space('padding'), s.number('height'))),
