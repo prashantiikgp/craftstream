@@ -80,7 +80,7 @@ bricks:
       title: hero
       body: body
       body_color: text_muted
-      body_inset_end: 96                 # keeps the text clear of the door art
+      body_inset_end: 140                # keeps the text clear of the door art
       arrow_box: 36
       arrow_icon: 18
       arrow: arrow                       # icons.yml name

@@ -69,7 +69,11 @@ class ScreenHost extends ConsumerWidget {
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: pad),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                      if (spec.top.isNotEmpty) _Bricks(spec.top, gap: t.spacing(spec.gap), fill: false),
+                      if (spec.top.isNotEmpty)
+                        Padding(
+                          padding: EdgeInsets.only(top: pad),
+                          child: _Bricks(spec.top, gap: t.spacing(spec.gap), fill: false),
+                        ),
                       Expanded(
                         child: data.state == SourceState.loading
                             ? Center(child: CircularProgressIndicator(color: t.tone('brand').fill))

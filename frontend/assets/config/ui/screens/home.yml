@@ -2,7 +2,7 @@ about: The front door. The company name, then one door to buy and one to sell, t
 data: home
 width: narrow
 fill: true
-gap: xl
+gap: lg
 backdrop: home
 
 top:
