@@ -17,14 +17,14 @@ void main() {
   test('routes.yml loads; nested paths are joined and their parameters listed', () {
     expect(engine.initial, '/');
     final buy = engine.entries.firstWhere((e) => e.path == '/product/:id/buy');
-    expect(buy.legacy, 'checkout');
+    expect(buy.screen, 'checkout');
     expect(buy.params, ['id']);
     expect(engine.screenNames, containsAll(['home', 'orders', 'placed']));
   });
 
   test('concrete locations and go: templates match routes', () {
     expect(engine.match('/placed/3129d7a45f42')?.screen, 'placed');
-    expect(engine.match('/product/p_01/buy')?.legacy, 'checkout');
+    expect(engine.match('/product/p_01/buy')?.screen, 'checkout');
     expect(engine.match('/discover?q=mug')?.screen, 'discover');
     expect(engine.match('/nowhere'), isNull);
     expect(engine.acceptsTemplate('/placed/{item.id}'), isTrue);

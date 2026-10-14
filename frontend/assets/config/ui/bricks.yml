@@ -163,6 +163,7 @@ bricks:
       variant: { type: enum, options: [primary, ghost], default: primary }
       tone: { type: tone, default: brand }
       enabled: { type: bind }                    # when the bound value is false the button is greyed out
+      busy: { type: bind }                       # while true the button shows a spinner and does nothing
       action: { type: action, required: true }
     style:
       height: 54
@@ -172,6 +173,8 @@ bricks:
       label: title
       ghost_border: line_strong
       ghost_background: surface
+      spinner: 18
+      spinner_stroke: 2
 
   list:
     about: Repeats one brick for every item of a bound list; inside it, `item` is the current entry.
@@ -393,6 +396,7 @@ bricks:
       title: { type: text, required: true }
       message: { type: text }
       args: { type: args }
+      detail: { type: bind }                     # text from the data (e.g. the API's error); replaces message
     style:
       padding: lg
       gap: sm
@@ -467,6 +471,86 @@ bricks:
       error_max_width: 320
       error_padding: lg
       error_style: body
+
+  product_summary:
+    about: A small card for the product being ordered. Poster, title, who made it and the unit price.
+    props:
+      bind: { type: bind, required: true }       # a product
+      artisan: { type: text, required: true }    # e.g. product.by_artisan: "by {artisan}"
+      each: { type: text, required: true }       # e.g. checkout.each: "{price} each"
+    style:
+      padding: md
+      gap: md
+      poster: 64
+      background: surface
+      border: line
+      title: title
+      title_lines: 2
+      artisan: caption
+      artisan_color: text_muted
+      each: price_sm
+      each_color: marigold.ink
+
+  text_field:
+    about: A labelled text input. Sends each change through `action`; shows the source's error under it.
+    props:
+      label: { type: text, required: true }
+      hint: { type: text, required: true }
+      bind: { type: bind, required: true }       # the current text
+      error: { type: bind }                      # {key, args} from the source, or null
+      action: { type: action, required: true }   # a {call: …}; gets the text
+    style:
+      gap: sm
+      padding: md
+      label: eyebrow
+      label_color: text_muted
+      text: body
+      hint: text_faint
+      background: surface
+      border: line_strong
+      focus: brand.line
+      error: caption
+      error_color: danger.ink
+      radius: sharp
+
+  stepper:
+    about: − value + within limits (the buttons stop at min and max), with an optional limit note beside it.
+    props:
+      bind: { type: bind, required: true }
+      min: { type: bind, required: true }
+      max: { type: bind, required: true }
+      less: { type: text, required: true }       # button labels for screen readers
+      more: { type: text, required: true }
+      limit: { type: text }                      # e.g. checkout.quantity_limit: "Up to {max} per order"
+      action: { type: action, required: true }   # a {call: …}; gets the new value
+    style:
+      height: 48
+      button: 44
+      icon: 16
+      less_icon: minus
+      more_icon: plus
+      value_width: 36
+      value: price_sm
+      background: surface
+      border: line_strong
+      disabled: text_faint
+      gap: md
+      limit: caption
+      limit_color: text_muted
+
+  amount_row:
+    about: A label and an amount of money, under a hairline (the order total).
+    props:
+      label: { type: text, required: true }
+      bind: { type: bind, required: true }
+      currency: { type: bind, required: true }
+    style:
+      padding: lg
+      border: line
+      label: eyebrow
+      label_color: text_muted
+      amount: price
+      amount_color: marigold.ink
 
   spacer:
     about: "Takes the free height, pushing what follows to the bottom (only inside a screen with `fill: true`)."

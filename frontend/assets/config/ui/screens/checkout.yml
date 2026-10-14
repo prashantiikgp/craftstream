@@ -1,0 +1,80 @@
+about: >-
+  Place an order: who is buying and how many. No payment; the artisan contacts the buyer. Placing the order goes to
+  its receipt (Order placed).
+data: checkout          # params.id -> the product
+width: narrow
+gap: lg
+
+top:
+  - brick: top_bar
+    leading: back
+    label: common.back
+    role: buy
+    action: { back: true }
+
+body:
+  - brick: text
+    text: checkout.title
+    style: h1
+
+  - brick: product_summary
+    bind: checkout.product
+    artisan: product.by_artisan
+    each: checkout.each
+
+  - brick: text_field
+    label: checkout.name_label
+    hint: checkout.name_hint
+    bind: checkout.name
+    error: checkout.name_error
+    action: { call: set_name }
+
+  - brick: text
+    text: checkout.quantity_label
+    style: eyebrow
+    color: text_muted
+
+  - brick: stepper
+    bind: checkout.quantity
+    min: checkout.min
+    max: checkout.max
+    less: checkout.decrease
+    more: checkout.increase
+    limit: checkout.quantity_limit
+    action: { call: set_quantity }
+
+  - brick: amount_row
+    label: checkout.total
+    bind: checkout.total
+    currency: checkout.currency
+
+  - brick: text
+    text: checkout.total_note
+    args: { quantity: checkout.quantity, price: checkout.unit_price }
+    color: text_muted
+
+  - brick: notice
+    when: checkout.failed
+    tone: danger
+    icon: info
+    title: checkout.failed_title
+    message: checkout.failed_message
+    detail: checkout.failure
+
+  - brick: button
+    label: checkout.place_order
+    busy: checkout.submitting
+    action: { call: place, then: { go: "/placed/{result}" } }
+
+  - brick: text
+    text: checkout.no_payment_note
+    color: text_muted
+    align: center
+
+error:
+  - brick: empty_state
+    icon: info
+    title: common.error_title
+    message: product.load_error
+    button: common.retry
+    action: { call: retry }

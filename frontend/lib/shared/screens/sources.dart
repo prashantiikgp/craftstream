@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/checkout/checkout_source.dart';
 import '../../features/discover/discover_source.dart';
 import '../../features/orders/orders_source.dart';
 import '../../features/product/product_source.dart';
@@ -25,4 +26,5 @@ const Map<String, SourceDef> screenSources = {
   'receipt': SourceDef(receiptSource),
   'discover': SourceDef(discoverSource, calls: discoverCalls),
   'product': SourceDef(productSource, calls: productCalls),
+  'checkout': SourceDef(checkoutSource, calls: checkoutCalls),
 };

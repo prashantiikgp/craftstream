@@ -2,6 +2,8 @@
 /// way to run actions. Bindings in screen YAML (`order.total`, `item.id`, `params.order_id`) resolve here.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 import '../../domain/ui/bricks_engine.dart';
@@ -15,8 +17,10 @@ class ScreenData {
   final SourceState state;
   final Map<String, Object?> values;
 
-  /// What `{call: name}` actions run; the argument is the action's `with:` value or the brick's own value.
-  final Map<String, void Function(Object? arg)> calls;
+  /// What `{call: name}` actions run; the argument is the action's `with:` value or the brick's own value. A call
+  /// may return a result (sync or async) that its `then:` action can use as `result`; returning `false` (or
+  /// throwing) skips `then:`.
+  final Map<String, FutureOr<Object?> Function(Object? arg)> calls;
   const ScreenData(this.state, [this.values = const {}, this.calls = const {}]);
   const ScreenData.ready(this.values, [this.calls = const {}]) : state = SourceState.ready;
 }
@@ -66,6 +70,17 @@ class BrickScope extends InheritedWidget {
   BrickScope withItem(Object? item, int index, Widget child) =>
       BrickScope(
           values: values, params: params, run: run, item: item, index: index, fill: fill, sizeClass: sizeClass, child: child);
+
+  /// The same scope with [result] (a call's answer) readable as `result` in templates (`/placed/{result}`).
+  BrickScope withResult(Object? result) => BrickScope(
+      values: {...values, 'result': result},
+      params: params,
+      run: run,
+      item: item,
+      index: index,
+      fill: fill,
+      sizeClass: sizeClass,
+      child: child);
 
   /// The same scope, telling bricks whether they have a share of the screen height.
   BrickScope withFill(bool fill, Widget child) => BrickScope(

@@ -55,6 +55,7 @@ ScreenData discoverSource(WidgetRef ref, Map<String, String> params) {
     'toggle_tag': (v) {
       final tag = v == null ? query.tag : '$v';
       if (tag != null) controller.toggleTag(tag);
+      return null;
     },
     'set_sort': (v) => controller.setSort(filters.sortNamed('$v')),
     'load_more': (_) => ref.read(discoverFeedProvider.notifier).loadMore(),

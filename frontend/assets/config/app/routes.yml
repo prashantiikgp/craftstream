@@ -22,7 +22,7 @@ routes:
     screen: product
     routes:
       - path: buy
-        legacy: checkout
+        screen: checkout
 
   # v1 screens, until each becomes a screen YAML
   - path: /studio

@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../domain/app/routes_engine.dart';
-import '../features/checkout/checkout_screen.dart';
 import '../features/design_catalog/design_catalog_screen.dart';
 import '../features/shell/app_shell.dart';
 import '../features/studio/studio_screen.dart';
@@ -20,7 +19,6 @@ import 'config.dart';
 final legacyScreens = <String, Widget Function(GoRouterState state)>{
   'studio': (_) => const StudioScreen(),
   'upload': (_) => const UploadScreen(),
-  'checkout': (s) => CheckoutScreen(productId: s.pathParameters['id']!),
   'design_catalog': (_) => const DesignCatalogScreen(),
 };
 

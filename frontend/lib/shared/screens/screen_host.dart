@@ -36,8 +36,15 @@ class ScreenHost extends ConsumerWidget {
       switch (action) {
         case CallAction(:final name, :final withPath, :final then):
           final call = data.calls[name] ?? (throw StateError('${spec.name}.yml: data source has no call "$name"'));
-          call(withPath == null ? value : scope.lookup(withPath));
-          if (then != null) run(context, then, scope);
+          final result = call(withPath == null ? value : scope.lookup(withPath));
+          if (then == null) return;
+          if (result is Future<Object?>) {
+            result.then((r) {
+              if (r != false && context.mounted) run(context, then, scope.withResult(r));
+            }, onError: (_) {});
+          } else if (result != false) {
+            run(context, then, scope.withResult(result));
+          }
         case GoAction(:final template):
           router.go(scope.fillTemplate(template));
         case BackAction():

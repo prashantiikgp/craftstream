@@ -116,6 +116,8 @@ Widget noticeBrick(BuildContext context, BrickNode n) {
   final t = context.tokens;
   final tone = t.tone(n.need('tone'));
   final message = n.prop<String>('message');
+  final detailPath = n.prop<String>('detail');
+  final detail = detailPath == null ? null : BrickScope.of(context).lookup(detailPath);
   return Container(
     padding: EdgeInsets.all(s.space('padding')),
     decoration: BoxDecoration(color: tone.wash, border: Border.all(color: tone.line)),
@@ -125,9 +127,10 @@ Widget noticeBrick(BuildContext context, BrickNode n) {
       Expanded(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           StyledText(say(context, n.need('title')), style: s.name('title'), color: tone.ink),
-          if (message != null) ...[
+          if (truthy(detail) || message != null) ...[
             SizedBox(height: s.space('gap')),
-            StyledText(say(context, message, args: n.prop('args')), style: s.name('message'), color: t.text),
+            StyledText(truthy(detail) ? '$detail' : say(context, message!, args: n.prop('args')),
+                style: s.name('message'), color: t.text),
           ],
         ]),
       ),

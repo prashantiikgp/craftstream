@@ -14,6 +14,7 @@ icons:
   close:  { stroke: ["M6 6l12 12", "M18 6L6 18"] }
   check:  { stroke: ["M4 12.5l5 5L20 6.5"] }
   plus:   { stroke: ["M12 5v14", "M5 12h14"] }
+  minus:  { stroke: ["M5 12h14"] }
   search: { stroke: ["M20 20l-4-4"], circles: [[11, 11, 7]] }
   orders: { stroke: ["M6 3h12v18l-3-2-3 2-3-2-3 2z", "M9 8h6", "M9 12h6"] }
   play:   { fill: ["M7 4l13 8-13 8z"] }

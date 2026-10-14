@@ -10,6 +10,7 @@ import '../format/money.dart';
 import '../screens/screen_scope.dart';
 import '../theme/app_theme.dart';
 import 'browse_bricks.dart';
+import 'form_bricks.dart';
 import 'kit.dart';
 import 'product_bricks.dart';
 
@@ -50,6 +51,10 @@ const brickBuilders = <String, BrickBuilder>{
   'notice': BrickBuilder(noticeBrick),
   'buy_bar': BrickBuilder(buyBarBrick),
   'video_player': BrickBuilder(videoPlayerBrick),
+  'product_summary': BrickBuilder(productSummaryBrick),
+  'text_field': BrickBuilder(textFieldBrick),
+  'stepper': BrickBuilder(stepperBrick),
+  'amount_row': BrickBuilder(amountRowBrick),
   'spacer': BrickBuilder(_spacer, flexes: true),
 };
 
@@ -329,8 +334,9 @@ Widget _receipt(BuildContext context, BrickNode n) {
 Widget _button(BuildContext context, BrickNode n) {
   final s = BrickStyle.of(context, 'button');
   final t = context.tokens;
-  final enabledPath = n.prop<String>('enabled');
-  final enabled = enabledPath == null || truthy(BrickScope.of(context).lookup(enabledPath));
+  final enabledPath = n.prop<String>('enabled'), busyPath = n.prop<String>('busy');
+  final busy = busyPath != null && truthy(BrickScope.of(context).lookup(busyPath));
+  final enabled = (enabledPath == null || truthy(BrickScope.of(context).lookup(enabledPath))) && !busy;
   final tone = t.tone(enabled ? n.need('tone') : 'neutral');
   final primary = n.need<String>('variant') == 'primary';
   final label = _say(context, n, 'label');
@@ -348,10 +354,15 @@ Widget _button(BuildContext context, BrickNode n) {
         border: primary ? null : Border.all(color: active ? tone.line : s.color('ghost_border')),
         borderRadius: BorderRadius.circular(s.radius('radius')),
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        StyledText(label, style: s.name('label'), color: ink),
-        if (icon != null) ...[SizedBox(width: s.space('gap')), YamlIcon(icon, size: s.number('icon'), color: ink)],
-      ]),
+      child: busy
+          ? SizedBox.square(
+              dimension: s.number('spinner'),
+              child: CircularProgressIndicator(strokeWidth: s.number('spinner_stroke'), color: ink),
+            )
+          : Row(mainAxisSize: MainAxisSize.min, children: [
+              StyledText(label, style: s.name('label'), color: ink),
+              if (icon != null) ...[SizedBox(width: s.space('gap')), YamlIcon(icon, size: s.number('icon'), color: ink)],
+            ]),
     ),
   );
 }
