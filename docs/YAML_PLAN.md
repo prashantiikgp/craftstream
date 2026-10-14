@@ -1,6 +1,7 @@
 # V2 plan: everything YAML-driven, theme B
 
-Status: **Phase 0 in progress** (2026-10-14). Decisions recorded in 0.2.
+Status: **Phase 1 in progress** (2026-10-14). Done: Phase 0; theme B; Home, Browse, Order placed, Your orders as screen YAML.
+Live: https://craftstream-qi0tvg.web.app (V2 build; v1 is the previous release in Firebase Hosting history).
 Inventory of what is hard-coded today: [`YAML_INVENTORY.md`](YAML_INVENTORY.md).
 Look and screens: the "CraftStream new look" canvas, rows **B dark** and **B light**.
 
@@ -128,7 +129,7 @@ and the convention tests run and fail on today's literals. The failing list *is*
 ## Phase 1: Frontend (theme B, everything in YAML)
 
 ### 1.1 Design system and tokens (`ui/theme.yml`)
-- [ ] Replace the palettes with **theme B**, in light and dark.
+- [x] Replace the palettes with **theme B**, in light and dark.
   - **Dark:** ground `#0F0B18`, surface `#19132A`, line `#33294D`, strong line `#4A3F66`, text `#F6F2FC`,
     muted `#B4AACB`.
   - **Light:** ground **`#F5F5F5`**, surface `#FFFFFF`, line `#DEDAE5`, strong line `#C9C3D4`, text `#150F20`,
@@ -136,16 +137,16 @@ and the convention tests run and fail on today's literals. The failing list *is*
   - **Accents:** orange `#FF6A2B`, pink `#FF4D94`, purple `#9D6BFF`, marigold `#FFB627`. Accent ink for text:
     dark `#FF8A57` / `#FF7AAE` / `#BFA0FF` / `#FFC75A`; light `#B83D0B` / `#B4145F` / `#6D28D9`.
   - **On-accent text** is ink (`#0F0B18` / `#150F20`), never white. Orange with white text fails AA.
-- [ ] **Type:** Space Grotesk (UI) and Space Mono (labels, prices, ids), bundled and subset with
+- [x] **Type:** Space Grotesk (UI) and Space Mono (labels, prices, ids), bundled and subset with
       `tools/subset_fonts.sh`. Inter and Poppins go. Check the web shell size after subsetting (≤ +60 KB).
-- [ ] **Shape:** radius `sharp` 2, `card` 3–4, no pills.
-- [ ] **Shadows:** the key-card set (`--sh-ant` layers) for hover and press. On dark it is tinted by the
+- [x] **Shape:** radius `sharp` 2, `card` 3–4, no pills.
+- [x] **Shadows:** the key-card set (`--sh-ant` layers) for hover and press. On dark it is tinted by the
       card's accent (an orange or pink glow).
-- [ ] **Motion:** lift −2 / −3 px on hover, scale 0.985 on press, 150 ms. Wire up the unused
+- [x] **Motion:** lift −2 / −3 px on hover, scale 0.985 on press, 150 ms. Wire up the unused
       `reduced_motion_factor`.
-- [ ] Move the contrast rules from `theme_engine.dart` into a `contrast:` block in theme.yml. The test checks
+- [x] Move the contrast rules from `theme_engine.dart` into a `contrast:` block in theme.yml. The test checks
       every pair in both modes.
-- [ ] **Theme mode:** `app/app.yml` sets the default (system); the user can switch light and dark from the
+- [ ] **Theme mode:** the toggle works (home); the default still comes from env THEME_MODE (prod: light); move it to `app/app.yml` (system) and add the toggle to every top bar. `app/app.yml` sets the default (system); the user can switch light and dark from the
       header.
 - [ ] Rebuild `/catalog` (dev only) from YAML, so the design system page reads its own text from strings.yml.
 - [ ] Update the **CraftStream Design System** artifact to theme B (tokens, type, components), so the canvas,
@@ -155,11 +156,11 @@ and the convention tests run and fail on today's literals. The failing list *is*
 
 ### 1.2 App, routes and navigation
 - [ ] `app/app.yml`: app name, initial route, default theme mode, dev-only routes.
-- [ ] `app/routes.yml`: every route (path, screen file, kind `tab` / `page`, shell, guard `dev_only`) and
+- [x] `app/routes.yml`: every route (path, screen file, kind `tab` / `page`, shell, guard `dev_only`) and
       redirects.
-- [ ] `app/navigation.yml`: the two roles (Buy `01`, Sell `02`) with their accent, entry route and nav items
+- [x] `app/navigation.yml`: the two roles (Buy `01`, Sell `02`) with their accent, entry route and nav items
       (route, label key, icon name). The role rule ("paths under `/studio` are Sell") moves here too.
-- [ ] **Theme B home** (`/`): the two doors replace the redirect to `/discover`.
+- [x] **Theme B home** (`/`): the two doors replace the redirect to `/discover`.
 
 ### 1.3 Bricks (`ui/bricks.yml` + `lib/shared/bricks/`)
 Every reusable widget becomes a brick, with variants, sizes and states in YAML.
@@ -170,11 +171,11 @@ Every reusable widget becomes a brick, with variants, sizes and states in YAML.
   - product card, product grid, listing card, product summary;
   - video player and its overlay (rung pill, controls, buffering);
   - video pick card, upload progress, buy bar, top bar (back + crumb), section header.
-- [ ] **Poster art:** the colour and shape rules for product posters go in `ui/art.yml`. The painter (geometry)
+- [x] **Poster art:** the colour and shape rules for product posters go in `ui/art.yml`. The painter (geometry)
       stays in Dart.
-- [ ] `ui/icons.yml`: semantic names (`search`, `back`, `play`, `orders`…) mapped to glyphs. Nothing else
+- [x] `ui/icons.yml`: semantic names (`search`, `back`, `play`, `orders`…) mapped to glyphs. Nothing else
       names an icon.
-- [ ] `ui/status.yml`: each video and order status gets a label key, accent, dot and hint. This replaces about
+- [x] `ui/status.yml`: each video and order status gets a label key, accent, dot and hint. This replaces about
       15 Dart switches.
 - [ ] `ui/format.yml`: currency symbols and grouping (INR ₹, Indian grouping), the minus sign, bytes and
       duration formats.
@@ -183,23 +184,23 @@ Every reusable widget becomes a brick, with variants, sizes and states in YAML.
 ### 1.4 Screens (`screens/*.yml`)
 One file per screen. Each lists its data source, its four states (loading, empty, error, data) and its bricks
 per size class.
-- [ ] `home.yml`: wordmark, the two doors, theme toggle.
-- [ ] `discover.yml`: top bar, title, search, chip row, sort, product grid, load more.
+- [x] `home.yml`: wordmark, the two doors, theme toggle.
+- [x] `discover.yml`: top bar, title, search, chip row, sort, product grid, load more.
 - [ ] `product.yml`:
   - stacked or side by side: video, tags, title, artisan row, price, description;
   - buy bar: quantity, then Buy, which goes to checkout.
 - [ ] `checkout.yml`: product summary, name field, quantity stepper and limit, total, note, Place order.
-- [ ] **`placed.yml`, the new confirmation screen:** check mark, `03 / DONE`, "Order placed", artisan
+- [x] **`placed.yml`, the new confirmation screen:** check mark, `03 / DONE`, "Order placed", artisan
       message, receipt card (order number, product, quantity, total, PLACED badge), **See your orders**,
       Keep exploring.
-- [ ] `orders.yml`: the order list. Each card shows a poster, title, quantity × artisan, total, status, order
+- [x] `orders.yml`: the order list. Each card shows a poster, title, quantity × artisan, total, status, order
       number and date, and opens the receipt. The newest order is highlighted.
 - [ ] **Orders must survive a restart.** Today `orders_controller.dart` keeps them in memory only and there is
       no endpoint to read an order back, so "check where my order is" breaks once the app is closed.
   - Keep the placed order ids on the device; the storage key and how many to keep go in `orders/orders.yml`.
   - Add `GET /orders/{order_id}` to `models/endpoints.yml` (backend in 2.1). The list and receipt load each
     order from the API, so they show the stored status.
-- [ ] New copy (orders entry point, theme toggle, `03 / DONE`, receipt labels) goes in `strings.yml`.
+- [x] New copy (orders entry point, theme toggle, `03 / DONE`, receipt labels) goes in `strings.yml`.
 - [ ] `studio.yml` and `upload.yml`, using the 0.1 Sell mockups.
 - [ ] Remove the old `features/*/…_screen.dart` layouts. Controllers stay and expose view models for bindings.
 
