@@ -80,6 +80,34 @@
       ],
       "title": "Rung",
       "type": "object"
+    },
+    "ThumbnailSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "exclusiveMinimum": 0,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "exclusiveMinimum": 0,
+          "title": "Height",
+          "type": "integer"
+        },
+        "jpeg_quality": {
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Jpeg Quality",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "jpeg_quality"
+      ],
+      "title": "ThumbnailSettings",
+      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -110,6 +138,9 @@
       "title": "Rungs",
       "type": "array"
     },
+    "thumbnail": {
+      "$ref": "#/$defs/ThumbnailSettings"
+    },
     "max_lowest_rung_total_kbps": {
       "exclusiveMinimum": 0,
       "title": "Max Lowest Rung Total Kbps",
@@ -122,6 +153,7 @@
     "video_codec",
     "audio",
     "rungs",
+    "thumbnail",
     "max_lowest_rung_total_kbps"
   ],
   "title": "LadderRules",

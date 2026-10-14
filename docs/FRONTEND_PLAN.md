@@ -119,7 +119,7 @@ Upload limits (15 min, file types) are **not** a frontend YAML. The app reads th
 ### F5: Low-bandwidth player
 - [x] `player_engine` start-low settings on web (hls.js) and Android (ExoPlayer)
   - Web: our own `<video>` + bundled hls.js (`web/vendor/`), every setting from `player.yml` (`startLevel: 0`, 40 kbps first guess, 30 s buffer cap); rung pill shows e.g. "144p · 47 kbps".
-  - Android: video_player exposes none of ExoPlayer's track selection or bandwidth settings, and ExoPlayer picks its first rung from its own bandwidth guess (several Mbps on Wi-Fi), not from playlist order: on the emulator at 45 kbps it started high and timed out. So the app fetches the master playlist, hands ExoPlayer a `data:` copy with only the lowest rung and its default audio (`lowestRungOnly`), and swaps in the real master once the buffer is 20 s ahead within the first minute (`native_upswitch_*` in `player.yml`), which a slow link never manages.
+  - Android: video_player exposes none of ExoPlayer's track selection or bandwidth settings, and ExoPlayer picks its first rung from its own bandwidth guess (several Mbps on Wi-Fi), not from playlist order: on the emulator at 45 kbps it started high and timed out. So the app fetches the master playlist, hands ExoPlayer a `data:` copy with only the lowest rung and its default audio (`lowestRungOnly`), and swaps in the real master once the buffer is 20 s ahead within the first minute (`native_upswitch_*` in `player.yml`), which a slow link never manages. The old session is released before the new one starts (two live ExoPlayers made the emulator's AAC decoder fail); on the tablet over a fast link it climbs to 720p · 1535 kbps within seconds.
 - [x] Chrome under a 45 kbps / 300 ms throttle against the live backend: starts on 256×144, 0 mid-playback stalls over 2 minutes, buffer grows ahead of playback, 13.6 s tap-to-first-frame
 - [x] Android emulator at 45 kbps against the live backend: starts on 144p (32 kbps rung), plays in real time (58 s of video in 59 s of wall time) with no stalls over 6 minutes, ≤ 14 s from tap to playing. The emulator's `-netspeed` shaper delivered ~2 kbps at that setting, so the cap comes from `tools/throttle_proxy.py` via `-http-proxy` (measured 43–45 kbps).
 - [x] Fallback low-band manifest: not needed (the real ladder's lowest rung plays without stalling at 45 kbps)
@@ -128,7 +128,7 @@ Upload limits (15 min, file types) are **not** a frontend YAML. The app reads th
 ### F6: Builds + demo
 - [x] Point at the Cloud Run URL (`env/prod.json`); web build → Firebase Hosting: https://craftstream-qi0tvg.web.app (upload → live → search verified on the hosted build against GCP)
 - [x] Release APK (`make apk ENV=prod`; plugins forced to compileSdk 36 in `android/build.gradle.kts`, Gradle heap capped at 2 GB)
-- [ ] Check layouts on phone, tablet (portrait + landscape) and desktop Chrome
+- [x] Check layouts on phone, tablet (portrait + landscape) and desktop Chrome: phone 2-column grid + bottom bar; tablet portrait 3 columns + bottom bar; tablet landscape 5 columns + side rail, product page video | details side by side; checkout a centred column; desktop Chrome checked on the hosted build
 - [ ] Record video 1 (Android) and video 2 (Chrome): upload → search → throttled playback → order
 
 ---

@@ -23,6 +23,14 @@ def test_job_config_has_all_rungs():
     assert all(m["container"] == "fmp4" for m in cfg["muxStreams"])
 
 
+def test_thumbnail_comes_from_the_rules():
+    rules = load_ladder_rules()
+    (sheet,) = build_job_config()["spriteSheets"]
+    assert (sheet["spriteWidthPixels"], sheet["spriteHeightPixels"]) == (rules.thumbnail.width, rules.thumbnail.height)
+    assert sheet["quality"] == rules.thumbnail.jpeg_quality < 100  # small enough for a 45 kbps catalog
+    assert sheet["totalCount"] == 1
+
+
 def test_budget_violation_is_detected():
     rules = load_ladder_rules()
     too_big = rules.model_copy(update={"max_lowest_rung_total_kbps": sorted_rungs(rules)[0].total_kbps - 1})

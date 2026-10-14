@@ -106,8 +106,17 @@ Same flow as video 3, on the Android emulator (phone, then a tablet AVD for a fe
    python3 tools/throttle_proxy.py --kbps 45 --rtt-ms 300          # WSL or any terminal; listens on 127.0.0.1:8045
    emulator -avd <name> -http-proxy http://127.0.0.1:8045 -no-snapshot
    ```
-   Before recording, stop background downloads that would share the 45 kbps: Google's speech-voice download
-   (`adb shell pm disable-user --user 0 com.google.android.tts`) filled the link on a fresh Play Store image.
+   Before recording, keep Google's background downloads (voice data, text-classifier models, Play services sync)
+   off the 45 kbps link, the way a phone on a slow metered connection would. Let the image finish its first-boot
+   downloads at full speed, then turn on Data Saver with the app exempt:
+   ```bash
+   adb shell cmd netpolicy set metered-network '"AndroidWifi"' true
+   adb shell cmd netpolicy set restrict-background true
+   adb shell cmd netpolicy add restrict-background-whitelist $(adb shell pm list packages -U | grep craftstream | sed 's/.*uid://')
+   adb shell pm disable-user --user 0 com.google.android.tts
+   ```
+   Restart the proxy afterwards (it drops any download already running). With `-v` it prints the top connections
+   every 10 s, so you can confirm the link is idle before you start.
    The 20 s test clip uploads in about 3.5 minutes at 45 kbps, so a short clip keeps the video short.
 3. Sell → New listing → pick a video from the device → upload (toggle airplane mode on and off mid-upload to show the
    resume) → wait for live.

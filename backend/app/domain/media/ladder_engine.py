@@ -81,8 +81,13 @@ def build_job_config(
         "elementaryStreams": elementary,
         "muxStreams": mux,
         "manifests": [{"fileName": "manifest.m3u8", "type": "HLS", "muxStreams": [m["key"] for m in mux]}],
-        "spriteSheets": [{"filePrefix": "thumb", "spriteWidthPixels": 320, "spriteHeightPixels": 180,
-                          "columnCount": 1, "rowCount": 1, "totalCount": 1}],
+        "spriteSheets": [{
+            "filePrefix": "thumb",
+            "spriteWidthPixels": rules.thumbnail.width,
+            "spriteHeightPixels": rules.thumbnail.height,
+            "quality": rules.thumbnail.jpeg_quality,
+            "columnCount": 1, "rowCount": 1, "totalCount": 1,
+        }],
     }
     if pubsub_topic:
         config["pubsubDestination"] = {"topic": pubsub_topic}  # job result -> /internal/media/transcoded

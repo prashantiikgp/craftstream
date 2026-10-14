@@ -45,5 +45,12 @@ rungs:
     audio_kbps: 96
     audio_profile: aac-lc
 
+# The poster image buyers see in the catalog and before playback (one frame, a Transcoder sprite sheet).
+# Keep it small: on a 45 kbps link a quality-100 320x180 JPEG (~20 KB) takes 4 s per card and delays the video.
+thumbnail:
+  width: 320
+  height: 180
+  jpeg_quality: 40        # 1-100; the Transcoder's default is 100
+
 # Hard budget the test suite enforces for the lowest rung.
 max_lowest_rung_total_kbps: 50

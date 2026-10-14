@@ -31,6 +31,14 @@ class AudioSettings(BaseModel):
     channels: int = Field(ge=1, le=2)
 
 
+class ThumbnailSettings(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    width: int = Field(gt=0)
+    height: int = Field(gt=0)
+    jpeg_quality: int = Field(ge=1, le=100)
+
+
 class LadderRules(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -39,4 +47,5 @@ class LadderRules(BaseModel):
     video_codec: Literal["h264"]
     audio: AudioSettings
     rungs: list[Rung] = Field(min_length=1)
+    thumbnail: ThumbnailSettings
     max_lowest_rung_total_kbps: int = Field(gt=0)

@@ -33,6 +33,7 @@ class NativePlayback implements Playback {
   bool _disposed = false;
   bool _fullLadder = false; // true once ExoPlayer has the real master (or the lowest-only copy was not needed)
   bool _switching = false;
+  Uri? _lowestUri; // the lowest-rung-only playlist, kept to fall back to
 
   NativePlayback(this.stream, this.rules);
 
@@ -65,7 +66,8 @@ class NativePlayback implements Playback {
         _variants = parseMasterPlaylist(res.body);
         final lowest = lowestRungOnly(res.body, stream);
         if (lowest != null) {
-          return Uri.dataFromString(lowest, mimeType: 'application/vnd.apple.mpegurl', encoding: utf8, base64: true);
+          return _lowestUri =
+              Uri.dataFromString(lowest, mimeType: 'application/vnd.apple.mpegurl', encoding: utf8, base64: true);
         }
       }
     } catch (_) {
@@ -116,29 +118,43 @@ class NativePlayback implements Playback {
   }
 
   /// The link is fast: hand ExoPlayer the real master so it can climb the ladder. ExoPlayer's bandwidth meter is
-  /// process-wide, so the new session already knows the measured throughput and picks a fitting rung. The old
-  /// session keeps playing until the new one is ready; on any failure playback simply stays on the lowest rung.
+  /// process-wide, so the new session already knows the measured throughput and picks a fitting rung.
+  ///
+  /// The old session is released first: two live ExoPlayers each hold their own decoders, and devices with few
+  /// codec instances (the emulator among them) fail to start the second set. On a fast link the gap is a moment
+  /// of buffering. If the full ladder will not start, playback goes back to the lowest rung at the same spot.
   Future<void> _upswitch(VideoPlayerController old) async {
     _switching = true;
-    final next = VideoPlayerController.networkUrl(stream, formatHint: VideoFormat.hls);
+    _fullLadder = true; // never try twice
+    final position = old.value.position;
+    old.removeListener(_onValue);
+    _ctrl.value = null;
+    _set(_state.value.copyWith(buffering: true));
+    await old.dispose();
+    if (_disposed) return;
+    final resumed = await _resume(stream, position) || await _resume(_lowestUri!, position);
+    if (!resumed) _set(_state.value.copyWith(phase: PlaybackPhase.error, buffering: false));
+    _switching = false;
+  }
+
+  /// A new session on [uri], at [position], playing. False (and nothing left behind) if it will not start.
+  Future<bool> _resume(Uri uri, Duration position) async {
+    if (_disposed) return false;
+    final c = VideoPlayerController.networkUrl(uri, formatHint: VideoFormat.hls);
     try {
-      await next.initialize();
-      await next.seekTo(old.value.position);
+      await c.initialize();
+      await c.seekTo(position);
       if (_disposed) {
-        await next.dispose();
-        return;
+        await c.dispose();
+        return false;
       }
-      old.removeListener(_onValue);
-      await old.pause();
-      next.addListener(_onValue);
-      _ctrl.value = next;
-      await next.play();
-      await old.dispose();
+      c.addListener(_onValue);
+      _ctrl.value = c;
+      await c.play();
+      return true;
     } catch (_) {
-      await next.dispose();
-    } finally {
-      _fullLadder = true;
-      _switching = false;
+      await c.dispose();
+      return false;
     }
   }
 

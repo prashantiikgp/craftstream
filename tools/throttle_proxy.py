@@ -111,6 +111,7 @@ class Proxy:
         self.rtt = rtt_ms / 1000
         self.meter = Meter()
         self.verbose = verbose
+        self.active: dict[str, Meter] = {}  # open connections, for the top-talkers line
 
     async def handle(self, client_r: asyncio.StreamReader, client_w: asyncio.StreamWriter) -> None:
         try:
@@ -136,10 +137,15 @@ class Proxy:
             print(f"  open {host}:{port}", flush=True)
         conn = Meter()
         opened = time.monotonic()
-        await asyncio.gather(
-            _pipe(up_r, client_w, self.down, self.meter, down=True, conn=conn),
-            _pipe(client_r, up_w, self.up, self.meter, down=False, conn=conn),
-        )
+        key = f"{host}:{port}#{id(conn) % 10000}"
+        self.active[key] = conn
+        try:
+            await asyncio.gather(
+                _pipe(up_r, client_w, self.down, self.meter, down=True, conn=conn),
+                _pipe(client_r, up_w, self.up, self.meter, down=False, conn=conn),
+            )
+        finally:
+            self.active.pop(key, None)
         if self.verbose:
             secs = time.monotonic() - opened
             print(f"  close {host}:{port} after {secs:.0f}s: down {conn.down / 1000:.1f} KB, up {conn.up / 1000:.1f} KB",
@@ -157,6 +163,11 @@ class Proxy:
                 flush=True,
             )
             last = (d, u, t)
+            if self.verbose and self.active:
+                prev = getattr(self, "_seen", {})
+                rates = sorted(((m.down - prev.get(k, 0), k) for k, m in self.active.items()), reverse=True)[:3]
+                self._seen = {k: m.down for k, m in self.active.items()}
+                print("    top: " + ", ".join(f"{k.split('#')[0]} {b / 1000:.0f} KB" for b, k in rates if b > 0), flush=True)
 
 
 async def main() -> None:
