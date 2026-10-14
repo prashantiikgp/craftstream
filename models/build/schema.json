@@ -7,7 +7,7 @@
       "properties": {
         "code": {
           "type": "string",
-          "description": "machine-readable, e.g. not_found, validation_error, unsupported_media_type"
+          "description": "machine-readable: bad_request, unauthorized, forbidden, not_found, method_not_allowed, conflict, product_not_ready, unsupported_media_type, validation_error, internal_error"
         },
         "message": {
           "type": "string",

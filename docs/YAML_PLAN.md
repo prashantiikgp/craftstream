@@ -241,8 +241,9 @@ and the light and dark theme B match the canvas.
 - [ ] `models/endpoints.yml` becomes the single source for routes:
   - the API **mounts routes from it** (handlers by name), instead of hand-written decorators;
   - query params gain constraints (`max_length`, `minimum`);
-  - `base_path` is read from it; `/api/v1` disappears from code.
-- [ ] `config/api/http.yml`:
+  - `base_path` is read from it; `/api/v1` disappears from code. *(Done: `make gen` writes it to
+    `app/generated/api.py`, since `models/` is not in the server image.)*
+- [x] `config/api/http.yml`:
   - error code ↔ status map, default messages, the validation and internal error codes;
   - CORS methods, headers and expose list.
   - Add `product_not_ready` to `models/error_response.yml`.

@@ -3,6 +3,7 @@
     models/*.yml + models/endpoints.yml
         -> models/build/schema.json                     (JSON Schema)
         -> backend/app/generated/models.py              (Pydantic models for FastAPI)
+        -> backend/app/generated/api.py                 (the API base path; models/ is not in the server image)
         -> frontend/lib/data/generated/models.dart      (Dart models for Flutter)
         -> frontend/lib/data/generated/api_client.dart  (Dart HTTP client, public endpoints only)
         -> frontend/lib/data/generated/limits.dart      (field limits as Dart constants, for form checks)
@@ -218,6 +219,13 @@ def build_python(models: dict) -> str:
     return "\n".join(out).rstrip() + "\n"
 
 
+def build_python_api(api: dict) -> str:
+    return "\n".join([
+        f'"""{HEADER}', "",
+        "What the backend needs from models/endpoints.yml at run time (models/ is not in the server image).",
+        '"""', "", f"BASE_PATH = {api['base_path']!r}", ""])
+
+
 # ---------------------------------------------------------------- Dart
 
 DART_TYPES = {"string": "String", "integer": "int", "number": "double", "boolean": "bool",
@@ -411,6 +419,7 @@ def main() -> None:
     print("Generating code from models/ ...")
     write(MODELS / "build" / "schema.json", json.dumps(build_schema(models), indent=2) + "\n")
     write(ROOT / "backend" / "app" / "generated" / "models.py", build_python(models))
+    write(ROOT / "backend" / "app" / "generated" / "api.py", build_python_api(api))
     write(ROOT / "backend" / "app" / "generated" / "__init__.py", "")
     write(DART_OUT / "models.dart", build_dart_models(models))
     write(DART_OUT / "api_client.dart", build_dart_client(api, models))

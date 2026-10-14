@@ -1,6 +1,7 @@
 """Every error leaves the API as an ErrorResponse (models/error_response.yml).
 
-Services raise DomainError subclasses and know nothing about HTTP; the status mapping lives here only.
+Services raise DomainError subclasses and know nothing about HTTP. The status of each code and the default
+messages come from api/http.yml (http_engine); this is the only place that applies them.
 """
 
 from __future__ import annotations
@@ -12,6 +13,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.domain.api import http_engine
 from app.generated.models import ErrorResponse
 
 log = logging.getLogger(__name__)
@@ -45,14 +47,6 @@ class Unauthorized(DomainError):
     code = "unauthorized"
 
 
-_STATUS_FOR = {NotFound: 404, Conflict: 409, Unauthorized: 401, DomainError: 400}
-
-_CODE_FOR_STATUS = {
-    400: "bad_request", 401: "unauthorized", 403: "forbidden", 404: "not_found", 405: "method_not_allowed",
-    409: "conflict", 415: "unsupported_media_type", 422: "validation_error",
-}
-
-
 def _response(status: int, code: str, message: str, details: list[str] | None = None) -> JSONResponse:
     body = ErrorResponse(code=code, message=message, details=details or [])
     return JSONResponse(status_code=status, content=body.model_dump())
@@ -61,19 +55,21 @@ def _response(status: int, code: str, message: str, details: list[str] | None = 
 def install_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(DomainError)
     async def _domain(_: Request, exc: DomainError) -> JSONResponse:
-        status = next(s for cls, s in _STATUS_FOR.items() if isinstance(exc, cls))
+        status = http_engine.status_for(exc.code, type(exc).code)
         return _response(status, exc.code, exc.message, exc.details)
 
     @app.exception_handler(StarletteHTTPException)
     async def _http(_: Request, exc: StarletteHTTPException) -> JSONResponse:
-        return _response(exc.status_code, _CODE_FOR_STATUS.get(exc.status_code, "error"), str(exc.detail))
+        return _response(exc.status_code, http_engine.code_for_status(exc.status_code), str(exc.detail))
 
     @app.exception_handler(RequestValidationError)
     async def _validation(_: Request, exc: RequestValidationError) -> JSONResponse:
         details = [f"{'.'.join(str(p) for p in e['loc'])} - {e['msg']}" for e in exc.errors()]
-        return _response(422, "validation_error", "The request is not valid.", details)
+        err = http_engine.validation_error()
+        return _response(http_engine.status_for(err.code), err.code, err.message, details)
 
     @app.exception_handler(Exception)
     async def _unexpected(request: Request, exc: Exception) -> JSONResponse:
         log.exception("unhandled error", extra={"path": request.url.path})
-        return _response(500, "internal_error", "Something went wrong on our side.")
+        err = http_engine.internal_error()
+        return _response(http_engine.status_for(err.code), err.code, err.message)

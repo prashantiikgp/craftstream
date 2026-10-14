@@ -50,9 +50,9 @@ review column is for the user: **Y** move to YAML, **C** keep in code (give a re
 
 | # | Area | Main items (file:line) | Review |
 |---|---|---|---|
-| B1 | App settings | `main.py:19` `API="/api/v1"` (duplicates endpoints.yml); title and version :26; CORS methods and headers :30-33; GZip 500 :35; log format `core/logging.py:32-39`; required-in-GCP list `settings.py:39-40` | |
+| B1 | App settings | `main.py:19` `API="/api/v1"` (duplicates endpoints.yml); title and version :26; CORS methods and headers :30-33; GZip 500 :35; log format `core/logging.py:32-39`; required-in-GCP list `settings.py:39-40` | Y: done for base path (generated from endpoints.yml), title, version, CORS, GZip (`api/http.yml`); log format and the required-in-GCP list are still code (`app.yml`, not in this pass) |
 | B2 | Routes | hand-written decorators in `api/routers/*.py`, kept in step with endpoints.yml only by a test; query limits `products.py:22-25` (q 200, tag 50, cursor 100) missing from endpoints.yml; `internal.py:19` prefix duplicated 4× | |
-| B3 | Errors | `core/errors.py:21-79` code ↔ status map, default messages; `order_service.py:29` `product_not_ready` is not in error_response.yml | |
+| B3 | Errors | `core/errors.py:21-79` code ↔ status map, default messages; `order_service.py:29` `product_not_ready` is not in error_response.yml | Y: done, `api/http.yml`; error_response.yml lists every code (test-checked) |
 | B4 | Video state machine | `product_repo.py:13` Literal duplicates product.yml; transitions in `media_service.py:63-94`; Transcoder states `SUCCEEDED`/`FAILED`; `"ready"` in product_repo:39,72 and order_rules_engine:18 | Y: done, `media/video_lifecycle.yml` (states test-checked against product.yml) |
 | B5 | Storage layout | `infra/gcp/gcs.py:13-65`: `raw/{id}/source` and its regex, `hls/{id}/`, `manifest.m3u8`, thumbnail name, public URL, cache-control; repeated in transcoder.py:31-38 and 02_storage.sh | Y: done, `media/storage_layout.yml` (also the local upload path and sample stream) |
 | B6 | Encoder | `ladder_engine.py:49-145`: `h264` key, `vbr`, `aac-he`, channel layout, `fmp4`, sprite grid, `input0`/`atom0`, baseline ≤ 240p, ffmpeg preset, maxrate ×1.2, bufsize ×2, headroom 1.1, HLS v7 | Y: done, `ladder.yml` `encoder:` (job configs and FFmpeg args unchanged); C: FFmpeg flag names and JobConfig field names are the tools' APIs |

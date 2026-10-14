@@ -4,4 +4,3 @@ app/api/deps.py: {path: 1}
 app/api/routers/internal.py: {path: 1}
 app/infra/gcp/auth.py: {path: 1}
 app/infra/local/local_auth.py: {path: 1}
-app/main.py: {path: 1, tunable: 1}
