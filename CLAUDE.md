@@ -22,8 +22,22 @@ Every rule file gets exactly one schema, one loader and one engine, **named afte
 - No generic `config_loader/` or `engines/` buckets. Loaders all call the shared `core/yaml_loader` helper.
 - Schemas reject unknown keys (Pydantic `extra="forbid"`; Dart `disallowUnrecognizedKeys`). A typo in YAML must fail at startup, not at runtime.
 - Engines import only their schema: no HTTP, database or GCP. That keeps them pure and trivially testable.
-- A convention test fails if a YAML is missing its schema or loader.
-- Behaviour that might change (limits, bitrates, breakpoints, text, colours) goes in YAML, not in code.
+- A convention test (backend and frontend) fails if a YAML is missing its schema, loader, engine or engine test.
+- **Everything that describes behaviour or appearance is YAML.** That covers:
+  - screens (which bricks, in what order, bound to what data, doing what on tap);
+  - bricks and their variants, design tokens, icons, status labels and tones;
+  - routes and navigation;
+  - limits, timeouts, paths, names, state machines, error codes and infra resources.
+- Code is only the engine that reads it:
+  - algorithms such as HLS parsing, the resumable upload and search tokenising;
+  - platform glue: Firestore, GCS, Transcoder, ExoPlayer, hls.js;
+  - artwork geometry.
+- **No literals in screens, bricks, controllers, services or engines.** That means no colours, sizes, durations,
+  paths, status strings or `Icons.*`. The literal-lint tests enforce it. Files still being migrated are listed in a
+  baseline that may only shrink.
+- A rule folder (`frontend/assets/config/ui/screens/*.yml`) shares one schema, loader and engine named after the
+  folder in the singular (`screen_schema.dart` …).
+- V2 migration plan and status: `docs/YAML_PLAN.md`.
 
 ## Data models come first
 

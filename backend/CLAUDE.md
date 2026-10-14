@@ -59,7 +59,10 @@ YAML gotcha: bare `on`, `off`, `yes`, `no` are booleans. Quote them in string li
 
 - `tests/unit/<domain>/`: engines, pure and fast, no fixtures beyond rules
 - `tests/api/`: `client` fixture (`tests/conftest.py`) = fresh app + fresh in-memory data per test; build a custom `Container` to swap a part (see `test_internal.py`)
-- `tests/config_validation/`: every YAML loads; naming convention; routes == `endpoints.yml`
+- `tests/config_validation/`:
+  - every YAML loads; naming convention; routes == `endpoints.yml`;
+  - **literal lint** (`test_literal_lint.py`): no status strings, storage paths, collection names or tunable
+    numbers in Python. Files still being migrated are in `literal_baseline.yml`, which may only shrink.
 - Bitrate budget test (needs FFmpeg; skipped with a clear reason if it's missing)
 - Run: `make test` from the repo root
 

@@ -1,0 +1,28 @@
+# Literals still in UI code, per file and kind (see literal_lint_test.dart).
+# This list may only shrink. Move the value to YAML, then lower or delete the entry.
+lib/core/router.dart: {route: 8}
+lib/features/checkout/checkout_screen.dart: {icon: 1, route: 2, size: 4}
+lib/features/checkout/order_placed_screen.dart: {size: 1, route: 2}
+lib/features/checkout/widgets/quantity_stepper.dart: {icon: 2, size: 1}
+lib/features/design_catalog/design_catalog_screen.dart: {icon: 8, route: 1, size: 30, inset: 1}
+lib/features/discover/discover_screen.dart: {icon: 4, route: 1}
+lib/features/discover/widgets/filter_bar.dart: {icon: 1, size: 1}
+lib/features/discover/widgets/product_card.dart: {size: 7, icon: 1}
+lib/features/discover/widgets/search_field.dart: {icon: 2}
+lib/features/orders/orders_screen.dart: {icon: 1, route: 2}
+lib/features/product/product_screen.dart: {route: 3, icon: 2, status: 1, size: 10}
+lib/features/product/widgets/process_video.dart: {status: 1, size: 5, icon: 8}
+lib/features/product/widgets/product_details.dart: {status: 2, icon: 1}
+lib/features/shell/app_shell.dart: {icon: 1, route: 1}
+lib/features/shell/shell_controller.dart: {icon: 8}
+lib/features/studio/studio_screen.dart: {icon: 3, route: 4, size: 1, status: 1}
+lib/features/studio/widgets/listing_card.dart: {status: 5, size: 1, icon: 1}
+lib/features/upload/upload_controller.dart: {status: 2}
+lib/features/upload/upload_screen.dart: {size: 1, icon: 1}
+lib/features/upload/widgets/upload_progress.dart: {icon: 10, size: 2, route: 2}
+lib/features/upload/widgets/video_pick_card.dart: {icon: 3, size: 1}
+lib/shared/widgets/app_button.dart: {size: 2}
+lib/shared/widgets/indicators.dart: {size: 3, icon: 1}
+lib/shared/widgets/page.dart: {icon: 1}
+lib/shared/widgets/surfaces.dart: {icon: 4, size: 2, duration: 1}
+lib/shared/widgets/video_status_badge.dart: {status: 3}
