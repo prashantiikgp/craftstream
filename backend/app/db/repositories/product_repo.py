@@ -46,15 +46,15 @@ class InMemoryProductRepo:
 
 
 class FirestoreProductRepo:
-    """Collection `products`; each document is the Product plus a `keywords` array."""
+    """Each document is the Product plus a `keywords` array. The collection name and the most candidates one
+    search reads come from catalog/listing.yml (passed in by api/deps.py)."""
 
-    LIST_LIMIT = 500  # candidates per search; the rest of the matching and paging happens in the service
-
-    def __init__(self, project: str) -> None:
+    def __init__(self, project: str, collection: str, candidate_limit: int) -> None:
         from google.cloud import firestore  # imported lazily so local mode needs no GCP libs
 
         self._db = firestore.Client(project=project)
-        self._col = self._db.collection("products")
+        self._col = self._db.collection(collection)
+        self._candidate_limit = candidate_limit
 
     def save(self, product: Product, keywords: list[str]) -> None:
         self._col.document(product.id).set({**product.model_dump(), "keywords": keywords})
@@ -72,7 +72,7 @@ class FirestoreProductRepo:
         if contains is not None:
             query = query.where(filter=FieldFilter("keywords", "array_contains", contains))
         docs = (query.order_by("created_at", direction=firestore.Query.DESCENDING)
-                .limit(self.LIST_LIMIT).stream())
+                .limit(self._candidate_limit).stream())
         return [_to_product(d.to_dict()) for d in docs]
 
     def update_video(self, product_id: str, status: str, hls_url: str | None = None,

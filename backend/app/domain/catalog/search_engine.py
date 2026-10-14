@@ -4,7 +4,7 @@ Two halves that must agree:
   index_terms(...)  -> what we store with each product (`keywords`): words, their prefixes, and `tag:<tag>`
   query_terms(q)    -> what a buyer typed, cleaned the same way
 A product matches when every query term is one of its index terms, so the same rule works in memory and as
-Firestore `array-contains` lookups.
+Firestore `array-contains` lookups. Tags arrive already cleaned (catalog listing_engine.normalize_tag).
 """
 
 from __future__ import annotations
@@ -21,10 +21,6 @@ TAG_PREFIX = "tag:"
 
 def _rules(rules: SearchRules | None) -> SearchRules:
     return rules or load_search_rules()
-
-
-def normalize_tag(tag: str) -> str:
-    return " ".join(tag.lower().split())
 
 
 def words(text: str, rules: SearchRules | None = None) -> list[str]:
@@ -50,7 +46,7 @@ def index_terms(fields: dict[str, str | list[str]], rules: SearchRules | None = 
             terms.add(w)
             if r.prefix_match:
                 terms.update(w[:n] for n in range(r.min_prefix_length, len(w)))
-    terms.update(f"{TAG_PREFIX}{normalize_tag(t)}" for t in _as_list(fields.get("tags")))
+    terms.update(f"{TAG_PREFIX}{t}" for t in _as_list(fields.get("tags")) if t)
     return sorted(terms)
 
 
@@ -62,7 +58,8 @@ def query_terms(q: str | None, rules: SearchRules | None = None) -> list[str]:
 
 
 def tag_term(tag: str | None) -> str | None:
-    return f"{TAG_PREFIX}{normalize_tag(tag)}" if tag and tag.strip() else None
+    """The index term for a cleaned tag; None for no tag."""
+    return f"{TAG_PREFIX}{tag}" if tag else None
 
 
 def matches(keywords: Iterable[str], terms: Iterable[str]) -> bool:

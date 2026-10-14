@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=../.schemas/catalog/listing.schema.json
+# How listings and orders are stored and listed: record ids, tag clean-up, the tag list order and the
+# Firestore side of search. Used by core/ids.py, catalog_service and the repository wiring in api/deps.py.
+
+# New product and order ids: the first N hex characters of a random UUID (12 = 48 bits, plenty for a demo).
+id_length: 12
+
+# Tags are cleaned on create and in the tag filter, so "  Kitchen   Ware " and "kitchen ware" are one tag.
+tags:
+  lowercase: true
+  collapse_spaces: true      # trim, and turn runs of whitespace into one space
+  # GET /tags order. most_used: the most listed tags first, ties A-Z. alphabetical: A-Z only.
+  order: most_used
+
+# Firestore narrows a search by one term; this is the most candidates it returns. The service then matches
+# the remaining terms and pages through them, so a query never reads more documents than this.
+search_candidate_limit: 500
+
+# Firestore collections (infra/gcp/resources.yml creates their indexes and must agree).
+collections:
+  products: products
+  orders: orders

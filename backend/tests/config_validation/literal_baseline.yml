@@ -2,8 +2,6 @@
 # This list may only shrink. Move the value to config/*.yml, then lower or delete the entry.
 app/api/deps.py: {path: 1}
 app/api/routers/internal.py: {path: 1}
-app/db/repositories/order_repo.py: {collection: 1}
-app/db/repositories/product_repo.py: {tunable: 1, collection: 1}
 app/infra/gcp/auth.py: {path: 1}
 app/infra/local/local_auth.py: {path: 1}
 app/main.py: {path: 1, tunable: 1}

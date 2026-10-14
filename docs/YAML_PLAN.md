@@ -263,8 +263,9 @@ and the light and dark theme B match the canvas.
   - Transcoder: codec key, rate control, container, H.264 profile threshold, sprite grid;
   - local FFmpeg: preset, maxrate and bufsize factors, playlist headroom, HLS version.
 - [x] `config/media/ingest.yml`: ffprobe timeout, error text cap.
-- [ ] `config/catalog/listing.yml`: ID length and format, tag normalisation, tag sort, Firestore candidate
-      limit (500), cursor strategy, collection names.
+- [x] `config/catalog/listing.yml`: ID length and format, tag normalisation, tag sort, Firestore candidate
+      limit (500), cursor strategy, collection names. (The cursor stays "the last id on the page": there is
+      only one strategy, so it is not a setting.)
 - [ ] `config/platform/events.yml`: internal path prefix, Pub/Sub envelope keys, accepted Eventarc event type.
 
 ### 2.3 Infra and tools

@@ -25,12 +25,12 @@ class InMemoryOrderRepo:
 
 
 class FirestoreOrderRepo:
-    """Collection `orders`."""
+    """The collection name comes from catalog/listing.yml (passed in by api/deps.py)."""
 
-    def __init__(self, project: str) -> None:
+    def __init__(self, project: str, collection: str) -> None:
         from google.cloud import firestore  # imported lazily so local mode needs no GCP libs
 
-        self._col = firestore.Client(project=project).collection("orders")
+        self._col = firestore.Client(project=project).collection(collection)
 
     def save(self, order: Order) -> None:
         self._col.document(order.id).set(order.model_dump())
