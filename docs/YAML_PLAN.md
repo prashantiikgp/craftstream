@@ -262,7 +262,7 @@ and the light and dark theme B match the canvas.
 - [x] `config/media/ladder.yml` gains an `encoder:` block:
   - Transcoder: codec key, rate control, container, H.264 profile threshold, sprite grid;
   - local FFmpeg: preset, maxrate and bufsize factors, playlist headroom, HLS version.
-- [ ] `config/media/ingest.yml`: ffprobe timeout, error text cap.
+- [x] `config/media/ingest.yml`: ffprobe timeout, error text cap.
 - [ ] `config/catalog/listing.yml`: ID length and format, tag normalisation, tag sort, Firestore candidate
       limit (500), cursor strategy, collection names.
 - [ ] `config/platform/events.yml`: internal path prefix, Pub/Sub envelope keys, accepted Eventarc event type.

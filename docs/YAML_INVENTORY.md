@@ -58,7 +58,7 @@ review column is for the user: **Y** move to YAML, **C** keep in code (give a re
 | B6 | Encoder | `ladder_engine.py:49-145`: `h264` key, `vbr`, `aac-he`, channel layout, `fmp4`, sprite grid, `input0`/`atom0`, baseline ≤ 240p, ffmpeg preset, maxrate ×1.2, bufsize ×2, headroom 1.1, HLS v7 | Y: done, `ladder.yml` `encoder:` (job configs and FFmpeg args unchanged); C: FFmpeg flag names and JobConfig field names are the tools' APIs |
 | B7 | Catalog | `core/ids.py:10` 12-hex ids; search field map duplicates search_schema; tag order; `LIST_LIMIT=500`; collections `products` and `orders`; indexes duplicated in 03_firestore.sh | |
 | B8 | Events | Pub/Sub envelope shape and error texts in `internal.py:26-47`; event type in 06_events.sh | |
-| B9 | Ingest | `ffprobe.py:10,19` timeout 60 s, stderr cap 200 | |
+| B9 | Ingest | `ffprobe.py:10,19` timeout 60 s, stderr cap 200 | Y: done, `media/ingest.yml` |
 | B10 | Infra | `_common.sh` names; 9 APIs; lifecycle; public media bucket; 2 CORS templates; Firestore indexes; 14 IAM bindings; Cloud Run sizing (1 CPU, 512 Mi, 0–3 instances, concurrency 40); Pub/Sub retry 30 s / 10–600 s | |
 | B11 | Tools | codegen maps; local_hls sample settings; throttle proxy defaults; smoke test timeouts and payload; subset_fonts ranges and families | |
 | B12 | Convention test | `tests/config_validation/test_rule_files.py` checks file trios and `extra="forbid"`; it does **not** check for literals in services or engines | |
