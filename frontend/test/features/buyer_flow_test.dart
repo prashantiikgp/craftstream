@@ -25,7 +25,8 @@ void main() {
     await settle(tester);
     expect(find.text(str(c, 'product.about')), findsOneWidget);
 
-    await tester.tap(find.text(str(c, 'product.buy')).first);
+    // The Buy button, not the Buy crumb in the trail at the top.
+    await tester.tap(find.text(str(c, 'product.buy')).last);
     await settle(tester);
     expect(find.text(str(c, 'checkout.title')), findsOneWidget);
 

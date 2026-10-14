@@ -11,6 +11,7 @@ top:
     role: sell
     action: { go: / }
     crumbs:
+      - { brick: crumb, text: common.home, action: { go: / } }
       - { brick: crumb, role: sell }
 
 body:

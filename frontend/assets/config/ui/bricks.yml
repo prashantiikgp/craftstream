@@ -87,6 +87,7 @@ bricks:
       body_lines: 2                      # the text never takes more than two lines
       body_color: text_muted
       body_width: 0.72                   # share of the door the text may use (keeps it clear of the door art)
+      compact_body_width: 1              # phones: the art sits below the text, so the text takes the full width
       arrow_box: 36
       arrow_icon: 18
       arrow: arrow                       # icons.yml name
@@ -114,32 +115,30 @@ bricks:
 
   top_bar:
     about: >-
-      The bar at the top of an inner screen. Home or back on the left; on the right, where you are: a trail of
-      crumbs (Buy / Hand-thrown clay mug / Checkout). Every crumb but the last leads back.
+      The bar at the top of an inner screen: the logo (home) or a back button, then where you are as a trail of
+      crumbs, like a web page (Home / Buy / Hand-thrown clay mug / Order). Every crumb but the last leads back.
     props:
       leading: { type: enum, options: [home, back], default: home }
       action: { type: action, required: true }
-      label: { type: text }              # next to the leading control (e.g. Home)
+      label: { type: text }              # what the leading control says to screen readers (Home, Back)
       role: { type: role }               # colours the crumbs that lead somewhere
-      crumbs: { type: nodes }            # crumb bricks, outermost first
+      crumbs: { type: nodes }            # crumb bricks, outermost (Home) first
     style:
       height: 52
-      padding: sm
+      padding: md
       mark: 28
       icon: 22
       box: 44
       border: line
-      label: h3
-      label_color: text
       back_icon: back
       stripes: [orange, pink, purple]
-      crumb: label
+      crumb: h3
       crumb_current: text_muted
       separator: " / "
       separator_color: text_faint
 
   crumb:
-    about: One step of the top bar's trail. Its text is a strings key, a role ("01 / BUY") or data (a title).
+    about: One step of the top bar's trail. Its text is a strings key, a role (its name, Buy or Sell) or data (a title).
     props:
       text: { type: text }
       role: { type: role }

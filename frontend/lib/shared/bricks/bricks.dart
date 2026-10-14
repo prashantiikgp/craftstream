@@ -245,7 +245,7 @@ Widget _door(BuildContext context, BrickNode n) {
                   // A share of the door's width, so the text scales with the door and stays clear of its art.
                   FractionallySizedBox(
                     alignment: AlignmentDirectional.centerStart,
-                    widthFactor: s.number('body_width'),
+                    widthFactor: s.number(compact ? 'compact_body_width' : 'body_width'),
                     child: StyledText(
                       say(context, body),
                       style: s.name('body'),
@@ -315,20 +315,7 @@ Widget _topBar(BuildContext context, BrickNode n) {
           semanticLabel: label == null ? config.strings.get('common.back') : say(context, label),
           onTap: () => _act(context, n),
           builder: (context, active) => home
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Stripes(size: s.number('mark'), accents: s.names('stripes')),
-                    if (label != null) ...[
-                      SizedBox(width: s.space('padding')),
-                      StyledText(
-                        say(context, label),
-                        style: s.name('label'),
-                        color: active ? t.text : s.color('label_color'),
-                      ),
-                    ],
-                  ],
-                )
+              ? Stripes(size: s.number('mark'), accents: s.names('stripes'))
               : Container(
                   width: s.number('box'),
                   height: s.number('box'),
@@ -340,7 +327,7 @@ Widget _topBar(BuildContext context, BrickNode n) {
         SizedBox(width: s.space('padding')),
         Expanded(
           child: Align(
-            alignment: AlignmentDirectional.centerEnd,
+            alignment: AlignmentDirectional.centerStart,
             child: _crumbs(context, s, n.prop<List<BrickNode>>('crumbs') ?? const [], role),
           ),
         ),
@@ -349,7 +336,7 @@ Widget _topBar(BuildContext context, BrickNode n) {
   );
 }
 
-/// The trail on the right of the top bar: crumbs joined by the separator. Crumbs with an action lead back (in the
+/// The top bar's trail: crumbs joined by the separator. Crumbs with an action lead back (in the
 /// role's colour); the last one is where you are. Long crumbs shorten with an ellipsis.
 Widget _crumbs(BuildContext context, BrickStyle s, List<BrickNode> crumbs, RoleSchema? role) {
   final scope = BrickScope.of(context);
@@ -381,13 +368,12 @@ Widget _crumbs(BuildContext context, BrickStyle s, List<BrickNode> crumbs, RoleS
   );
 }
 
-/// A crumb's words: its role ("01 / BUY"), its strings key, or its data.
+/// A crumb's words: its role's name (Buy), its strings key, or its data.
 String crumbText(BuildContext context, BrickNode c) {
   final config = configOf(context);
   final role = c.prop<String>('role');
   if (role != null) {
-    final r = config.navigation.role(role);
-    return config.strings.get('nav.role_tag', {'number': r.number, 'label': config.strings.get(r.label)});
+    return config.strings.get(config.navigation.role(role).label);
   }
   final text = c.prop<String>('text');
   if (text != null) return config.strings.get(text);

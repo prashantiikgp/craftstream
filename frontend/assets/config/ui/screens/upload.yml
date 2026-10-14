@@ -14,6 +14,7 @@ top:
     role: sell
     action: { go: /studio }
     crumbs:
+      - { brick: crumb, text: common.home, action: { go: / } }
       - { brick: crumb, role: sell, action: { go: /studio } }
       - { brick: crumb, text: upload.title }
 

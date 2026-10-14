@@ -10,7 +10,7 @@ top:
     role: buy
     action: { go: / }
     crumbs:
-      - { brick: crumb, role: buy, action: { go: /discover } }
+      - { brick: crumb, text: common.home, action: { go: / } }
       - { brick: crumb, text: orders.title }
 
 body:
