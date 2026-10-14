@@ -1,6 +1,2 @@
 # Policy literals still in Python, per file and kind (see test_literal_lint.py).
 # This list may only shrink. Move the value to config/*.yml, then lower or delete the entry.
-app/api/deps.py: {path: 1}
-app/api/routers/internal.py: {path: 1}
-app/infra/gcp/auth.py: {path: 1}
-app/infra/local/local_auth.py: {path: 1}

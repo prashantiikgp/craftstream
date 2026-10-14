@@ -267,7 +267,7 @@ and the light and dark theme B match the canvas.
 - [x] `config/catalog/listing.yml`: ID length and format, tag normalisation, tag sort, Firestore candidate
       limit (500), cursor strategy, collection names. (The cursor stays "the last id on the page": there is
       only one strategy, so it is not a setting.)
-- [ ] `config/platform/events.yml`: internal path prefix, Pub/Sub envelope keys, accepted Eventarc event type.
+- [x] `config/platform/events.yml`: internal path prefix, Pub/Sub envelope keys, accepted Eventarc event type.
 
 ### 2.3 Infra and tools
 - [ ] `infra/gcp/resources.yml`: one place for:

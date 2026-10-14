@@ -1,0 +1,132 @@
+{
+  "$defs": {
+    "Messages": {
+      "additionalProperties": false,
+      "properties": {
+        "not_json": {
+          "minLength": 1,
+          "title": "Not Json",
+          "type": "string"
+        },
+        "not_an_object": {
+          "minLength": 1,
+          "title": "Not An Object",
+          "type": "string"
+        },
+        "not_a_job_result": {
+          "minLength": 1,
+          "title": "Not A Job Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "not_json",
+        "not_an_object",
+        "not_a_job_result"
+      ],
+      "title": "Messages",
+      "type": "object"
+    },
+    "TranscodeResult": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "envelope_keys": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Envelope Keys",
+          "type": "array"
+        },
+        "job_key": {
+          "minLength": 1,
+          "title": "Job Key",
+          "type": "string"
+        },
+        "job_name_key": {
+          "minLength": 1,
+          "title": "Job Name Key",
+          "type": "string"
+        },
+        "job_state_key": {
+          "minLength": 1,
+          "title": "Job State Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "envelope_keys",
+        "job_key",
+        "job_name_key",
+        "job_state_key"
+      ],
+      "title": "TranscodeResult",
+      "type": "object"
+    },
+    "UploadFinalized": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "event_type_header": {
+          "minLength": 1,
+          "title": "Event Type Header",
+          "type": "string"
+        },
+        "accepted_event_types": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Accepted Event Types",
+          "type": "array"
+        },
+        "object_name_key": {
+          "minLength": 1,
+          "title": "Object Name Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "event_type_header",
+        "accepted_event_types",
+        "object_name_key"
+      ],
+      "title": "UploadFinalized",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "internal_prefix": {
+      "title": "Internal Prefix",
+      "type": "string"
+    },
+    "upload_finalized": {
+      "$ref": "#/$defs/UploadFinalized"
+    },
+    "transcode_result": {
+      "$ref": "#/$defs/TranscodeResult"
+    },
+    "messages": {
+      "$ref": "#/$defs/Messages"
+    }
+  },
+  "required": [
+    "internal_prefix",
+    "upload_finalized",
+    "transcode_result",
+    "messages"
+  ],
+  "title": "EventsRules",
+  "type": "object",
+  "$comment": "GENERATED from the Pydantic schema by tools/export_rule_schemas.py for events.yml."
+}

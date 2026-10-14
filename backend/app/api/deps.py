@@ -85,7 +85,7 @@ def get_orders(c: Annotated[Container, Depends(get_container)]) -> OrderService:
 
 def verify_internal_caller(c: Annotated[Container, Depends(get_container)],
                            authorization: Annotated[str | None, Header()] = None) -> str:
-    """Dependency for /internal/*: only our Eventarc trigger and Pub/Sub subscription get through."""
+    """Dependency for the internal routes: only our Eventarc trigger and Pub/Sub subscription get through."""
     from app.infra.gcp.auth import CallerRejected
 
     try:
