@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/discover/discover_source.dart';
 import '../../features/orders/orders_source.dart';
+import '../../features/product/product_source.dart';
 import 'screen_scope.dart';
 
 typedef ScreenSource = ScreenData Function(WidgetRef ref, Map<String, String> params);
@@ -23,4 +24,5 @@ const Map<String, SourceDef> screenSources = {
   'orders': SourceDef(ordersSource),
   'receipt': SourceDef(receiptSource),
   'discover': SourceDef(discoverSource, calls: discoverCalls),
+  'product': SourceDef(productSource, calls: productCalls),
 };

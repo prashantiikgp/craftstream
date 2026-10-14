@@ -88,14 +88,16 @@ Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
   final filters = FiltersEngine(await loadFiltersRules(bundle: bundle));
   _crossCheck(
       theme: theme, strings: strings, routes: routes, navigation: navigation, status: status, art: art, filters: filters);
-  final refs = brickRefs(theme: theme, strings: strings, routes: routes, navigation: navigation, icons: icons, art: art);
+  final layout = LayoutEngine(await loadLayoutRules(bundle: bundle));
+  final refs = brickRefs(
+      theme: theme, strings: strings, routes: routes, navigation: navigation, icons: icons, art: art, layout: layout);
   final screens = ScreenEngine(await loadScreenRules(bundle: bundle), bricks, refs, backdrops: art.backdropNames.toSet());
   final unrouted = routes.screenNames.difference(screens.names.toSet());
   if (unrouted.isNotEmpty) throw ConfigCrossCheckError(['routes.yml shows screens with no YAML: ${unrouted.join(', ')}']);
   return AppConfig(
     env: e,
     theme: theme,
-    layout: LayoutEngine(await loadLayoutRules(bundle: bundle)),
+    layout: layout,
     strings: strings,
     filters: filters,
     player: PlayerEngine(await loadPlayerRules(bundle: bundle)),
@@ -118,6 +120,7 @@ BrickRefs brickRefs({
   required NavigationEngine navigation,
   required IconsEngine icons,
   required ArtEngine art,
+  required LayoutEngine layout,
 }) {
   final t = theme.light;
   return BrickRefs(
@@ -130,6 +133,7 @@ BrickRefs brickRefs({
     styles: t.styles.keys.toSet(),
     spaces: spacingSteps,
     doorArts: art.doorNames.toSet(),
+    sizeClasses: layout.sizeClassNames.toSet(),
   );
 }
 

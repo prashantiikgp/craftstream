@@ -15,7 +15,13 @@ class StatusEngine {
 
   StatusEngine(this.rules) {
     if (rules.video.isEmpty || rules.order.isEmpty) throw const StatusRulesError('video and order need statuses');
+    if (rules.video.values.where((l) => l.orderable).length != 1) {
+      throw const StatusRulesError('exactly one video status must be orderable: true');
+    }
   }
+
+  /// Whether a product with this video status can be watched and bought.
+  bool orderable(String videoStatus) => look('video', videoStatus).orderable;
 
   Map<String, StatusLookSchema> _kind(String kind) => switch (kind) {
         'video' => rules.video,

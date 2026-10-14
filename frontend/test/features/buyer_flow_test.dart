@@ -52,8 +52,9 @@ void main() {
 
   testWidgets('a tag on the product page filters Discover', (tester) async {
     await pumpApp(tester, c, location: '/product/p_07');
-    await tester.ensureVisible(find.text('dhokra'));
-    await tester.tap(find.text('dhokra'));
+    // Tag chips use the eyebrow style, which theme.yml shows in capitals.
+    await tester.ensureVisible(find.text('DHOKRA'));
+    await tester.tap(find.text('DHOKRA'));
     await settle(tester);
     expect(find.text(str(c, 'discover.tag_filter', {'tag': 'dhokra'})), findsOneWidget);
     expect(find.text('Dhokra brass elephant'), findsOneWidget);

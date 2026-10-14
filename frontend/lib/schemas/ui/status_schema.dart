@@ -22,8 +22,16 @@ class StatusLookSchema {
   final String? hint;
   final bool progress;
   final bool retry;
+  final bool orderable;
 
-  const StatusLookSchema({required this.label, required this.tone, this.hint, this.progress = false, this.retry = false});
+  const StatusLookSchema({
+    required this.label,
+    required this.tone,
+    this.hint,
+    this.progress = false,
+    this.retry = false,
+    this.orderable = false,
+  });
 
   factory StatusLookSchema.fromJson(Map<String, dynamic> json) => _$StatusLookSchemaFromJson(json);
 }

@@ -37,7 +37,10 @@ class ToggleThemeAction extends ActionSpec {
 class CallAction extends ActionSpec {
   final String name;
   final String? withPath;
-  const CallAction(this.name, [this.withPath]);
+
+  /// What to do after the call (`then: {go: /discover}`), e.g. show the result somewhere else.
+  final ActionSpec? then;
+  const CallAction(this.name, [this.withPath, this.then]);
 }
 
 /// One receipt line: a strings key for the label and a field of the bound record.
@@ -57,7 +60,10 @@ class BrickNode {
 
   /// Data paths: the brick shows only while [when] is truthy and [unless] is not (any brick may have them).
   final String? when, unless;
-  const BrickNode(this.brick, this.props, this.where, {this.when, this.unless});
+
+  /// Size classes (ui/layout.yml) the brick shows on; null = all.
+  final List<String>? only;
+  const BrickNode(this.brick, this.props, this.where, {this.when, this.unless, this.only});
 
   T? prop<T>(String name) => props[name] as T?;
   T need<T>(String name) => props[name] as T? ?? (throw BricksRulesError('$where: $brick.$name is missing'));
@@ -67,10 +73,11 @@ class BrickNode {
 class BrickRefs {
   final bool Function(String key) hasText;
   final bool Function(String template) acceptsRoute;
-  final Set<String> icons, roles, tones, colors, styles, spaces, doorArts;
+  final Set<String> icons, roles, tones, colors, styles, spaces, doorArts, sizeClasses;
   const BrickRefs({
     required this.hasText,
     required this.acceptsRoute,
+    required this.sizeClasses,
     required this.icons,
     required this.roles,
     required this.tones,
@@ -141,7 +148,7 @@ class BricksEngine {
     }
 
     for (final key in raw.keys) {
-      if (!const {'brick', 'when', 'unless'}.contains(key) && !b.props.containsKey(key)) {
+      if (!const {'brick', 'when', 'unless', 'only'}.contains(key) && !b.props.containsKey(key)) {
         throw BricksRulesError('$at: unknown prop "$key" (has: ${b.props.keys.join(', ')})');
       }
     }
@@ -154,7 +161,12 @@ class BricksEngine {
       }
       props[prop] = _value(p, value, '$at.$prop', refs);
     });
-    return BrickNode(name, props, at, when: condition('when'), unless: condition('unless'));
+    final only = raw['only'];
+    if (only != null && (only is! List || only.isEmpty || only.any((c) => !refs.sizeClasses.contains(c)))) {
+      throw BricksRulesError('$at.only: list size classes from ui/layout.yml (${refs.sizeClasses.join(', ')})');
+    }
+    return BrickNode(name, props, at,
+        when: condition('when'), unless: condition('unless'), only: only == null ? null : [for (final c in only as List) '$c']);
   }
 
   Object? _value(PropSchema p, Object value, String at, BrickRefs refs) {
@@ -233,11 +245,14 @@ class BricksEngine {
     if (value is Map && value.containsKey('call')) {
       final name = value['call'], arg = value['with'];
       if (name is! String || !_field.hasMatch(name)) throw BricksRulesError('$at: call needs a name like load_more');
-      if (value.keys.any((k) => k != 'call' && k != 'with')) throw BricksRulesError('$at: a call takes only "with"');
+      if (value.keys.any((k) => !const {'call', 'with', 'then'}.contains(k))) {
+        throw BricksRulesError('$at: a call takes only "with" and "then"');
+      }
       if (arg != null && (arg is! String || !_path.hasMatch(arg))) {
         throw BricksRulesError('$at: with: "$arg" is not a data path');
       }
-      return CallAction(name, arg as String?);
+      final then = value['then'];
+      return CallAction(name, arg as String?, then == null ? null : _action(then as Object, '$at.then', refs));
     }
     if (value is! Map || value.length != 1) {
       throw BricksRulesError(

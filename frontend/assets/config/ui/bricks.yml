@@ -162,6 +162,7 @@ bricks:
       icon: { type: icon }
       variant: { type: enum, options: [primary, ghost], default: primary }
       tone: { type: tone, default: brand }
+      enabled: { type: bind }                    # when the bound value is false the button is greyed out
       action: { type: action, required: true }
     style:
       height: 54
@@ -332,6 +333,140 @@ bricks:
       error_color: danger.ink
       spinner: 18
       spinner_stroke: 2
+
+  split:
+    about: Two columns side by side on wide screens (layout.yml product_layout), stacked on phones and tablets.
+    props:
+      first: { type: nodes, required: true }     # the video column
+      second: { type: nodes, required: true }    # the details column
+      gap: { type: space, default: lg }          # between bricks in a column (and between columns when stacked)
+      side_gap: { type: space, default: xxl }    # between the columns when side by side
+    style:
+      flex_scale: 100                            # turns layout.yml side_by_side_video_fraction into flex values
+
+  value:
+    about: A piece of data shown as text (a product's title or description), in a theme text style.
+    props:
+      bind: { type: bind, required: true }
+      style: { type: style, default: body }
+      color: { type: color, default: text }
+
+  tag_row:
+    about: A product's tags as outlined chips in rotating accents. Tapping one passes it to `action` as item.
+    props:
+      bind: { type: bind, required: true }       # list of tag strings
+      action: { type: action }
+    style:
+      gap: xs
+      height: 30
+      padding: sm
+      label: eyebrow
+      background: surface
+      accents: [orange, purple, pink, marigold]
+
+  artisan_row:
+    about: Who made it (initials square, name, a caption) with the price on the right, between hairlines.
+    props:
+      name: { type: bind, required: true }
+      caption: { type: text, required: true }
+      price: { type: bind, required: true }
+      currency: { type: bind, required: true }
+    style:
+      padding: md
+      gap: md
+      border: line
+      avatar: 40
+      avatar_accent: pink
+      avatar_style: price_sm
+      initials: 2
+      name_style: body_strong
+      caption_style: caption
+      caption_color: text_muted
+      price_style: price
+      price_color: marigold.ink
+
+  notice:
+    about: A tinted box with an icon, a title and a message, in a tone (info, warning, danger, success).
+    props:
+      tone: { type: tone, default: info }
+      icon: { type: icon, default: info }
+      title: { type: text, required: true }
+      message: { type: text }
+      args: { type: args }
+    style:
+      padding: lg
+      gap: sm
+      icon: 20
+      title: label
+      message: body
+
+  buy_bar:
+    about: The price and a Buy button, pinned to the bottom of the screen on phones so buying is one tap away.
+    props:
+      price: { type: bind, required: true }
+      currency: { type: bind, required: true }
+      label: { type: text, required: true }
+      enabled: { type: bind, required: true }    # false: the button is greyed out and does nothing
+      tone: { type: tone, default: brand }
+      action: { type: action, required: true }
+    style:
+      gap: md
+      height: 52
+      button_width: 180
+      price: price
+      price_color: text
+      label: title
+
+  video_player:
+    about: >-
+      The process video for slow connections. Nothing loads until play is tapped; it starts on the lowest rung
+      (media/player.yml) and a pill shows the rung ("144p · 47 kbps"). Tap the picture to pause.
+    props:
+      bind: { type: bind, required: true }       # a product: id, hls_url, thumbnail_url, ready
+      play: { type: text, default: product.play }
+      pause: { type: text, default: product.pause }
+      slow_note: { type: text, default: product.slow_network_note }
+      rung: { type: text, default: product.rung }
+      rung_height_only: { type: text, default: product.rung_height_only }
+      estimate: { type: text, default: product.network_estimate }
+      buffering: { type: text, default: product.buffering }
+      error: { type: text, default: product.video_error }
+      retry: { type: text, default: common.retry }
+      seek: { type: text, default: product.seek }
+      time: { type: text, default: product.time }
+    style:
+      aspect_w: 16
+      aspect_h: 9
+      background: scrim
+      bar: scrim
+      on_bar: on_scrim
+      panel: surface
+      accent: brand.fill
+      on_accent: brand.on_fill
+      inset: md
+      pill_padding: sm
+      pill_gap: xs
+      pill_icon: 14
+      pill_icon_name: signal
+      pill_icon_color: brand.fill
+      pill_style: mono
+      estimate_icon: gauge
+      play_box: 64
+      play_icon: play
+      play_icon_size: 28
+      pause_icon: pause
+      retry_icon: retry
+      control_box: 44
+      control_icon: 18
+      track: 3
+      track_color: text_muted
+      thumb: 6
+      time_style: mono
+      spinner: 28
+      spinner_stroke: 3
+      error_max_width: 320
+      error_padding: lg
+      error_style: body
 
   spacer:
     about: "Takes the free height, pushing what follows to the bottom (only inside a screen with `fill: true`)."

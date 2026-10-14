@@ -6,11 +6,12 @@
 #   hint      strings.yml key for the line under a listing (the artisan's products)
 #   progress  show a progress bar while in this status
 #   retry     offer "Upload again"
+#   orderable the video can be watched and the product bought (exactly one video status)
 
 video:
   awaiting_upload: { label: status.awaiting_upload, tone: neutral, hint: studio.hint_awaiting_upload }
   processing:      { label: status.processing, tone: info, hint: studio.hint_processing, progress: true }
-  ready:           { label: status.ready, tone: success, hint: studio.hint_ready }
+  ready:           { label: status.ready, tone: success, hint: studio.hint_ready, orderable: true }
   failed:          { label: status.failed, tone: danger, hint: studio.hint_failed, retry: true }
 
 order:

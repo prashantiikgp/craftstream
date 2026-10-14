@@ -251,8 +251,6 @@ Widget _card(BuildContext context, BrickNode n, BrickStyle s, double aspect) {
   final brand = t.tone('brand');
   final title = '${p['title'] ?? ''}', artisan = '${p['artisan_name'] ?? ''}';
   final price = formatMoney(p['price'] as num? ?? 0, '${p['currency']}');
-  final thumb = p['thumbnail_url'] as String?;
-  final art = PosterArt('${p['id']}');
   return Pressable(
     accent: brand.fill,
     semanticLabel: '$title, $artisan, $price',
@@ -266,15 +264,7 @@ Widget _card(BuildContext context, BrickNode n, BrickStyle s, double aspect) {
         AspectRatio(
           aspectRatio: aspect,
           child: Stack(fit: StackFit.expand, children: [
-            if (thumb == null)
-              art
-            else
-              Image.network(
-                thumb,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => art,
-                frameBuilder: (_, child, frame, sync) => frame == null && !sync ? art : child,
-              ),
+            Poster(seed: '${p['id']}', thumbnailUrl: p['thumbnail_url'] as String?),
             Positioned(
               left: s.space('tag_inset'),
               bottom: s.space('tag_inset'),

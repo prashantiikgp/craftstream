@@ -1,0 +1,78 @@
+about: >-
+  One product. The process video (loads only when tapped, starts on the lowest rung), what it is, who made it,
+  and Buy. Video beside the details on wide screens, above them on phones; on phones Buy is pinned to the bottom.
+data: product           # params.id -> product
+width: wide
+gap: lg
+
+top:
+  - brick: top_bar
+    leading: back
+    label: common.back
+    role: buy
+    action: { back: true }
+
+body:
+  - brick: split
+    first:
+      - brick: video_player
+        bind: product
+    second:
+      - brick: notice
+        when: product.not_ready
+        tone: warning
+        icon: info
+        title: product.not_ready_title
+        message: product.not_ready_message
+
+      - brick: tag_row
+        bind: product.tags
+        action: { call: show_tag, with: item, then: { go: /discover } }
+
+      - brick: value
+        bind: product.title
+        style: h1
+
+      - brick: artisan_row
+        name: product.artisan_name
+        caption: product.artisan
+        price: product.price
+        currency: product.currency
+
+      # On wide screens Buy sits with the details; phones get the bar at the bottom.
+      - brick: button
+        only: [expanded, large]
+        label: product.buy
+        enabled: product.ready
+        action: { go: "/product/{product.id}/buy" }
+
+      - brick: text
+        text: product.about
+        style: h3
+
+      - brick: value
+        bind: product.description
+
+      - brick: notice
+        tone: info
+        icon: info
+        title: product.after_order_title
+        message: product.after_order_message
+        args: { artisan: product.artisan_name }
+
+bottom:
+  - brick: buy_bar
+    only: [compact, medium]
+    price: product.price
+    currency: product.currency
+    label: product.buy
+    enabled: product.ready
+    action: { go: "/product/{product.id}/buy" }
+
+error:
+  - brick: empty_state
+    icon: info
+    title: common.error_title
+    message: product.load_error
+    button: common.retry
+    action: { call: retry }

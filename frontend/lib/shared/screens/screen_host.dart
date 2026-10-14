@@ -34,9 +34,10 @@ class ScreenHost extends ConsumerWidget {
     void run(BuildContext context, ActionSpec action, BrickScope scope, [Object? value]) {
       final router = GoRouter.of(context);
       switch (action) {
-        case CallAction(:final name, :final withPath):
+        case CallAction(:final name, :final withPath, :final then):
           final call = data.calls[name] ?? (throw StateError('${spec.name}.yml: data source has no call "$name"'));
           call(withPath == null ? value : scope.lookup(withPath));
+          if (then != null) run(context, then, scope);
         case GoAction(:final template):
           router.go(scope.fillTemplate(template));
         case BackAction():
@@ -59,6 +60,7 @@ class ScreenHost extends ConsumerWidget {
         values: data.values,
         params: params,
         run: run,
+        sizeClass: config.layout.sizeClassFor(MediaQuery.sizeOf(context).width).name,
         child: Stack(children: [
           if (spec.backdrop != null) Positioned.fill(child: ArtShapes(config.art.backdrop(spec.backdrop!))),
           SafeArea(

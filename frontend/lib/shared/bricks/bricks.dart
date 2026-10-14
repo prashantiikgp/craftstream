@@ -11,6 +11,7 @@ import '../screens/screen_scope.dart';
 import '../theme/app_theme.dart';
 import 'browse_bricks.dart';
 import 'kit.dart';
+import 'product_bricks.dart';
 
 typedef BrickBuild = Widget Function(BuildContext context, BrickNode node);
 
@@ -42,6 +43,13 @@ const brickBuilders = <String, BrickBuilder>{
   'results_bar': BrickBuilder(resultsBarBrick),
   'product_grid': BrickBuilder(productGridBrick),
   'load_more': BrickBuilder(loadMoreBrick),
+  'split': BrickBuilder(splitBrick),
+  'value': BrickBuilder(valueBrick),
+  'tag_row': BrickBuilder(tagRowBrick),
+  'artisan_row': BrickBuilder(artisanRowBrick),
+  'notice': BrickBuilder(noticeBrick),
+  'buy_bar': BrickBuilder(buyBarBrick),
+  'video_player': BrickBuilder(videoPlayerBrick),
   'spacer': BrickBuilder(_spacer, flexes: true),
 };
 
@@ -321,7 +329,9 @@ Widget _receipt(BuildContext context, BrickNode n) {
 Widget _button(BuildContext context, BrickNode n) {
   final s = BrickStyle.of(context, 'button');
   final t = context.tokens;
-  final tone = t.tone(n.need('tone'));
+  final enabledPath = n.prop<String>('enabled');
+  final enabled = enabledPath == null || truthy(BrickScope.of(context).lookup(enabledPath));
+  final tone = t.tone(enabled ? n.need('tone') : 'neutral');
   final primary = n.need<String>('variant') == 'primary';
   final label = _say(context, n, 'label');
   final icon = n.prop<String>('icon');
@@ -329,7 +339,7 @@ Widget _button(BuildContext context, BrickNode n) {
   return Pressable(
     accent: tone.fill,
     semanticLabel: label,
-    onTap: () => _act(context, n),
+    onTap: enabled ? () => _act(context, n) : null,
     builder: (context, active) => Container(
       height: s.number('height'),
       alignment: Alignment.center,

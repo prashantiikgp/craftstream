@@ -18,6 +18,11 @@ routes:
     screen: placed
   - path: /discover
     screen: discover
+  - path: /product/:id
+    screen: product
+    routes:
+      - path: buy
+        legacy: checkout
 
   # v1 screens, until each becomes a screen YAML
   - path: /studio
@@ -26,11 +31,6 @@ routes:
   - path: /studio/new
     legacy: upload
     shell: true
-  - path: /product/:id
-    legacy: product
-    routes:
-      - path: buy
-        legacy: checkout
   - path: /catalog
     legacy: design_catalog
     dev_only: true

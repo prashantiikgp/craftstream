@@ -21,6 +21,10 @@ icons:
   info:   { stroke: ["M12 8v5", "M12 16h.01"], circles: [[12, 12, 9]] }
   shop:   { stroke: ["M4 10h16v10H4z", "M3 10l2-6h14l2 6", "M10 20v-5h4v5"] }
   sort:   { stroke: ["M8 4v16", "M4 8l4-4 4 4", "M16 20V4", "M12 16l4 4 4-4"] }
+  pause:  { fill: ["M6 4h4v16H6z", "M14 4h4v16h-4z"] }
+  signal: { stroke: ["M4 20v-3", "M9 20v-7", "M14 20V9", "M19 20V5"] }
+  gauge:  { stroke: ["M4 18C4 11.4 7.6 7 12 7C16.4 7 20 11.4 20 18", "M12 18l4-6"] }
+  retry:  { stroke: ["M19 8C17.6 5.6 15 4 12 4C7.6 4 4 7.6 4 12C4 16.4 7.6 20 12 20C15.3 20 18.1 18 19.3 15.1", "M19 3v5h-5"] }
   # theme toggle: shows where a tap takes you (sun in dark mode, moon in light mode)
   sun:
     stroke: ["M12 2v2", "M12 20v2", "M4.9 4.9l1.4 1.4", "M17.7 17.7l1.4 1.4", "M2 12h2", "M20 12h2",

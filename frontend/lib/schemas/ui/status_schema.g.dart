@@ -33,7 +33,14 @@ StatusLookSchema _$StatusLookSchemaFromJson(Map<String, dynamic> json) =>
     $checkedCreate('StatusLookSchema', json, ($checkedConvert) {
       $checkKeys(
         json,
-        allowedKeys: const ['label', 'tone', 'hint', 'progress', 'retry'],
+        allowedKeys: const [
+          'label',
+          'tone',
+          'hint',
+          'progress',
+          'retry',
+          'orderable',
+        ],
       );
       final val = StatusLookSchema(
         label: $checkedConvert('label', (v) => v as String),
@@ -41,6 +48,7 @@ StatusLookSchema _$StatusLookSchemaFromJson(Map<String, dynamic> json) =>
         hint: $checkedConvert('hint', (v) => v as String?),
         progress: $checkedConvert('progress', (v) => v as bool? ?? false),
         retry: $checkedConvert('retry', (v) => v as bool? ?? false),
+        orderable: $checkedConvert('orderable', (v) => v as bool? ?? false),
       );
       return val;
     });

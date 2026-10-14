@@ -26,7 +26,8 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     c = await testConfig();
     refs = brickRefs(
-        theme: c.theme, strings: c.strings, routes: c.routes, navigation: c.navigation, icons: c.icons, art: c.art);
+        theme: c.theme, strings: c.strings, routes: c.routes, navigation: c.navigation, icons: c.icons, art: c.art,
+        layout: c.layout);
   });
 
   ScreenEngine engine([String Function(String name, String yaml)? edit]) =>

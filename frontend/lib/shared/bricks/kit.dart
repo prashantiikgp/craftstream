@@ -284,6 +284,26 @@ class _PosterPainter extends CustomPainter {
   bool shouldRepaint(_PosterPainter old) => old.look != look || old.t != t;
 }
 
+/// A product's picture: its thumbnail when it has one, else (and while it loads, or if it fails) the art.yml
+/// poster for [seed]. Images only: video never loads here.
+class Poster extends StatelessWidget {
+  final String seed;
+  final String? thumbnailUrl;
+  const Poster({super.key, required this.seed, this.thumbnailUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    final art = PosterArt(seed);
+    if (thumbnailUrl == null) return art;
+    return Image.network(
+      thumbnailUrl!,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => art,
+      frameBuilder: (_, child, frame, sync) => frame == null && !sync ? art : child,
+    );
+  }
+}
+
 /// The CraftStream mark: three slanted stripes, one per accent in [accents].
 class Stripes extends StatelessWidget {
   final double size;

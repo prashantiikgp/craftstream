@@ -73,7 +73,7 @@ strings:
     clear_filters: Clear filters
 
   product:
-    screen_title: Product
+    artisan: Artisan
     by_artisan: by {artisan}
     play: Play the process video
     pause: Pause
@@ -87,7 +87,6 @@ strings:
     time: "{position} / {duration}"
     buy: Buy
     about: How it's made
-    tags: Tags
     not_ready_title: The video is still processing
     not_ready_message: You can buy this once the process video is ready to watch.
     after_order_title: What happens after you order
