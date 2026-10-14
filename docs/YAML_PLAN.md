@@ -47,11 +47,12 @@ Sets up what every later phase needs, so Phases 1 and 2 are mostly "move the lit
 ### 0.1 Investigation
 - [x] Inventory the hard-coded behaviour in the frontend and backend (`YAML_INVENTORY.md`).
 - [x] Mock up theme B: dark and light (#F5F5F5); home, browse, product, checkout, order placed, your orders.
-- [ ] Mock up theme B for the artisan side: My products (listing cards with status) and New product (form,
-      video pick, upload progress).
+- [x] Mock up theme B for the artisan side, in dark: Your products (listing cards with status), New product
+      (form, video pick) and Uploading (progress and the four steps). The light versions come from the same
+      tokens. *(Awaiting user approval.)*
 - [ ] Mock up theme B for tablet landscape and desktop: home with doors side by side; browse with 4–5 columns;
       product with video and details side by side.
-- [ ] Mock up the missing entry points:
+- [x] Mock up the missing entry points *(awaiting user approval)*:
   - where a buyer opens **Your orders** without placing a new order (a header action on Browse and Product,
     plus a link under the doors on Home);
   - where the **light/dark toggle** sits;
