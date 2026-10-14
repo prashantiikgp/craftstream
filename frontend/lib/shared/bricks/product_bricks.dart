@@ -66,13 +66,13 @@ Widget tagRowBrick(BuildContext context, BrickNode n) {
             onTap: () => BrickScope.of(context).act(context, n.prop<ActionSpec>('action')),
             builder: (context, active) => Container(
               height: s.number('height'),
-              alignment: Alignment.center,
               padding: EdgeInsets.symmetric(horizontal: s.space('padding')),
               decoration: BoxDecoration(
                 color: active ? accent.wash : s.color('background'),
                 border: Border.all(color: accent.line),
               ),
-              child: StyledText('$tag', style: s.name('label'), color: accent.ink),
+              // widthFactor 1: the chip hugs its text instead of filling the row.
+              child: Align(widthFactor: 1, child: StyledText('$tag', style: s.name('label'), color: accent.ink)),
             ),
           );
         }),
