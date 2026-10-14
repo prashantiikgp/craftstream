@@ -50,4 +50,5 @@ ScreenSchema _$ScreenSchemaFromJson(Map<String, dynamic> json) =>
 const _$ScreenWidthEnumMap = {
   ScreenWidth.narrow: 'narrow',
   ScreenWidth.wide: 'wide',
+  ScreenWidth.auto: 'auto',
 };

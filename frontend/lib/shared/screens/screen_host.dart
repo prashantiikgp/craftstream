@@ -74,7 +74,12 @@ class ScreenHost extends ConsumerWidget {
             child: LayoutBuilder(builder: (context, box) {
               final layout = config.layout;
               final pad = layout.sizeClassFor(box.maxWidth).pagePadding;
-              final maxWidth = spec.width == ScreenWidth.narrow ? layout.rules.formMaxWidth : layout.rules.maxContentWidth;
+              final wide = switch (spec.width) {
+                ScreenWidth.narrow => false,
+                ScreenWidth.wide => true,
+                ScreenWidth.auto => layout.productSideBySide(box.maxWidth),
+              };
+              final maxWidth = wide ? layout.rules.maxContentWidth : layout.rules.formMaxWidth;
               return Center(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: maxWidth),

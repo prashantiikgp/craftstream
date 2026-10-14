@@ -68,6 +68,12 @@ class LayoutEngine {
     return math.max(1, math.min(rules.listCard.maxColumns, fit));
   }
 
+  /// List-card columns that fit in [available] logical pixels (the space the list really has).
+  int listColumnsIn(double available, double gap) {
+    final fit = ((available + gap) / (rules.listCard.minWidth + gap)).floor();
+    return math.max(1, math.min(rules.listCard.maxColumns, fit));
+  }
+
   bool usesRail(double width) => sizeClassFor(width).navigation == NavigationStyle.rail;
 
   bool productSideBySide(double width) => sizeClassFor(width).productLayout == ProductLayout.sideBySide;

@@ -1,6 +1,6 @@
 about: The artisan's side. Their products with each video's status (live, processing, failed) and a way to add one.
 data: studio
-width: narrow
+width: auto              # cards in columns on wide screens (layout.yml list_card)
 gap: md
 backdrop: sell
 
@@ -29,6 +29,7 @@ body:
   - brick: list
     bind: studio.items
     gap: md
+    layout: cards
     item:
       brick: listing_card
       role: sell

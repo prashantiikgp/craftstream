@@ -45,7 +45,7 @@ Widget listingCardBrick(BuildContext context, BrickNode n) {
                 Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Expanded(child: StyledText(title, style: s.name('title'), maxLines: s.number('title_lines').toInt())),
                   SizedBox(width: s.space('gap')),
-                  StatusTag(kind: 'video', value: '${p['video_status']}', style: s.name('tag')),
+                  Flexible(child: StatusTag(kind: 'video', value: '${p['video_status']}', style: s.name('tag'))),
                 ]),
                 StyledText(formatMoney(p['price'] as num? ?? 0, '${p['currency']}'),
                     style: s.name('price'), color: s.color('price_color')),

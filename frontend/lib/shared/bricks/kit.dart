@@ -362,7 +362,7 @@ class StatusTag extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: t.space.xs + t.space.xxs, vertical: t.space.xxs),
       color: tone.fill,
-      child: StyledText(config.strings.get(look.label), style: style, color: tone.onFill),
+      child: StyledText(config.strings.get(look.label), style: style, color: tone.onFill, maxLines: 1),
     );
   }
 }

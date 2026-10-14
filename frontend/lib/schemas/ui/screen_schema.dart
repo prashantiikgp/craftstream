@@ -7,7 +7,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'screen_schema.g.dart';
 
 @JsonEnum()
-enum ScreenWidth { narrow, wide }
+enum ScreenWidth { narrow, wide, auto }
 
 @JsonSerializable()
 class ScreenSchema {
@@ -16,7 +16,8 @@ class ScreenSchema {
   /// The data source (lib/shared/screens/sources.dart) that fills the screen's bindings; none for static screens.
   final String? data;
 
-  /// narrow: forms and confirmations (layout.yml form_max_width); wide: grids and lists (max_content_width).
+  /// narrow: forms and confirmations (layout.yml form_max_width); wide: grids and lists (max_content_width);
+  /// auto: narrow where layout.yml stacks (phones, portrait tablets), wide where it goes side by side.
   final ScreenWidth width;
 
   /// Spacing step between body bricks.

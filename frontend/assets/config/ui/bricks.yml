@@ -183,6 +183,7 @@ bricks:
       bind: { type: bind, required: true }
       item: { type: node, required: true }
       gap: { type: space, default: md }
+      layout: { type: enum, options: [stack, cards], default: stack }   # cards: columns from layout.yml list_card
 
   order_card:
     about: One placed order. Poster, product, quantity and artisan, total and status; the order number below.
@@ -518,7 +519,7 @@ bricks:
       error: caption
       error_color: danger.ink
       radius: sharp
-      prefix_style: price_sm
+      prefix_style: title
       prefix_color: marigold.ink
 
   stepper:
