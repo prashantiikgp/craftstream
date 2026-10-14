@@ -5,8 +5,13 @@
 locale: en
 
 strings:
+  brand:
+    name: CraftStream
+
   common:
     back: Back
+    home: Home
+    count_go: "{count} →"
     retry: Try again
     error_title: Something went wrong
     error_message: We couldn't load this. Check your connection and try again.
@@ -17,6 +22,9 @@ strings:
     design_system: Design system
 
   nav:
+    buy: Buy
+    sell: Sell
+    role_tag: "{number} / {label}"
     discover: Discover
     orders: Orders
     my_products: My products
@@ -27,6 +35,19 @@ strings:
     processing: Processing
     failed: Failed
     awaiting_upload: Waiting for video
+    placed: Placed
+
+  home:
+    tagline: Handmade · shown in full
+    buy_title: Buy
+    buy_body: Search by craft, watch the whole making video, then order from the artisan.
+    sell_title: Sell
+    sell_body: Upload a process video up to 15 minutes. Buyers can watch it even on a slow connection.
+    orders: Your orders
+
+  theme:
+    to_light: Switch to the light theme
+    to_dark: Switch to the dark theme
 
   discover:
     title: Made by hand, shown in full
@@ -93,6 +114,7 @@ strings:
     no_payment_note: No payment now. The artisan contacts you to arrange delivery.
 
   placed:
+    step: 03 / Done
     title: Order placed
     message: "{artisan} will be in touch about delivery."
     message_generic: The artisan will be in touch about delivery.
@@ -100,10 +122,10 @@ strings:
     product: Product
     quantity: Quantity
     total: Total
-    status: Status
-    status_placed: Placed
     keep_exploring: Keep exploring
     see_orders: See your orders
+    missing_title: This order isn't on this device
+    missing_message: Orders show here on the phone or browser they were placed from.
 
   orders:
     title: Your orders
@@ -112,6 +134,7 @@ strings:
     empty_message: When you order something, it shows up here.
     start_exploring: Start exploring
     line: "{quantity} × · from {artisan}"
+    number: "#{id}"
 
   studio:
     title: Your products

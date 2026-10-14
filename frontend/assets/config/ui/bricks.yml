@@ -1,0 +1,228 @@
+# The bricks screens are built from. A screen YAML (ui/screens/*.yml) lists bricks by name with their props;
+# the brick's look (sizes, spacing, text styles, colours) lives here under `style`, so every screen that uses a
+# brick looks the same. The Dart side (lib/shared/bricks/) only draws what this file describes.
+#
+# Prop types (what a screen may write):
+#   text     a strings.yml key                  args     {placeholder: data path} for the text's {placeholders}
+#   bind     a data path (`order.total`)         action   {go: /path/{item.id}} | {back: true} | {toggle_theme: true}
+#   icon     a name from ui/icons.yml            role     a role from app/navigation.yml (buy, sell)
+#   tone     a tone from ui/theme.yml            color    a colour from ui/theme.yml (`text_muted`, `pink.ink`)
+#   style    a text style from ui/theme.yml      space    a spacing step from ui/theme.yml (sm, md, lg …)
+#   door_art a door art name from ui/art.yml     enum     one of `options`
+#   bool, number, node (one brick), nodes (a list of bricks), rows (receipt rows: label + field)
+#
+# Style values: spacing steps (`lg`), radius names (`sharp`, `card`), text styles (`eyebrow`), colours (`line`) or
+# plain numbers (logical pixels).
+
+bricks:
+  text:
+    about: One line or paragraph of copy in a theme text style.
+    props:
+      text: { type: text, required: true }
+      args: { type: args }
+      fallback: { type: text }       # shown instead when an arg is missing (e.g. no artisan name)
+      style: { type: style, default: body }
+      color: { type: color, default: text }
+      align: { type: enum, options: [start, center, end], default: start }
+
+  wordmark:
+    about: The CraftStream stripes and name, with an optional tagline under it.
+    props:
+      size: { type: enum, options: [sm, lg], default: lg }
+      tagline: { type: text }
+    style:
+      lg_mark: 44
+      lg_name: h1
+      sm_mark: 20
+      sm_name: title
+      gap: md
+      tagline: eyebrow
+      tagline_color: text_muted
+      stripes: [orange, pink, purple]   # accents, left to right
+
+  theme_toggle:
+    about: Switches between light and dark. Shows a sun in dark mode and a moon in light mode.
+    props:
+      align: { type: enum, options: [start, end], default: end }
+    style:
+      box: 44
+      icon: 20
+      background: surface
+      border: line
+      radius: none
+      icon_in_dark: sun                  # icons.yml names: where a tap takes you
+      icon_in_light: moon
+
+  doors:
+    about: The Buy and Sell doors. Stacked and sharing the height on phones, side by side on wider screens.
+    props:
+      items: { type: nodes, required: true }
+    style:
+      gap: lg
+      side_by_side_from: medium          # a size class from ui/layout.yml
+
+  door:
+    about: A big tappable box for one role. Lifts and glows in the role's colour on hover and press.
+    props:
+      role: { type: role, required: true }
+      title: { type: text, required: true }
+      body: { type: text }
+      art: { type: door_art }            # defaults to the role's name
+      action: { type: action, required: true }
+    style:
+      padding: xl
+      gap: sm
+      radius: card
+      min_height: 180
+      background: surface
+      border: line
+      number: eyebrow
+      title: hero
+      body: body
+      body_color: text_muted
+      body_inset_end: 96                 # keeps the text clear of the door art
+      arrow_box: 36
+      arrow_icon: 18
+      arrow: arrow                       # icons.yml name
+
+  link_row:
+    about: A full-width row that leads somewhere, with an icon and an optional count (Your orders · 3 →).
+    props:
+      icon: { type: icon, required: true }
+      label: { type: text, required: true }
+      count: { type: bind }
+      tone: { type: tone, default: success }
+      action: { type: action, required: true }
+    style:
+      height: 48
+      padding: lg
+      gap: sm
+      icon: 20
+      background: ground
+      border: line
+      label: body_strong
+      count: price_sm
+
+  top_bar:
+    about: The bar at the top of an inner screen. Home or back on the left; the role's "01 / BUY" on the right.
+    props:
+      leading: { type: enum, options: [home, back], default: home }
+      action: { type: action, required: true }
+      label: { type: text }              # next to the leading control (e.g. HOME)
+      role: { type: role }
+    style:
+      height: 44
+      padding: sm
+      mark: 20
+      icon: 22
+      box: 44
+      border: line
+      label: eyebrow
+      label_color: text_muted
+      role_tag: eyebrow
+      back_icon: back
+      stripes: [orange, pink, purple]
+
+  mark:
+    about: A filled square with an icon, used as a big status mark (the check on Order placed).
+    props:
+      icon: { type: icon, required: true }
+      tone: { type: tone, default: brand }
+    style:
+      box: 64
+      icon: 32
+      stroke: 3
+
+  receipt:
+    about: An order receipt. Order number and status on top, then label/value rows, then the total.
+    props:
+      bind: { type: bind, required: true }      # an order: id, status, total, currency …
+      number: { type: text, required: true }    # label for the order number
+      rows: { type: rows }
+      total: { type: text, required: true }     # label for the total
+    style:
+      padding: lg
+      gap: sm
+      background: surface
+      border: line
+      divider: line_strong
+      label: eyebrow
+      label_color: text_muted
+      number: price_sm
+      tag: eyebrow
+      row_label: body
+      row_label_color: text_muted
+      row_value: body_strong
+      total_value: price
+
+  button:
+    about: A full-width action. Primary is filled in the tone's colour; ghost is outlined.
+    props:
+      label: { type: text, required: true }
+      icon: { type: icon }
+      variant: { type: enum, options: [primary, ghost], default: primary }
+      tone: { type: tone, default: brand }
+      action: { type: action, required: true }
+    style:
+      height: 54
+      gap: sm
+      icon: 18
+      radius: sharp
+      label: title
+      ghost_border: line_strong
+      ghost_background: surface
+
+  list:
+    about: Repeats one brick for every item of a bound list; inside it, `item` is the current entry.
+    props:
+      bind: { type: bind, required: true }
+      item: { type: node, required: true }
+      gap: { type: space, default: md }
+
+  order_card:
+    about: One placed order. Poster, product, quantity and artisan, total and status; the order number below.
+    props:
+      bind: { type: bind, default: item }
+      line: { type: text, required: true }     # e.g. orders.line: "{quantity} × · from {artisan}"
+      args: { type: args }                     # fills the line's placeholders
+      number: { type: text, required: true }   # e.g. orders.number: "#{id}"
+      action: { type: action }
+    style:
+      padding: md
+      gap: md
+      poster: 64
+      background: surface
+      border: line
+      highlight_first: true                  # the newest order gets its tone's border
+      title: title
+      title_lines: 2
+      line_style: caption
+      line_color: text_muted
+      total: price_sm
+      tag: eyebrow
+      footer: mono
+      footer_color: text_muted
+      divider: line_strong
+
+  empty_state:
+    about: Nothing to show yet, with one way forward.
+    props:
+      icon: { type: icon, required: true }
+      title: { type: text, required: true }
+      message: { type: text }
+      button: { type: text }
+      action: { type: action }
+    style:
+      padding: xxl
+      gap: md
+      icon_box: 64
+      icon: 28
+      icon_background: neutral.wash
+      icon_color: text_muted
+      title: h3
+      message: body
+      message_color: text_muted
+
+  spacer:
+    about: "Takes the free height, pushing what follows to the bottom (only inside a screen with `fill: true`)."
+    props: {}

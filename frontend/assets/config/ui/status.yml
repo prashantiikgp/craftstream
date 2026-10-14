@@ -1,0 +1,17 @@
+# What each status looks like and means on screen. The keys must be exactly the values in models/product.yml
+# (video_status) and models/order.yml (status); status_engine_test checks that.
+#
+#   label     strings.yml key shown on the badge
+#   tone      a tone from ui/theme.yml (success, danger, info, warning, neutral, brand)
+#   hint      strings.yml key for the line under a listing (the artisan's products)
+#   progress  show a progress bar while in this status
+#   retry     offer "Upload again"
+
+video:
+  awaiting_upload: { label: status.awaiting_upload, tone: neutral, hint: studio.hint_awaiting_upload }
+  processing:      { label: status.processing, tone: info, hint: studio.hint_processing, progress: true }
+  ready:           { label: status.ready, tone: success, hint: studio.hint_ready }
+  failed:          { label: status.failed, tone: danger, hint: studio.hint_failed, retry: true }
+
+order:
+  placed: { label: status.placed, tone: success }

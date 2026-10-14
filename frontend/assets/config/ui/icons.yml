@@ -1,0 +1,28 @@
+# Line icons, drawn from SVG path data on a 24 × 24 grid: the same sharp stroke icons as the design canvas.
+# No icon font is downloaded; screens and bricks name an icon (`icon: orders`), never a glyph.
+#
+#   stroke   outlined paths (commands M L H V C Q Z, absolute or relative)
+#   fill     solid paths
+#   circles  outlined circles, [cx, cy, r]
+
+view_box: 24
+stroke_width: 2
+
+icons:
+  back:   { stroke: ["M15 5l-7 7 7 7"] }
+  arrow:  { stroke: ["M5 12h14", "M13 6l6 6-6 6"] }
+  close:  { stroke: ["M6 6l12 12", "M18 6L6 18"] }
+  check:  { stroke: ["M4 12.5l5 5L20 6.5"] }
+  plus:   { stroke: ["M12 5v14", "M5 12h14"] }
+  search: { stroke: ["M20 20l-4-4"], circles: [[11, 11, 7]] }
+  orders: { stroke: ["M6 3h12v18l-3-2-3 2-3-2-3 2z", "M9 8h6", "M9 12h6"] }
+  play:   { fill: ["M7 4l13 8-13 8z"] }
+  video:  { stroke: ["M3 6h13v12H3z", "M16 10l5-3v10l-5-3z"] }
+  info:   { stroke: ["M12 8v5", "M12 16h.01"], circles: [[12, 12, 9]] }
+  # theme toggle: shows where a tap takes you (sun in dark mode, moon in light mode)
+  sun:
+    stroke: ["M12 2v2", "M12 20v2", "M4.9 4.9l1.4 1.4", "M17.7 17.7l1.4 1.4", "M2 12h2", "M20 12h2",
+             "M4.9 19.1l1.4-1.4", "M17.7 6.3l1.4-1.4"]
+    circles: [[12, 12, 4]]
+  moon:
+    stroke: ["M20 14.5C18.8 15.1 17.4 15.5 16 15.5 11.3 15.5 8.5 12.7 8.5 8 8.5 6.6 8.9 5.2 9.5 4 5.7 5.1 3 8.6 3 12.5 3 17.2 6.8 21 11.5 21 15.4 21 18.9 18.3 20 14.5z"]

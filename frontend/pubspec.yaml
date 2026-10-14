@@ -27,7 +27,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/config/app/
     - assets/config/ui/
+    - assets/config/ui/screens/
     - assets/config/catalog/
     - assets/config/media/
   # Bundled + subset by tools/subset_fonts.sh (Latin + ₹, ~137 KB total). Never fetched at runtime.

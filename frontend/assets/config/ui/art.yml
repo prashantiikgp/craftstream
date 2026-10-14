@@ -1,0 +1,33 @@
+# Abstract artwork in the accent colours: background shapes behind screens, the shapes inside the doors, and the
+# product posters. Drawn in code, so it costs nothing on a 50 kbps link and follows light and dark.
+#
+# Shapes (backdrops and door art) are placed in logical pixels from the box edges:
+#   shape     circle | square | bar        accent    an accent name from ui/theme.yml (its fill is used)
+#   size      circle diameter / square side        w, h      a bar's width and height
+#   left / right / top / bottom   offset from that edge (negative = partly outside the box)
+#   rotate    degrees              opacity   0–1 (default 1)
+
+backdrops:
+  home:
+    - { shape: circle, accent: purple, opacity: 0.10, size: 420, right: -220, bottom: -160 }
+    - { shape: bar, accent: orange, opacity: 0.16, w: 520, h: 26, left: -80, top: 210, rotate: -12 }
+  placed:
+    - { shape: circle, accent: pink, opacity: 0.10, size: 360, right: -170, top: -150 }
+    - { shape: bar, accent: marigold, opacity: 0.16, w: 520, h: 24, left: -90, top: 170, rotate: -10 }
+  sell:
+    - { shape: circle, accent: purple, opacity: 0.10, size: 340, right: -160, top: -140 }
+
+doors:
+  buy:
+    - { shape: circle, accent: orange, size: 150, right: -40, bottom: -50 }
+    - { shape: bar, accent: marigold, w: 120, h: 14, right: 20, bottom: 70, rotate: -18 }
+  sell:
+    - { shape: square, accent: purple, size: 120, right: -24, bottom: -24, rotate: 14 }
+    - { shape: circle, accent: pink, size: 64, right: 70, bottom: 60 }
+
+# Product posters: a background, a circle and a slanted bar, picked from `colors` by the product id, so every
+# product has its own stable look. Ranges are [min, max] fractions of the poster's width (x, size) or height (y).
+poster:
+  colors: [orange, pink, purple, marigold]
+  circle: { size: [0.44, 0.66], x: [0.08, 0.48], y: [0.06, 0.36] }
+  bar: { thickness: 0.10, y: [0.58, 0.80], rotate: [-15, 15] }

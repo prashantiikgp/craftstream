@@ -21,7 +21,9 @@ void main() {
     '/studio/new': (c) => [str(c, 'upload.video_empty_title'), str(c, 'upload.publish')],
     '/product/p_01': (c) => ['Hand-thrown clay mug', str(c, 'product.about')],
     '/product/p_01/buy': (c) => [str(c, 'checkout.title'), str(c, 'checkout.place_order')],
-    '/placed/ord_test': (c) => [str(c, 'placed.title')],
+    '/': (c) => [str(c, 'home.buy_title'), str(c, 'home.sell_title'), str(c, 'home.orders')],
+    // An order this device did not place: the receipt explains instead of showing an empty one.
+    '/placed/ord_test': (c) => [str(c, 'placed.missing_title')],
   };
   const sizes = {'phone': Size(390, 844), 'tablet': Size(820, 1180), 'desktop': Size(1280, 900)};
 

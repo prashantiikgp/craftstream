@@ -1,0 +1,19 @@
+# The two sides of the app. Doors, top bars and the "01 / BUY" eyebrows read their number, label, accent and
+# home route from here, so each role looks the same everywhere.
+#   accent  an accent name from ui/theme.yml (its fill, ink and glow colour the role)
+#   home    where the role's door leads
+#   paths   locations that belong to the role (v1 shell: which side of the switch is selected)
+
+roles:
+  buy:
+    number: "01"
+    label: nav.buy
+    accent: orange
+    home: /discover
+    paths: [/discover, /orders, /product, /placed]
+  sell:
+    number: "02"
+    label: nav.sell
+    accent: pink
+    home: /studio
+    paths: [/studio]

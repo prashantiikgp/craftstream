@@ -83,38 +83,40 @@ Sets up what every later phase needs, so Phases 1 and 2 are mostly "move the lit
 - [x] **D10, inventory review:** Claude fills the Y/C/D column; the user checks only the C (keep in code) rows.
 
 ### 0.3 Groundwork (code)
-- [ ] Branch `v2-yaml`; tag `v1.0` on the current head.
-- [ ] Update the root, frontend and backend `CLAUDE.md`: the rule becomes "everything YAML". Add the
+- [x] Branch `v2-yaml`; tag `v1.0` on the current head.
+- [x] Update the root, frontend and backend `CLAUDE.md`: the rule becomes "everything YAML". Add the
       "what stays in code" list from Principle 2.
 - [ ] **Convention tests, both sides:**
-  - [ ] **Create the frontend convention test.** None exists today; only the backend has
+  - [x] **Create the frontend convention test.** None exists today; only the backend has
         `test_rule_files.py`, although the root CLAUDE.md says both sides have one. Every
         `assets/config/**.yml` needs its schema, loader, engine and engine test, and must be listed in
         `pubspec.yaml`.
-  - [ ] Rule folders (D1): each file in a rule folder needs the folder's schema, loader and engine.
-  - [ ] **Screen render test:** every `screens/*.yml` builds without error in every size class, in light and
+  - [x] Rule folders (D1): each file in a rule folder needs the folder's schema, loader and engine.
+  - [x] **Screen render test:** every `screens/*.yml` builds without error in every size class, in light and
         dark, with mock data. Every brick name, binding path and action in it must resolve. This replaces the
         compile-time checks we lose when screens leave Dart.
-  - [ ] Literal lint (frontend): no `Color(`, `Icons.`, numeric sizes or `Duration(` in `lib/features/**` and
-        `lib/shared/bricks/**`. Allow-listed files only.
-  - [ ] Literal lint (backend): no status strings, paths or collection names in `app/domain/**/*_service.py`
-        and `app/infra/**`.
+  - [x] Literal lint (frontend): no `Color(`, `Icons.`, numeric sizes or `Duration(` in `lib/features/**` and
+        `lib/shared/bricks/**`. Baseline at the start: about 180 literals in 26 files (`literal_baseline.yml`).
+  - [x] Literal lint (backend): no status strings, paths or collection names in `app/domain/**/*_service.py`
+        and `app/infra/**`. Baseline at the start: 52 literals in 13 files.
   - [ ] Every engine has a unit test file (backend check, mirrored in Dart).
 - [ ] **Editor support:**
   - Export JSON Schemas for the frontend YAML too, like `backend/config/.schemas` does.
   - Add a `# yaml-language-server: $schema=` modeline to every rule file, so VS Code autocompletes and flags
     typos while you edit.
-- [ ] **Frontend engine skeletons** (empty registries, no screens moved yet):
-  - [ ] `route_engine`: builds the GoRouter from `app/routes.yml`.
-  - [ ] `screen_engine`: resolves a screen YAML to a brick tree per size class.
-  - [ ] `brick_registry.dart`: maps a brick name to a widget builder and validates its props.
-  - [ ] Binding resolver: `bind: product.title` reads from the screen's controller view model.
-  - [ ] Action dispatcher: `go`, `back`, `submit`, `retry`, `set_filter`, `toggle_theme`, `switch_role`.
+- [x] **Frontend engines** (built as `routes_engine`, `screen_engine` + `bricks_engine`, `navigation_engine`, `icons_engine`,
+      `status_engine`, `art_engine`; bricks in `lib/shared/bricks/bricks.dart`):
+  - [x] `route_engine`: builds the GoRouter from `app/routes.yml`.
+  - [x] `screen_engine`: resolves a screen YAML to a brick tree per size class.
+  - [x] `brick_registry.dart`: maps a brick name to a widget builder and validates its props.
+  - [x] Binding resolver: `bind: product.title` reads from the screen's controller view model.
+  - [ ] Action dispatcher: `go`, `back`, `toggle_theme` done; `submit`, `retry`, `set_filter` come with the screens
+        that need them (1.4).
 - [ ] **Backend:** the shared YAML helper can read rule folders; `settings` reads non-secret defaults from
       `config/app/app.yml`.
 - [ ] `make test` and the Flutter test batches are green on the branch before Phase 1 starts.
 
-- [ ] **Vertical slice first:** take **Home → Order placed → Your orders** through every layer (tokens, bricks,
+- [x] **Vertical slice first:** take **Home → Order placed → Your orders** through every layer (tokens, bricks,
       screen YAML, routes, bindings, actions, render test) before converting anything else. If the brick or
       binding design is wrong, it shows up on 3 screens, not 8.
 

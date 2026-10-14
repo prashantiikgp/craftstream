@@ -1,0 +1,41 @@
+about: Every order placed from this device, newest first. Each opens its receipt.
+data: orders
+width: narrow
+gap: md
+
+top:
+  - brick: top_bar
+    leading: home
+    label: common.home
+    role: buy
+    action: { go: / }
+
+body:
+  - brick: text
+    text: orders.title
+    style: h1
+
+  - brick: text
+    text: orders.subtitle
+    color: text_muted
+
+  - brick: list
+    bind: orders.items
+    gap: md
+    item:
+      brick: order_card
+      line: orders.line
+      args: { quantity: item.quantity, artisan: item.artisan_name }
+      number: orders.number
+      action: { go: "/placed/{item.id}" }
+
+empty:
+  - brick: text
+    text: orders.title
+    style: h1
+  - brick: empty_state
+    icon: orders
+    title: orders.empty_title
+    message: orders.empty_message
+    button: orders.start_exploring
+    action: { go: /discover }

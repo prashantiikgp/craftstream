@@ -1,0 +1,55 @@
+about: The end of the buyer flow. Confirms the order, shows the receipt and leads to the buyer's orders.
+data: receipt           # params.order_id -> order (one of the orders placed from this device)
+width: narrow
+fill: true
+gap: lg
+backdrop: placed
+
+body:
+  - brick: mark
+    icon: check
+    tone: brand
+
+  - brick: text
+    text: placed.step
+    style: eyebrow
+    color: orange.ink
+
+  - brick: text
+    text: placed.title
+    style: display
+
+  - brick: text
+    text: placed.message
+    args: { artisan: order.artisan_name }
+    fallback: placed.message_generic
+    color: text_muted
+
+  - brick: receipt
+    bind: order
+    number: placed.order_id
+    rows:
+      - { label: placed.product, field: product_title }
+      - { label: placed.quantity, field: quantity, style: price_sm }
+    total: placed.total
+
+  - brick: spacer
+
+  - brick: button
+    label: placed.see_orders
+    icon: arrow
+    action: { go: /orders }
+
+  - brick: button
+    label: placed.keep_exploring
+    variant: ghost
+    action: { go: /discover }
+
+# The order is not on this device (opened from an old link or another phone).
+empty:
+  - brick: empty_state
+    icon: orders
+    title: placed.missing_title
+    message: placed.missing_message
+    button: placed.see_orders
+    action: { go: /orders }

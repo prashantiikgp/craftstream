@@ -31,6 +31,39 @@ Upload limits are **not** frontend YAML: read them from `GET /api/v1/upload-poli
 `MockStore` (sample products, the API's search rules, a simulated resumable upload); otherwise the generated
 API client. Screens and controllers only see the repository interfaces.
 
+## Screens are YAML (V2, docs/YAML_PLAN.md)
+
+| File | Says |
+|---|---|
+| `assets/config/app/routes.yml` | every route; each shows a screen YAML (`screen:`) or, until migrated, a v1 Dart screen (`legacy:`) |
+| `assets/config/app/navigation.yml` | the Buy (01, orange) and Sell (02, pink) roles |
+| `assets/config/ui/screens/<name>.yml` | one screen: `data` source, `width`, `fill`, `backdrop`, and `top` / `body` / `bottom` / `empty` / `error` bricks |
+| `assets/config/ui/bricks.yml` | the brick catalogue: each brick's props (what a screen may set) and style (its look, in tokens) |
+| `assets/config/ui/icons.yml` | line icons as SVG path data. Never use `Icons.*` |
+| `assets/config/ui/status.yml` | label, tone and hint for each video and order status. Never compare status strings |
+| `assets/config/ui/art.yml` | backdrop shapes, door art, the poster generator |
+
+- **How it runs:**
+  - `core/router.dart` builds GoRouter from routes.yml.
+  - `shared/screens/screen_host.dart` draws a screen.
+  - `shared/bricks/bricks.dart` has one builder per brick.
+  - `shared/screens/sources.dart` lists the data sources a screen's `data:` can name.
+- **Bindings:**
+  - `order.total` reads the screen's data, `item.id` the current list entry, `params.order_id` the route.
+  - Data keys are the `models/*.yml` field names (`toJson()`).
+- **Actions:** `{go: /placed/{item.id}}`, `{back: true}`, `{toggle_theme: true}`. A `go:` target must match routes.yml.
+- **Startup checks every screen:** an unknown brick, prop, strings key, icon, role, colour, text style or route fails
+  with the file and position. `test/features/screen_render_test.dart` then draws every screen at phone, tablet and
+  desktop sizes, in light and dark.
+- **New brick:**
+  1. Add it to bricks.yml (props + style).
+  2. Add a builder in `bricks.dart` that reads only its node and `BrickStyle`.
+  3. The render test fails until both exist.
+- **New screen:**
+  1. Write `ui/screens/<name>.yml`.
+  2. Add a route.
+  3. Add a source if it shows data.
+
 ## Design system
 
 - **Theme B** ("two doors"; canvas "CraftStream new look"): sharp corners, Space Grotesk and Space Mono, accents

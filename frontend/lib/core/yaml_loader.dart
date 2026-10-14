@@ -43,3 +43,18 @@ Future<T> loadYamlAsset<T>(String relativePath, T Function(Map<String, dynamic>)
   final text = await (bundle ?? rootBundle).loadString(path);
   return parseYaml(text, path, fromJson);
 }
+
+/// Loads every `*.yml` in the rule folder `assets/config/<relativeDir>/`, keyed by file name without `.yml`
+/// (`ui/screens/home.yml` -> `home`). Each file is validated on its own, so errors name the file.
+Future<Map<String, T>> loadYamlFolder<T>(String relativeDir, T Function(Map<String, dynamic>) fromJson,
+    {AssetBundle? bundle}) async {
+  final b = bundle ?? rootBundle;
+  final prefix = 'assets/config/$relativeDir/';
+  final manifest = await AssetManifest.loadFromAssetBundle(b);
+  final paths = manifest.listAssets().where((p) => p.startsWith(prefix) && p.endsWith('.yml')).toList()..sort();
+  if (paths.isEmpty) throw ConfigError(prefix, 'no .yml files (is the folder listed in pubspec.yaml?)');
+  return {
+    for (final path in paths)
+      path.substring(prefix.length, path.length - 4): parseYaml(await b.loadString(path), path, fromJson),
+  };
+}

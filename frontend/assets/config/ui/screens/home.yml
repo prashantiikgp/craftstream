@@ -1,0 +1,33 @@
+about: The front door. The company name, then one door to buy and one to sell, then the buyer's orders.
+data: home
+width: narrow
+fill: true
+gap: xl
+backdrop: home
+
+top:
+  - brick: theme_toggle
+
+body:
+  - brick: wordmark
+    size: lg
+    tagline: home.tagline
+
+  - brick: doors
+    items:
+      - brick: door
+        role: buy
+        title: home.buy_title
+        body: home.buy_body
+        action: { go: /discover }
+      - brick: door
+        role: sell
+        title: home.sell_title
+        body: home.sell_body
+        action: { go: /studio }
+
+  - brick: link_row
+    icon: orders
+    label: home.orders
+    count: orders.count
+    action: { go: /orders }

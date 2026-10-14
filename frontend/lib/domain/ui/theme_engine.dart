@@ -171,6 +171,20 @@ class DesignTokens {
 
   bool get isDark => brightness == Brightness.dark;
 
+  /// A spacing step by its theme.yml name (`lg` -> 16).
+  double spacing(String name) => switch (name) {
+        'xxs' => space.xxs,
+        'xs' => space.xs,
+        'sm' => space.sm,
+        'md' => space.md,
+        'lg' => space.lg,
+        'xl' => space.xl,
+        'xxl' => space.xxl,
+        'xxxl' => space.xxxl,
+        'section' => space.section,
+        _ => throw ThemeRulesError('unknown spacing step "$name"'),
+      };
+
   Iterable<String> get toneNames => _tones.keys;
 
   AccentColors accent(String name) => accents[name] ?? (throw ThemeRulesError('unknown accent "$name"'));
