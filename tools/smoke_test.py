@@ -112,6 +112,11 @@ def main() -> None:
     if order.get("status") != "placed" or order.get("total") != 999.0:
         fail(f"order: {order}")
     ok(f"order {order['id']} placed, total {order['currency']} {order['total']}")
+
+    again = api.get(f"/orders/{order['id']}").json()
+    if again != order:
+        fail(f"order read back differs: {again}")
+    ok("order reads back by id (Your orders after a restart)")
     print("PASS")
 
 

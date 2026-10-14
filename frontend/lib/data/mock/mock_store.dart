@@ -77,11 +77,15 @@ class MockStore {
 
   // ---- orders
 
+  final Map<String, Order> _orders = {};
+
+  Order order(String id) => _orders[id] ?? (throw StateError('no order $id'));
+
   Order placeOrder(OrderCreate body) {
     final p = product(body.productId);
     if (p.videoStatus != 'ready') throw StateError('product is not ready');
     _seq++;
-    return Order(
+    final order = Order(
       id: 'ord_${DateTime.now().millisecondsSinceEpoch.toRadixString(36)}$_seq',
       productId: p.id,
       buyerName: body.buyerName,
@@ -91,6 +95,7 @@ class MockStore {
       status: 'placed',
       createdAt: DateTime.now(),
     );
+    return _orders[order.id] = order;
   }
 
   // ---- uploads

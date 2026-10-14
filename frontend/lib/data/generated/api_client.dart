@@ -79,4 +79,11 @@ class ApiClient {
     return Order.fromJson(_decode(r) as Map<String, dynamic>);
   }
 
+  /// One order, so a device can show its orders after a restart (it keeps only their ids).
+  Future<Order> getOrder(String orderId) async {
+    final uri = Uri.parse('$baseUrl/orders/$orderId');
+    final r = await _http.get(uri);
+    return Order.fromJson(_decode(r) as Map<String, dynamic>);
+  }
+
 }

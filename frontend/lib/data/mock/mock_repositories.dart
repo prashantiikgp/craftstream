@@ -41,6 +41,12 @@ class MockOrderRepository implements OrderRepository {
     await _s.wait();
     return _s.placeOrder(order);
   }
+
+  @override
+  Future<Order> get(String id) async {
+    await _s.wait();
+    return _s.order(id);
+  }
 }
 
 class MockUploadRepository implements UploadRepository {

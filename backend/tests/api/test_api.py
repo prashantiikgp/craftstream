@@ -152,6 +152,18 @@ def test_order_total_uses_decimal_rounding(client):
     assert order["total"] == 0.3
 
 
+def test_an_order_can_be_read_back_by_id(client):
+    ticket = _new_product(client, _unique_tag(), price=450)
+    _upload(client, ticket, size=10)
+    placed = client.post(f"{API}/orders", json={"product_id": ticket["product"]["id"], "buyer_name": "Asha",
+                                                 "quantity": 2}).json()
+    again = client.get(f"{API}/orders/{placed['id']}")
+    assert again.status_code == 200 and again.json() == placed
+
+    missing = client.get(f"{API}/orders/does-not-exist")
+    assert missing.status_code == 404 and missing.json()["code"] == "not_found"
+
+
 def test_large_responses_are_gzipped(client):
     tag = _unique_tag()
     for _ in range(5):

@@ -1,0 +1,6 @@
+# Orders placed from this device. There is no login, so the device remembers them: it keeps a small copy of each
+# (so Your orders shows at once, even offline) and re-reads each order from the API (GET /orders/{id}) on start.
+
+storage_key: craftstream.orders.v1   # where the copies live (localStorage on the web, shared preferences on Android)
+keep: 50                             # the newest orders kept on the device; older ones are forgotten
+refresh_on_start: true               # re-read every kept order from the API when the app starts

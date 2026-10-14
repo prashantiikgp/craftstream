@@ -32,3 +32,9 @@ class OrderService:
         self._orders.save(order)
         log.info("order placed", extra={"order_id": order.id, "product_id": product.id})
         return order
+
+    def get(self, order_id: str) -> Order:
+        order = self._orders.get(order_id)
+        if order is None:
+            raise NotFound(f"Order {order_id} not found")
+        return order

@@ -5,6 +5,7 @@ import 'package:craftstream/core/config.dart';
 import 'package:craftstream/core/env.dart';
 import 'package:craftstream/core/router.dart';
 import 'package:craftstream/data/mock/mock_store.dart';
+import 'package:craftstream/data/orders/order_store.dart';
 import 'package:craftstream/data/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +33,7 @@ Future<ProviderContainer> pumpApp(
   Size size = const Size(390, 844),
   String location = '/discover',
   Duration chunkDelay = Duration.zero,
+  OrderStore? orderStore,
   List<Override> overrides = const [],
 }) async {
   tester.view.physicalSize = size;
@@ -44,6 +46,7 @@ Future<ProviderContainer> pumpApp(
       mockStoreProvider.overrideWithValue(
         MockStore(latency: Duration.zero, chunkDelay: chunkDelay, processingTime: Duration.zero),
       ),
+      orderStoreProvider.overrideWithValue(orderStore ?? MemoryOrderStore()),
       ...overrides,
     ],
     child: const CraftStreamApp(),

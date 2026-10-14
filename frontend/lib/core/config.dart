@@ -15,6 +15,8 @@ import '../domain/catalog/filters_loader.dart';
 import '../domain/media/player_engine.dart';
 import '../domain/media/player_loader.dart';
 import '../domain/media/upload_engine.dart';
+import '../domain/orders/orders_engine.dart';
+import '../domain/orders/orders_loader.dart';
 import '../domain/media/upload_loader.dart';
 import '../domain/ui/art_engine.dart';
 import '../domain/ui/art_loader.dart';
@@ -49,6 +51,7 @@ class AppConfig {
   final ArtEngine art;
   final BricksEngine bricks;
   final ScreenEngine screens;
+  final OrdersEngine orders;
   const AppConfig({
     required this.env,
     required this.theme,
@@ -64,6 +67,7 @@ class AppConfig {
     required this.art,
     required this.bricks,
     required this.screens,
+    required this.orders,
   });
 }
 
@@ -109,6 +113,7 @@ Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
     art: art,
     bricks: bricks,
     screens: screens,
+    orders: OrdersEngine(await loadOrdersRules(bundle: bundle)),
   );
 }
 

@@ -55,6 +55,13 @@ endpoints:
     status: 201
     summary: Place an order. The flow ends here.
 
+  - name: getOrder
+    method: GET
+    path: /orders/{order_id}
+    returns: Order
+    status: 200
+    summary: One order, so a device can show its orders after a restart (it keeps only their ids).
+
 # Not called by the app, so not in the Dart client. Full paths (no base_path).
 internal:
   - name: health
