@@ -10,7 +10,7 @@ class _Query:
     def __init__(self, calls: list) -> None:
         self.calls = calls
 
-    def where(self, *, filter):  # noqa: A002 (Firestore's own keyword)
+    def where(self, *, filter):
         self.calls.append(("where", filter.field_path, filter.op_string, filter.value))
         return self
 
