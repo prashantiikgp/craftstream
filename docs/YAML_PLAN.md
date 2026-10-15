@@ -371,7 +371,8 @@ are gone.
 - [x] Docs: (README "How to read the YAML", activity log and caching; ARCHITECTURE sections 8 and 9.)
   - README screenshots and the architecture section ("how to read the YAML");
   - `ARCHITECTURE.md`; tick this plan.
-- [ ] Merge `v2-yaml`. Re-record the demos if V2 is what gets submitted.
+- [x] Merge `v2-yaml` into `main` (v1 stays tagged `v1.0`); published at https://github.com/prashantiikgp/craftstream.
+- [ ] Record the demos on V2 (`docs/EVIDENCE.md`).
 
 ## Order of work
 

@@ -4,10 +4,11 @@ A marketplace where artisans sell handmade goods by showing **how** they are mad
 (up to 15 minutes, any file size) with a title, description and price. A buyer searches by keyword or tag, watches the
 video **smoothly on a connection under 50 kbps**, and places an order. One Flutter codebase runs on Android phones,
 Android tablets and Chrome; the backend runs entirely on Google Cloud. Built for the DevDolphins technical assignment
-(`docs/Technical_Assignment.pdf`; requirements in [docs/INTENT.md](docs/INTENT.md)).
+(requirements and definition of done in [docs/INTENT.md](docs/INTENT.md)).
 
 | | |
 |---|---|
+| **Repository** | https://github.com/prashantiikgp/craftstream |
 | **Web app** | https://craftstream-qi0tvg.web.app |
 | **API** | https://craftstream-api-424435123536.asia-south1.run.app (liveness: [`/health`](https://craftstream-api-424435123536.asia-south1.run.app/health)) |
 | **GCP project** | `craftstream-qi0tvg`, everything in `asia-south1` |
