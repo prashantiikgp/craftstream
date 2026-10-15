@@ -52,15 +52,17 @@ Sets up what every later phase needs, so Phases 1 and 2 are mostly "move the lit
 - [x] Mock up theme B for the artisan side, in dark: Your products (listing cards with status), New product
       (form, video pick) and Uploading (progress and the four steps). The light versions come from the same
       tokens. *(Awaiting user approval.)*
-- [ ] Mock up theme B for tablet landscape and desktop: home with doors side by side; browse with 4–5 columns;
-      product with video and details side by side.
+- [x] Mock up theme B for tablet landscape and desktop: home with doors side by side; browse with 4–5 columns;
+      product with video and details side by side. *(Built directly instead of mocked: Home doors side by side
+      from `expanded`, the product grid and listing cards take columns from `layout.yml`, Product and Upload use
+      `split`; checked live at 1440 and 1920 px and in the render test.)*
 - [x] Mock up the missing entry points *(awaiting user approval)*:
   - where a buyer opens **Your orders** without placing a new order (a header action on Browse and Product,
     plus a link under the doors on Home);
   - where the **light/dark toggle** sits;
   - how Sell switches back to Buy.
-- [ ] Review the inventory with the user: mark each item **move to YAML**, **keep in code (reason)** or
-      **delete**.
+- [x] Review the inventory: mark each item **move to YAML**, **keep in code (reason)** or **delete**. *(D10:
+      filled in by Claude in `YAML_INVENTORY.md`, frontend F1–F18 and backend B1–B12.)*
 
 ### 0.2 Decisions (decided 2026-10-14)
 - [x] **D1, screen files:** `assets/config/screens/*.yml`, one file per screen, all validated by one
@@ -112,11 +114,11 @@ Sets up what every later phase needs, so Phases 1 and 2 are mostly "move the lit
   - [x] `screen_engine`: resolves a screen YAML to a brick tree per size class.
   - [x] `brick_registry.dart`: maps a brick name to a widget builder and validates its props.
   - [x] Binding resolver: `bind: product.title` reads from the screen's controller view model.
-  - [ ] Action dispatcher: `go`, `back`, `toggle_theme` done; `submit`, `retry`, `set_filter` come with the screens
-        that need them (1.4).
+  - [x] Action dispatcher: `go`, `back`, `toggle_theme`, and `call` (a source's named call with `with:` and
+        `then:`), which covers submit, retry and the filters.
 - [ ] **Backend:** the shared YAML helper can read rule folders; `settings` reads non-secret defaults from
       `config/app/app.yml`.
-- [ ] `make test` and the Flutter test batches are green on the branch before Phase 1 starts.
+- [x] `make test` and the Flutter test batches are green on the branch before Phase 1 starts.
 
 - [x] **Vertical slice first:** take **Home → Order placed → Your orders** through every layer (tokens, bricks,
       screen YAML, routes, bindings, actions, render test) before converting anything else. If the brick or
@@ -224,7 +226,9 @@ per size class.
       out of `mock_products.dart`).
 
 ### 1.6 Responsive check
-- [ ] Phone, tablet portrait, tablet landscape and desktop for every screen, in light and dark.
+- [x] Phone, tablet portrait, tablet landscape and desktop for every screen, in light and dark.
+      (`screen_render_test.dart`: 360×640, 390×844, 820×1180, 1180×820, 1280×900, with and without data; Home
+      fits one screen from 360×640 to 1920×880.)
       Progress: screen_render_test draws every screen at 360/390/820/1280 px in both modes; Product, New product /
       Uploading go side by side and Your products shows card columns on wide screens (`width: auto`, `split`,
       `list layout: cards`). Left: a screenshot pass against the canvas at each size (Phase 3). Breakpoints and
@@ -278,10 +282,10 @@ and the light and dark theme B match the canvas.
   - Cloud Run sizing; Pub/Sub retry; Firestore indexes.
 - [x] The shell scripts read `resources.yml` through a small Python reader. `config.env` keeps only the 5
       environment values.
-- [ ] **Dry run before touching GCP:** the reader prints the gcloud commands. Compare them with the live project
+- [x] **Dry run before touching GCP:** the reader prints the gcloud commands. Compare them with the live project
       (`craftstream-qi0tvg` only) and get the user's OK before any IAM, bucket or Cloud Run change is applied.
-      *(The printer is done: `make infra-print`. The comparison with the live project and the user's OK are
-      still to do; the rewritten scripts have not been run.)*
+      *(2026-10-15: the live service's env vars, the buckets' CORS, lifecycle and IAM matched the printout; the
+      user approved; the scripts ran clean.)*
 - [x] A test cross-checks `resources.yml` against `storage_layout.yml` and the Firestore queries.
 - [ ] `tools/tools.yml`: smoke test, throttle proxy and local_hls defaults.
 
@@ -296,7 +300,8 @@ and the light and dark theme B match the canvas.
       unhandled-error handler. No buyer names, upload URLs or tokens in any entry.
 - [x] `infra/gcp/resources.yml`: three `activity_log` composite indexes and the `expire_at` TTL policy;
       `resources.py --print` and `03_firestore.sh` create them; the infra test checks them.
-- [ ] Apply the indexes and the TTL policy to the GCP project and deploy (waits for the user's OK).
+- [x] Apply the indexes and the TTL policy to the GCP project and deploy. (2026-10-15, with the user's OK: three
+      `activity_log` indexes READY, TTL on `expire_at` ACTIVE, API revision `craftstream-api-00013-n2h`.)
 - [x] `tools/smoke_test.py` checks the listing's log entries (listing_created, upload_received, order_placed).
 
 ### 2.5 Activity log (app)
@@ -340,14 +345,15 @@ are gone.
   - 2026-10-15: the smoke test passes against `CRAFTSTREAM_MODE=local` (upload, ready, search, order, read back,
     activity log); a browser upload through the local build goes live and its steps show in the Activity log.
     Mock mode is covered by the widget tests (buyer, upload with a drop, orders after a restart, activity log).
-- [ ] **GCP:**
+- [x] **GCP:** (2026-10-15: `infra/gcp/setup.sh` re-run from `resources.yml`, exit 0; smoke test PASS against
+      the deployed API including the activity log; web app deployed.)
   - redeploy the API, re-run `infra/gcp` from `resources.yml` (no changes expected);
   - run the smoke test;
   - deploy the web app to Firebase Hosting.
 - [ ] **Throttled 45 kbps, again:** Chrome (DevTools) and Android (`tools/throttle_proxy.py`).
   - Upload, search, playback starts on 144p without stalls, order placed, the order shows in Your orders.
   - Web shell size measured after the font change.
-- [ ] Docs:
+- [x] Docs: (README "How to read the YAML", activity log and caching; ARCHITECTURE sections 8 and 9.)
   - README screenshots and the architecture section ("how to read the YAML");
   - `ARCHITECTURE.md`; tick this plan.
 - [ ] Merge `v2-yaml`. Re-record the demos if V2 is what gets submitted.

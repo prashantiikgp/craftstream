@@ -63,7 +63,7 @@ void main() {
   // and the door text (two lines at most) has room for whole words. The test font is wider than Space
   // Grotesk, so passing here leaves a margin on real screens.
   for (final size in const [
-    Size(360, 640), Size(390, 844), Size(820, 1180), // phones, tablet portrait
+    Size(360, 640), Size(390, 844), Size(820, 1180), Size(1180, 820), // phones, tablet portrait and landscape
     Size(1280, 720), Size(1366, 657), Size(1440, 900), Size(1920, 880), // laptops and desktops
   ]) {
     testWidgets('home fits and reads well at ${size.width.toInt()}×${size.height.toInt()}', (tester) async {
@@ -79,7 +79,13 @@ void main() {
     });
   }
 
-  const sizes = {'phone': Size(390, 844), 'small phone': Size(360, 640), 'tablet': Size(820, 1180), 'desktop': Size(1280, 900)};
+  const sizes = {
+    'phone': Size(390, 844),
+    'small phone': Size(360, 640),
+    'tablet': Size(820, 1180),
+    'tablet landscape': Size(1180, 820),
+    'desktop': Size(1280, 900),
+  };
 
   for (final mode in ['light', 'dark']) {
     for (final MapEntry(key: device, value: size) in sizes.entries) {

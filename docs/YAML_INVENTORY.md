@@ -1,7 +1,7 @@
 # Inventory: what is not YAML-driven yet
 
 Phase 0.1 of [`YAML_PLAN.md`](YAML_PLAN.md). Taken on 2026-10-14 at commit `edf4d55` by reading the code. The
-review column is for the user: **Y** move to YAML, **C** keep in code (give a reason), **D** delete.
+review column (filled in per decision D10, 2026-10-15): **Y** move to YAML, **C** keep in code (with the reason), **D** delete.
 
 ## Already YAML-driven
 
@@ -19,24 +19,24 @@ review column is for the user: **Y** move to YAML, **C** keep in code (give a re
 
 | # | Area | Main items (file:line) | Review |
 |---|---|---|---|
-| F1 | Routes | `core/router.dart:26-50`: initial `/discover`, `/` redirect, 4 shell tabs, product, buy, placed, dev-only `/catalog` | |
-| F2 | Navigation | `shell/shell_controller.dart:16-26`: buyer and artisan nav items and icons, "`/studio` means artisan"; `app_shell.dart:32-57`: role switch target, dev action, rail labels | |
-| F3 | Inline paths | about 15 `context.go('/…')` calls in product, checkout, order placed, orders, studio, upload and discover | |
-| F4 | Screen structure | every screen hard-codes section order and the spacing between sections: discover:96-112, product:41-101, product_details:18-53, checkout:84-150, order_placed:34-64, studio:33-75, upload:104-179 | |
-| F5 | Screen sizes | about 45 numbers: skeleton sizes, thumb 72/88, maxLines, buy button width 180, spinner 28, slider 3/6, progress bars 4/8, flex 6/5 | |
-| F6 | Icons | about 35 `Icons.*` across screens and components | |
-| F7 | Tone and status maps | `ready` / `processing` / `failed` compared in about 13 places; tone maps in video_status_badge, listing_card, upload_progress:94-160, video_pick_card:74-95, notice:92-97 | |
-| F8 | Components | app_button heights 36/44/52, overlay 0.08, spinner 18; status dot 6; chip padding `xs+2`; skeleton 1100 ms and 0.55 opacity; card motion curve | |
-| F9 | Brand | `brand.dart:42` hard-codes `'Poppins'`; "Craft"/"Stream" text; 30-tag → motif map (:101-114); motif → colour (:129-135) | |
-| F10 | Controllers | currency `'INR'` (upload_controller:190, PriceText:72); price parsing; tag split and dedupe; validation order; sort behaviour in a Dart switch (filters_engine:65-76); orders newest first | |
-| F11 | Formatting | `shared/format/money.dart` (Indian grouping, symbols, minus sign), `bytes.dart` (1024, GB/MB/KB, h:mm:ss) | |
-| F12 | Player | budget `50000` in player_engine:15; hls.js `startLevel 0`, `testBandwidth false`; master fetch timeout 20 s; HLS MIME; web `<video>` attrs; recover-once | |
-| F13 | Upload and data | uploader status handling (200/201/308/408/429/5xx); extension → MIME map; `accept video/*`; metadata timeout 15 s | |
-| F14 | Theme engine | ColorScheme and TextTheme slot mapping, component themes (app_theme:73-191); 12 contrast rules in theme_engine:156-169; `THEME_PALETTE` default duplicates `default_palette` | |
-| F15 | Unused YAML | `reduced_motion_factor`, motion `medium` and `slow`, `radius.lg`, `space.section`, player `autoplay_on_product_page` and `min_buffer_to_start_seconds` | |
-| F16 | Strings outside strings.yml | about 60 in the design catalog screen; `CraftStream` in app.dart and brand.dart; product card semantics label; config error screen (deliberately token-free) | |
-| F17 | Env | defaults and policy in core/env.dart:42-121 (https outside dev, prod bans, `10.0.2.2`) | |
-| F18 | Mock data | latency 450 ms, chunk 140 ms, processing 8 s, page size 24 (duplicate), mock policy, sample videos, 14 fixture products | |
+| F1 | Routes | `core/router.dart:26-50`: initial `/discover`, `/` redirect, 4 shell tabs, product, buy, placed, dev-only `/catalog` | **Y, done:** `app/routes.yml` (+ `app.yml` initial route); `/catalog` deleted |
+| F2 | Navigation | `shell/shell_controller.dart:16-26`: buyer and artisan nav items and icons, "`/studio` means artisan"; `app_shell.dart:32-57`: role switch target, dev action, rail labels | **Y, done:** `app/navigation.yml`; the shell was replaced by the Home doors |
+| F3 | Inline paths | about 15 `context.go('/…')` calls in product, checkout, order placed, orders, studio, upload and discover | **Y, done:** `go:` actions in screen YAML, checked against routes.yml |
+| F4 | Screen structure | every screen hard-codes section order and the spacing between sections: discover:96-112, product:41-101, product_details:18-53, checkout:84-150, order_placed:34-64, studio:33-75, upload:104-179 | **Y, done:** `ui/screens/*.yml` (bricks, order, `gap`) |
+| F5 | Screen sizes | about 45 numbers: skeleton sizes, thumb 72/88, maxLines, buy button width 180, spinner 28, slider 3/6, progress bars 4/8, flex 6/5 | **Y, done:** brick styles in `ui/bricks.yml`; literal lint baseline empty |
+| F6 | Icons | about 35 `Icons.*` across screens and components | **Y, done:** `ui/icons.yml` (SVG path data); no `Icons.*` left |
+| F7 | Tone and status maps | `ready` / `processing` / `failed` compared in about 13 places; tone maps in video_status_badge, listing_card, upload_progress:94-160, video_pick_card:74-95, notice:92-97 | **Y, done:** `ui/status.yml` (label, tone, orderable, retry) |
+| F8 | Components | app_button heights 36/44/52, overlay 0.08, spinner 18; status dot 6; chip padding `xs+2`; skeleton 1100 ms and 0.55 opacity; card motion curve | **Y/D, done:** v1 components deleted; skeleton and motion in `theme.yml` |
+| F9 | Brand | `brand.dart:42` hard-codes `'Poppins'`; "Craft"/"Stream" text; 30-tag → motif map (:101-114); motif → colour (:129-135) | **D, done:** v1 brand painters deleted; the mark is the stripes brick |
+| F10 | Controllers | currency `'INR'` (upload_controller:190, PriceText:72); price parsing; tag split and dedupe; validation order; sort behaviour in a Dart switch (filters_engine:65-76); orders newest first | **Y:** `media/upload.yml` (price, tags), `catalog/filters.yml` (declarative sorts), `orders.yml` |
+| F11 | Formatting | `shared/format/money.dart` (Indian grouping, symbols, minus sign), `bytes.dart` (1024, GB/MB/KB, h:mm:ss) | **Y:** `ui/format.yml` |
+| F12 | Player | budget `50000` in player_engine:15; hls.js `startLevel 0`, `testBandwidth false`; master fetch timeout 20 s; HLS MIME; web `<video>` attrs; recover-once | **Y:** `media/player.yml`; the 50 kbps budget is checked against `ladder.yml` (backend test) |
+| F13 | Upload and data | uploader status handling (200/201/308/408/429/5xx); extension → MIME map; `accept video/*`; metadata timeout 15 s | **Y:** `media/upload.yml` |
+| F14 | Theme engine | ColorScheme and TextTheme slot mapping, component themes (app_theme:73-191); 12 contrast rules in theme_engine:156-169; `THEME_PALETTE` default duplicates `default_palette` | **C, kept:** Material slot mapping stays in `app_theme.dart` (glue); contrast rules moved to `theme.yml` |
+| F15 | Unused YAML | `reduced_motion_factor`, motion `medium` and `slow`, `radius.lg`, `space.section`, player `autoplay_on_product_page` and `min_buffer_to_start_seconds` | **Y, done:** wired up or removed |
+| F16 | Strings outside strings.yml | about 60 in the design catalog screen; `CraftStream` in app.dart and brand.dart; product card semantics label; config error screen (deliberately token-free) | **Y/D, done:** catalog deleted; other text in `strings.yml`; the config error screen stays token-free on purpose (it shows when config fails to load) |
+| F17 | Env | defaults and policy in core/env.dart:42-121 (https outside dev, prod bans, `10.0.2.2`) | **Y:** `app/env_rules.yml`; values stay in `env/*.json` |
+| F18 | Mock data | latency 450 ms, chunk 140 ms, processing 8 s, page size 24 (duplicate), mock policy, sample videos, 14 fixture products | **Y:** `dev/mock.yml` |
 
 **Bricks used by screens today:**
 - **Layout and basics:** PageScroll, sliver grid, SectionHeader, AppCard (flat, elevated, interactive), AppButton,
