@@ -50,3 +50,12 @@ def test_running_twice_fails_clearly(tmp_path):
     wb.main([str(web)])
     with pytest.raises(SystemExit, match="already bundled"):
         wb.main([str(web)])
+
+
+def test_hashed_files_from_an_earlier_build_are_removed(tmp_path):
+    web = _fake_build(tmp_path)
+    (web / "config.0ld0ld0ld0ld.json").write_text("{}", "utf-8")
+    (web / "main.0ld0ld0ld0ld.dart.js").write_text("old", "utf-8")
+    wb.main([str(web)])
+    assert len(list(web.glob("config.*.json"))) == 1 and len(list(web.glob("main.*.dart.js"))) == 1
+    assert not (web / "config.0ld0ld0ld0ld.json").exists()

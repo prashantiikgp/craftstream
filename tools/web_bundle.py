@@ -8,6 +8,7 @@ Firebase Hosting answers conditional requests (If-None-Match / If-Modified-Since
    instead of one per file. The app reads it through lib/core/config_bundle.dart.
 2. `main.dart.js` becomes `main.<hash>.dart.js`; flutter_bootstrap.js is pointed at it.
 3. index.html gets `<meta name="craftstream-config" content="config.<hash>.json">` so the app finds the bundle.
+4. Hashed files from earlier builds are removed (`flutter build web` leaves them in place, so they would ship).
 
 index.html and flutter_bootstrap.js stay `no-cache` (frontend/firebase.json); they are small and name the rest.
 
@@ -34,6 +35,14 @@ HASH_LENGTH = 12
 
 def _short_hash(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()[:HASH_LENGTH]
+
+
+def remove_stale(web: Path) -> list[str]:
+    """Deletes hashed files an earlier run left in [web]; returns their names."""
+    stale = sorted([*web.glob("config.*.json"), *web.glob("main.*.dart.js")])
+    for p in stale:
+        p.unlink()
+    return [p.name for p in stale]
 
 
 def bundle_config(web: Path) -> str:
@@ -77,10 +86,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("web", type=Path, help="the flutter build web output (frontend/build/web)")
     web = parser.parse_args(argv).web
+    if not (web / ENTRY).exists():
+        raise SystemExit(f"{web / ENTRY} is missing: already bundled? Run flutter build web again")
+    removed = remove_stale(web)
     config_name = bundle_config(web)
     entry_name = hash_entry(web)
     name_bundle_in_index(web, config_name)
-    print(f"web_bundle: {config_name}, {entry_name}")
+    print(f"web_bundle: {config_name}, {entry_name}" + (f" (removed {', '.join(removed)})" if removed else ""))
     return 0
 
 
