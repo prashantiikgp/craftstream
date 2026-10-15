@@ -14,12 +14,14 @@ errors:
     bad_request: 400
     unauthorized: 401
     forbidden: 403
+    log_event_not_reportable: 403   # the app posted an event only the API may record (platform/activity_log.yml)
     not_found: 404
     method_not_allowed: 405
     conflict: 409
     product_not_ready: 409      # an order for a product whose video isn't ready yet
     unsupported_media_type: 415
     validation_error: 422
+    unknown_log_event: 422      # POST /logs with an event that is not in platform/activity_log.yml
     internal_error: 500
   # A framework error (wrong method, unknown path, ...) gets the first code above with its status,
   # or this one when no code has it.

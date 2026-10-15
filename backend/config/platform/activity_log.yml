@@ -1,0 +1,160 @@
+# yaml-language-server: $schema=../.schemas/platform/activity_log.schema.json
+# The activity log: every step of an upload, a video and an order, stored in Firestore so the app can show it
+# (GET /logs) and report the upload steps only it sees (POST /logs). Used by activity_log_service, which the
+# catalog, media and order services call; the shapes are models/log_entry.yml, log_detail.yml, log_page.yml.
+#
+# Never put a buyer's name, an upload URL (it is a bearer credential), a token or a request body in a detail:
+# ids, sizes, durations, states and reasons only.
+
+# Firestore collection (infra/gcp/resources.yml creates its indexes and TTL policy and must agree).
+collection: activity_log
+# Each entry carries this timestamp field; a Firestore TTL policy on it deletes the entry after keep_days.
+expire_field: expire_at
+keep_days: 14
+# A log write waits at most this long for Firestore; a slow or failed write is logged to stdout and dropped.
+write_timeout_seconds: 2
+
+# Entries per page of GET /logs: used when the app doesn't say, and the most it may ask for.
+page_size:
+  default: 50
+  max: 100
+
+# Server entries are cut to fit (never rejected); the app's posts are held to the same limits by the model.
+details:
+  max_per_entry: 10
+  max_key_length: 40
+  max_value_length: 300
+  float_decimals: 2          # 12.3456 s shows as 12.35; 900.0 as 900
+  # What a message shows for a detail the entry doesn't have (e.g. a duration ffprobe couldn't read).
+  missing_value: unknown
+
+# Every entry is also written to the normal logger, so Cloud Logging keeps seeing each step.
+mirror_to_stdout: true
+
+# Who writes what: the API records its own events; POST /logs may only report `client` events.
+sources:
+  server: api
+  client: app
+
+# Errors for requests the log refuses (codes and statuses in api/http.yml).
+errors:
+  unknown_event: {code: unknown_log_event, message: There is no such activity log event.}
+  not_reportable: {code: log_event_not_reportable, message: The app may not report this event.}
+  bad_filter: {code: validation_error, message: The activity log filter is not valid.}
+
+# The event catalogue. `message` is filled from the entry's product_id / order_id and the keys listed in
+# `details` (a template naming anything else fails at startup).
+events:
+  # ---- API: uploads and videos ----
+  listing_created:
+    source: api
+    group: upload
+    level: info
+    message: Listing created; waiting for its video
+  upload_received:
+    source: api
+    group: upload
+    level: info
+    message: Video landed in storage; checking it
+  upload_unreadable:
+    source: api
+    group: video
+    level: error
+    details: [reason]
+    message: "The upload is not a readable video: {reason}"
+  transcode_submitted:
+    source: api
+    group: video
+    level: info
+    details: [seconds, cut_at_seconds, job]
+    message: Transcoding started for {seconds} s of video
+  transcode_succeeded:
+    source: api
+    group: video
+    level: info
+    details: [job]
+    message: Video is ready to watch
+  transcode_failed:
+    source: api
+    group: video
+    level: error
+    details: [job]
+    message: Transcoding failed; the video cannot be played
+  video_event_ignored:
+    source: api
+    group: video
+    level: warning
+    details: [event, state, job]
+    message: Ignored {event} (the video was {state})
+
+  # ---- API: orders ----
+  order_placed:
+    source: api
+    group: order
+    level: info
+    details: [quantity, total, currency]
+    message: Order placed for {quantity}, total {total} {currency}
+  order_rejected:
+    source: api
+    group: order
+    level: warning
+    details: [reason]
+    message: "Order not placed: {reason}"
+
+  # ---- API: system ----
+  internal_call_rejected:
+    source: api
+    group: system
+    level: warning
+    details: [path, reason]
+    message: "Refused a call to {path}: {reason}"
+  unhandled_error:
+    source: api
+    group: system
+    level: error
+    details: [path, error]
+    message: Unexpected {error} on {path}
+
+  # ---- App: upload steps only the device sees ----
+  upload_started:
+    source: app
+    group: upload
+    level: info
+    details: [size, chunks]
+    message: Upload started ({size} in {chunks} chunks)
+  upload_interrupted:
+    source: app
+    group: upload
+    level: warning
+    details: [sent, size, reason]
+    message: Upload interrupted after {sent} of {size} ({reason}); resuming
+  upload_resumed:
+    source: app
+    group: upload
+    level: info
+    details: [from, size]
+    message: Upload resumed from {from} of {size}
+  upload_finished:
+    source: app
+    group: upload
+    level: info
+    details: [size, seconds]
+    message: Upload finished ({size} in {seconds} s)
+  upload_failed:
+    source: app
+    group: upload
+    level: error
+    details: [reason]
+    message: "Upload failed: {reason}"
+  upload_too_long:            # checked on the device, before anything is uploaded (product_id may be null)
+    source: app
+    group: upload
+    level: warning
+    details: [seconds, max]
+    message: Video is {seconds} s long; the limit is {max} s, so it was not uploaded
+  upload_cancelled:
+    source: app
+    group: upload
+    level: info
+    details: [sent, size]
+    message: Upload cancelled after {sent} of {size}
