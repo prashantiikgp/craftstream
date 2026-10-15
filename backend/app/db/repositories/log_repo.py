@@ -72,13 +72,14 @@ class FirestoreLogRepo:
              limit: int) -> list[LogEntry]:
         from google.cloud import firestore
         from google.cloud.firestore_v1.base_query import FieldFilter
+        from google.cloud.firestore_v1.field_path import FieldPath  # not exported by google.cloud.firestore
 
         query = self._col
         for field, value in zip(FILTERS, (group, level, product_id), strict=True):
             if value is not None:
                 query = query.where(filter=FieldFilter(field, "==", value))
         query = (query.order_by(ORDER_BY, direction=firestore.Query.DESCENDING)
-                 .order_by(firestore.FieldPath.document_id(), direction=firestore.Query.DESCENDING))
+                 .order_by(FieldPath.document_id(), direction=firestore.Query.DESCENDING))
         if cursor is not None:
             last = self._col.document(cursor).get()
             if not last.exists:
