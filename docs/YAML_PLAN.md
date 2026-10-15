@@ -216,7 +216,7 @@ per size class.
 - [x] `media/player.yml`: master fetch timeout (20 s), HLS MIME type, web `<video>` settings, the
       media-error recovery count. The 50 kbps budget is checked against `ladder.yml`, not a Dart constant
       (`lowest_rung_budget_kbps`; `player_engine_test` holds it to ladder.yml's `max_lowest_rung_total_kbps`).
-- [ ] `media/upload.yml`:
+- [x] `media/upload.yml`:
   - HTTP status handling (done / continue / retry / reject);
   - extension → MIME map, picker `accept`, metadata timeout (15 s);
   - the tag split, normalise and dedupe rules;

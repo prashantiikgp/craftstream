@@ -3,6 +3,7 @@
 /// Web uses the browser's File (Blob.slice); Android uses the file path (File.openRead).
 library;
 
+import '../../domain/media/upload_engine.dart';
 import 'device_video_picker_io.dart' if (dart.library.js_interop) 'device_video_picker_web.dart' as device;
 import 'picked_video.dart';
 
@@ -11,18 +12,11 @@ abstract interface class VideoPicker {
   Future<PickedVideo?> pick();
 }
 
+/// File types, the dialog's filter and the metadata timeout come from upload.yml ([UploadEngine]).
 class DeviceVideoPicker implements VideoPicker {
-  const DeviceVideoPicker();
+  final UploadEngine rules;
+  const DeviceVideoPicker(this.rules);
 
   @override
-  Future<PickedVideo?> pick() => device.pickVideo();
+  Future<PickedVideo?> pick() => device.pickVideo(rules);
 }
-
-/// Used when the device does not report a type. The server checks the type again.
-String mimeOfExtension(String? ext) => switch (ext?.toLowerCase()) {
-      'mov' => 'video/quicktime',
-      'webm' => 'video/webm',
-      'mkv' => 'video/x-matroska',
-      '3gp' => 'video/3gpp',
-      _ => 'video/mp4',
-    };

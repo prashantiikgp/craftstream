@@ -46,6 +46,8 @@ VideoCheck checkVideo(PickedVideo video, UploadPolicy policy) {
 }
 
 class UploadState {
+  /// upload.yml: how tags and the price are read.
+  final UploadEngine rules;
   final String title, description, price, otherTags, artisanName;
   final Set<String> tags;
   final PickedVideo? video;
@@ -58,6 +60,7 @@ class UploadState {
   final bool pollGaveUp;
 
   const UploadState({
+    required this.rules,
     this.title = '',
     this.description = '',
     this.price = '',
@@ -78,16 +81,10 @@ class UploadState {
   double get fraction => total == 0 ? 0 : sent / total;
   bool get busy => phase != UploadPhase.editing;
 
-  double? get priceValue {
-    final v = double.tryParse(price.replaceAll(',', '').trim());
-    return v == null || v < ProductLimits.priceMin ? null : v;
-  }
+  double? get priceValue => rules.parsePrice(price, min: ProductLimits.priceMin);
 
-  /// Selected chips plus the comma-separated extras: lower case, de-duplicated, in order.
-  List<String> get allTags {
-    final extra = otherTags.split(',').map((t) => t.trim().toLowerCase()).where((t) => t.isNotEmpty);
-    return {...tags, ...extra}.toList();
-  }
+  /// Selected chips plus the typed extras (upload.yml `tags`).
+  List<String> get allTags => rules.mergeTags(tags, otherTags);
 
   Map<UploadField, FieldProblem> get problems {
     final p = <UploadField, FieldProblem>{};
@@ -130,6 +127,7 @@ class UploadState {
     String? Function()? error,
     bool? pollGaveUp,
   }) => UploadState(
+    rules: rules,
     title: title ?? this.title,
     description: description ?? this.description,
     price: price ?? this.price,
@@ -153,7 +151,8 @@ class UploadController extends Notifier<UploadState> {
   DateTime? _startedAt;
 
   @override
-  UploadState build() => UploadState(artisanName: ref.read(appConfigProvider).env.mockData ? mockArtisanName : '');
+  UploadState build() =>
+      UploadState(rules: _rules, artisanName: ref.read(appConfigProvider).env.mockData ? mockArtisanName : '');
 
   UploadRepository get _repo => ref.read(uploadRepositoryProvider);
 
@@ -200,7 +199,7 @@ class UploadController extends Notifier<UploadState> {
           title: state.title.trim(),
           description: state.description.trim(),
           price: state.priceValue!,
-          currency: 'INR',
+          currency: _rules.currency,
           tags: state.allTags,
           artisanName: state.artisanName.trim(),
         ),
@@ -239,7 +238,7 @@ class UploadController extends Notifier<UploadState> {
     if (state.ticket != null && state.sent < state.total && state.phase != UploadPhase.failed) {
       _report(UploadStep.cancelled);
     }
-    state = UploadState(artisanName: state.artisanName);
+    state = UploadState(rules: _rules, artisanName: state.artisanName);
   }
 
   Future<void> _run() async {
