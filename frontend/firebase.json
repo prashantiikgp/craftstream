@@ -13,11 +13,47 @@
     ],
     "headers": [
       {
-        "source": "**/*.@(js|wasm|json|yml|html|ttf|otf)",
+        "source": "**/*.@(html|yml)",
         "headers": [
           {
             "key": "Cache-Control",
             "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/@(manifest|version).json",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/assets/**/*.json",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/@(flutter_bootstrap|flutter|flutter_service_worker).js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/@(main.*.dart.js|config.*.json)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
           }
         ]
       },
@@ -27,6 +63,15 @@
           {
             "key": "Cache-Control",
             "value": "public, max-age=604800, immutable"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(ttf|otf)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=604800"
           }
         ]
       }

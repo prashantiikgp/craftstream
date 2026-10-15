@@ -44,6 +44,7 @@ apk:             ## Build the Android APK (ENV=prod for the deployed backend)
 
 web-build:       ## Build the web app for hosting (ENV=prod)
 	cd frontend && $(FLUTTER) build web --release --dart-define-from-file=env/$(ENV).json
+	$(PY) tools/web_bundle.py frontend/build/web   # hashed names + one config bundle (see the tool)
 
 flutter-test:    ## Flutter analyze + tests
 	cd frontend && $(FLUTTER) analyze && $(FLUTTER) test

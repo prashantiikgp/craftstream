@@ -134,7 +134,10 @@ If any YAML fails to load, the app shows an error screen at startup. It never ru
   the Windows one, so kill it first; the Play Store image shows "Allow USB debugging?", which the emulator console can
   answer without adb (`adb.exe emu screenrecord screenshot <dir>` to look, `adb.exe emu event mouse x y 0 1` / `... 0 0` to tap).
 - Schemas changed? `make flutter-gen` (json_serializable). Tests: `make flutter-test`.
-- **Throttled demo:** load the app first, then switch on the 45 kbps throttle. The hosted web shell is about 3.2 MB compressed (CanvasKit).
+- **Throttled demo:** load the app first, then switch on the 45 kbps throttle. The hosted web shell is about 2.5 MB compressed (CanvasKit).
+- **Hosting cache:** Firebase Hosting never answers 304, so anything `no-cache` is downloaded in full on every visit.
+  `make web-build` runs `tools/web_bundle.py`: rule YAML in one `config.<hash>.json` (read by `core/config_bundle.dart`)
+  and `main.<hash>.dart.js`, both cached for a year. A repeat visit is about 6 KB. Never deploy a build without it.
 - **Throttled Android:** not `-netspeed` (it runs far below its setting). Run `tools/throttle_proxy.py --kbps 45` and start the emulator with `-http-proxy http://127.0.0.1:8045`.
 
 ## Style

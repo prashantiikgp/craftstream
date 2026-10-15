@@ -47,6 +47,11 @@ flutter:
           weight: 600
         - asset: assets/fonts/SpaceGrotesk-Bold.ttf
           weight: 700
+    # Stand-in: the web engine downloads Roboto (63 KB, about 11 s at 45 kbps) unless a family of that name is
+    # bundled (canvaskit/fonts.dart). Our body font takes its place.
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/SpaceGrotesk-Regular.ttf
     - family: SpaceMono
       fonts:
         - asset: assets/fonts/SpaceMono-Regular.ttf

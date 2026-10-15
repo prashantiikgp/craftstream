@@ -5,6 +5,8 @@ library;
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
 
+import 'config_bundle.dart';
+
 class ConfigError implements Exception {
   final String file;
   final String problem;
@@ -50,8 +52,9 @@ Future<Map<String, T>> loadYamlFolder<T>(String relativeDir, T Function(Map<Stri
     {AssetBundle? bundle}) async {
   final b = bundle ?? rootBundle;
   final prefix = 'assets/config/$relativeDir/';
-  final manifest = await AssetManifest.loadFromAssetBundle(b);
-  final paths = manifest.listAssets().where((p) => p.startsWith(prefix) && p.endsWith('.yml')).toList()..sort();
+  // The web config bundle already lists its files; otherwise ask the asset manifest.
+  final listed = b is ConfigBundle ? b.keysUnder(prefix) : (await AssetManifest.loadFromAssetBundle(b)).listAssets();
+  final paths = listed.where((p) => p.startsWith(prefix) && p.endsWith('.yml')).toList()..sort();
   if (paths.isEmpty) throw ConfigError(prefix, 'no .yml files (is the folder listed in pubspec.yaml?)');
   return {
     for (final path in paths)

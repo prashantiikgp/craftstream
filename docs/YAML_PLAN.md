@@ -290,15 +290,22 @@ are gone.
 
 ## Phase 3: Make sure everything works
 
-- [ ] `make test` (in batches) and every Flutter test batch are green, including the new convention and
-      literal-lint tests.
+- [x] `make test` (in batches) and every Flutter test batch are green, including the new convention and
+      literal-lint tests. (2026-10-15: backend 131 / 26 / 52 / 1 + ruff; Flutter 6 / 14 / 10 / 64 / 31 / 101 + analyze.)
   - Of today's 24 Flutter test files, the engine, data and format tests should mostly keep passing.
   - `screens_test`, `buyer_flow_test`, `upload_flow_test`, `discover_paging_test` and `product_video_test` are
     rewritten against the YAML screens; their assertions are kept.
-- [ ] **Startup cost on the web:** each YAML is a separate HTTP fetch on Chrome. Today that is 6 files and 21 KB;
+- [x] **Startup cost on the web:** each YAML is a separate HTTP fetch on Chrome. Today that is 6 files and 21 KB;
       V2 adds roughly 20 more.
   - Measure the time to first screen at 45 kbps.
   - If it grows by more than about 2 s, merge all rule YAML into one asset at build time.
+  - **Measured 2026-10-15:** V2 fetched 21 YAML files (28 KB, about 5 s at 45 kbps) plus a 63 KB Roboto font
+    the web engine downloads unless a family of that name is bundled. Worse, Firebase Hosting never answers 304,
+    so `no-cache` re-downloaded the 700 KB `main.dart.js` on every visit (about 2 min at 45 kbps).
+  - **Done:** `tools/web_bundle.py` (run by `make web-build`) packs the YAML into one `config.<hash>.json` and
+    renames `main.dart.js` to `main.<hash>.dart.js`; both are cached for a year (`firebase.json`). Roboto is a
+    stand-in for Space Grotesk in `pubspec.yaml`. First visit: 19 requests (was 40), 0 YAML requests, no Roboto.
+    Repeat visit at 45 kbps: 6 KB on the wire, Home drawn in 2.4 s.
 - [ ] Screenshot every screen in light and dark across phone, tablet and desktop (golden tests, or a
       Playwright pass on web) and compare them with the canvas.
 - [ ] **Local mode:** the full flow with `MOCK_DATA=true` and `CRAFTSTREAM_MODE=local`.
