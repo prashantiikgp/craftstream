@@ -29,26 +29,38 @@ class FiltersEngine {
     if (rules.sortOptions.map((o) => o.id).toSet().length != rules.sortOptions.length) {
       throw const FiltersRulesError('sort option ids must be unique');
     }
+    for (final o in rules.sortOptions) {
+      if ((o.field == null) != (o.direction == null)) {
+        throw FiltersRulesError('sort option "${o.id}" needs both field and direction, or neither (API order)');
+      }
+    }
   }
 
   Duration get debounce => Duration(milliseconds: rules.search.debounceMs);
 
   int get pageSize => rules.pageSize;
 
-  List<SortId> get sortIds => [for (final o in rules.sortOptions) o.id];
+  List<String> get sortIds => [for (final o in rules.sortOptions) o.id];
 
-  SortId get defaultSort => rules.sortOptions.firstWhere((o) => o.isDefault).id;
+  String get defaultSort => rules.sortOptions.firstWhere((o) => o.isDefault).id;
+
+  SortOptionSchema _option(String id) =>
+      rules.sortOptions.firstWhere((o) => o.id == id, orElse: () => throw FiltersRulesError('unknown sort "$id"'));
 
   /// The strings.yml key a sort option shows.
-  String sortLabel(SortId id) => rules.sortOptions.firstWhere((o) => o.id == id).label;
+  String sortLabel(String id) => _option(id).label;
 
   /// Every sort label key, for the startup cross-check.
   Iterable<String> get sortLabels => rules.sortOptions.map((o) => o.label);
 
-  /// A sort's id as filters.yml writes it (`price_low`), and back.
-  static String sortName(SortId id) => id.name.replaceAllMapped(RegExp('[A-Z]'), (m) => '_${m[0]!.toLowerCase()}');
-  SortId sortNamed(String name) =>
-      sortIds.firstWhere((id) => sortName(id) == name, orElse: () => throw FiltersRulesError('unknown sort "$name"'));
+  /// Every field a sort reads, so a check can hold them against the model.
+  Set<String> get sortFields => {for (final o in rules.sortOptions) ?o.field};
+
+  /// The sort with this id; throws [FiltersRulesError] for an id filters.yml does not list.
+  String sortNamed(String id) => _option(id).id;
+
+  /// The tag to show after the buyer taps [tapped] while [current] is selected (null = every tag).
+  String? nextTag(String? current, String tapped) => rules.tagRetapClears && current == tapped ? null : tapped;
 
   /// What to send as `q`: trimmed, single-spaced, capped; null when too short to search on.
   String? normaliseQuery(String raw) {
@@ -72,17 +84,25 @@ class FiltersEngine {
     return out.take(rules.maxChips).toList();
   }
 
-  /// Sorts loaded results on the device. `newest` keeps the API's order.
-  List<T> sort<T>(List<T> items, SortId sort, num Function(T) priceOf) {
-    final out = [...items];
-    switch (sort) {
-      case SortId.newest:
-        break;
-      case SortId.priceLow:
-        out.sort((a, b) => priceOf(a).compareTo(priceOf(b)));
-      case SortId.priceHigh:
-        out.sort((a, b) => priceOf(b).compareTo(priceOf(a)));
-    }
-    return out;
+  /// Sorts loaded results on the device by the option's field and direction; an option without a field keeps
+  /// the API's order. [fieldOf] reads a field by its model name (`price`). Equal values keep their order.
+  List<T> sort<T>(List<T> items, String sortId, Object? Function(T item, String field) fieldOf) {
+    final o = _option(sortId);
+    final field = o.field;
+    if (field == null) return [...items];
+    final keyed = [for (final (i, item) in items.indexed) (i, fieldOf(item, field), item)];
+    final sign = o.direction == SortDirection.desc ? -1 : 1;
+    keyed.sort((a, b) {
+      final c = _compare(a.$2, b.$2) * sign;
+      return c != 0 ? c : a.$1.compareTo(b.$1);
+    });
+    return [for (final k in keyed) k.$3];
+  }
+
+  /// Nulls first; values that are not Comparable compare as text.
+  static int _compare(Object? a, Object? b) {
+    if (a == null || b == null) return a == null ? (b == null ? 0 : -1) : 1;
+    if (a is Comparable && b is Comparable) return a.compareTo(b);
+    return '$a'.compareTo('$b');
   }
 }

@@ -211,8 +211,8 @@ per size class.
       that exposes its view model and calls. (Left: the dev-only `/catalog` page, rebuilt in 1.1.)
 
 ### 1.5 Behaviour still in Dart → YAML
-- [ ] `catalog/filters.yml`: sorts become declarative (`field`, `direction`), so adding a sort needs no Dart.
-      Re-tapping a tag clears it.
+- [x] `catalog/filters.yml`: sorts become declarative (`field`, `direction`), so adding a sort needs no Dart.
+      Re-tapping a tag clears it (`tag_retap_clears`). A sort field must be a ProductSummary field (startup check).
 - [ ] `media/player.yml`: master fetch timeout (20 s), HLS MIME type, web `<video>` settings, the
       media-error recovery count. The 50 kbps budget is checked against `ladder.yml`, not a Dart constant.
 - [ ] `media/upload.yml`:

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart' show Brightness, ThemeMode;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/generated/models.dart' show ProductSummary;
 import '../domain/app/navigation_engine.dart';
 import '../domain/app/navigation_loader.dart';
 import '../domain/app/routes_engine.dart';
@@ -95,13 +96,34 @@ Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
   final bricks = BricksEngine(await loadBricksRules(bundle: bundle));
   final filters = FiltersEngine(await loadFiltersRules(bundle: bundle));
   _crossCheck(
-      theme: theme, strings: strings, routes: routes, navigation: navigation, status: status, art: art, filters: filters);
+    theme: theme,
+    strings: strings,
+    routes: routes,
+    navigation: navigation,
+    status: status,
+    art: art,
+    filters: filters,
+  );
   final layout = LayoutEngine(await loadLayoutRules(bundle: bundle));
   final refs = brickRefs(
-      theme: theme, strings: strings, routes: routes, navigation: navigation, icons: icons, art: art, layout: layout);
-  final screens = ScreenEngine(await loadScreenRules(bundle: bundle), bricks, refs, backdrops: art.backdropNames.toSet());
+    theme: theme,
+    strings: strings,
+    routes: routes,
+    navigation: navigation,
+    icons: icons,
+    art: art,
+    layout: layout,
+  );
+  final screens = ScreenEngine(
+    await loadScreenRules(bundle: bundle),
+    bricks,
+    refs,
+    backdrops: art.backdropNames.toSet(),
+  );
   final unrouted = routes.screenNames.difference(screens.names.toSet());
-  if (unrouted.isNotEmpty) throw ConfigCrossCheckError(['routes.yml shows screens with no YAML: ${unrouted.join(', ')}']);
+  if (unrouted.isNotEmpty) {
+    throw ConfigCrossCheckError(['routes.yml shows screens with no YAML: ${unrouted.join(', ')}']);
+  }
   return AppConfig(
     env: e,
     theme: theme,
@@ -139,7 +161,11 @@ BrickRefs brickRefs({
     icons: icons.names.toSet(),
     roles: navigation.names.toSet(),
     tones: t.toneNames.toSet(),
-    colors: {...t.namedColors.keys, for (final tone in t.toneNames) for (final part in t.tone(tone).parts.keys) '$tone.$part'},
+    colors: {
+      ...t.namedColors.keys,
+      for (final tone in t.toneNames)
+        for (final part in t.tone(tone).parts.keys) '$tone.$part',
+    },
     styles: t.styles.keys.toSet(),
     spaces: spacingSteps,
     doorArts: art.doorNames.toSet(),
@@ -162,9 +188,12 @@ void _crossCheck({
   final accents = theme.light.accents.keys.toSet(), tones = theme.light.toneNames.toSet();
   final problems = <String>[
     for (final r in navigation.names) ...[
-      if (!accents.contains(navigation.role(r).accent)) 'navigation.yml $r.accent: "${navigation.role(r).accent}" is not in theme.yml accents',
-      if (!strings.has(navigation.role(r).label)) 'navigation.yml $r.label: "${navigation.role(r).label}" is not in strings.yml',
-      if (routes.match(navigation.role(r).home) == null) 'navigation.yml $r.home: "${navigation.role(r).home}" is not a route',
+      if (!accents.contains(navigation.role(r).accent))
+        'navigation.yml $r.accent: "${navigation.role(r).accent}" is not in theme.yml accents',
+      if (!strings.has(navigation.role(r).label))
+        'navigation.yml $r.label: "${navigation.role(r).label}" is not in strings.yml',
+      if (routes.match(navigation.role(r).home) == null)
+        'navigation.yml $r.home: "${navigation.role(r).home}" is not a route',
     ],
     for (final a in art.accents)
       if (!accents.contains(a)) 'art.yml: accent "$a" is not in theme.yml accents',
@@ -174,9 +203,21 @@ void _crossCheck({
       if (!strings.has(key)) 'status.yml: "$key" is not in strings.yml',
     for (final key in filters.sortLabels)
       if (!strings.has(key)) 'filters.yml sort label: "$key" is not in strings.yml',
+    for (final field in filters.sortFields.difference(_productSummaryFields))
+      'filters.yml sort field: "$field" is not a ProductSummary field (models/product_summary.yml)',
   ];
   if (problems.isNotEmpty) throw ConfigCrossCheckError(problems);
 }
+
+/// The fields a search result has, as the API names them (what a sort may read).
+final _productSummaryFields = const ProductSummary(
+  id: '',
+  title: '',
+  price: 0,
+  currency: '',
+  tags: [],
+  artisanName: '',
+).toJson().keys.toSet();
 
 /// Overridden in main.dart with the loaded config.
 final appConfigProvider = Provider<AppConfig>((ref) => throw StateError('appConfigProvider not initialised'));

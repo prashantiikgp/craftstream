@@ -11,6 +11,7 @@ class FiltersSchema {
   final int pageSize;
   final List<String> featuredTags;
   final int maxChips;
+  final bool tagRetapClears;
   final List<SortOptionSchema> sortOptions;
 
   const FiltersSchema({
@@ -18,6 +19,7 @@ class FiltersSchema {
     required this.pageSize,
     required this.featuredTags,
     required this.maxChips,
+    required this.tagRetapClears,
     required this.sortOptions,
   });
 
@@ -35,19 +37,23 @@ class SearchSchema {
   factory SearchSchema.fromJson(Map<String, dynamic> json) => _$SearchSchemaFromJson(json);
 }
 
-@JsonEnum(fieldRename: FieldRename.snake)
-enum SortId { newest, priceLow, priceHigh }
+@JsonEnum()
+enum SortDirection { asc, desc }
 
 @JsonSerializable()
 class SortOptionSchema {
-  final SortId id;
+  final String id;
 
   /// A strings.yml key.
   final String label;
   @JsonKey(name: 'default')
   final bool isDefault;
 
-  const SortOptionSchema({required this.id, required this.label, this.isDefault = false});
+  /// The ProductSummary field to sort by; null keeps the API's order.
+  final String? field;
+  final SortDirection? direction;
+
+  const SortOptionSchema({required this.id, required this.label, this.isDefault = false, this.field, this.direction});
 
   factory SortOptionSchema.fromJson(Map<String, dynamic> json) => _$SortOptionSchemaFromJson(json);
 }

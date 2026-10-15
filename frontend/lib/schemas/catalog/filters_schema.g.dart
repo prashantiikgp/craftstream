@@ -18,6 +18,7 @@ FiltersSchema _$FiltersSchemaFromJson(Map<String, dynamic> json) =>
             'page_size',
             'featured_tags',
             'max_chips',
+            'tag_retap_clears',
             'sort_options',
           ],
         );
@@ -32,6 +33,7 @@ FiltersSchema _$FiltersSchemaFromJson(Map<String, dynamic> json) =>
             (v) => (v as List<dynamic>).map((e) => e as String).toList(),
           ),
           maxChips: $checkedConvert('max_chips', (v) => (v as num).toInt()),
+          tagRetapClears: $checkedConvert('tag_retap_clears', (v) => v as bool),
           sortOptions: $checkedConvert(
             'sort_options',
             (v) => (v as List<dynamic>)
@@ -47,6 +49,7 @@ FiltersSchema _$FiltersSchemaFromJson(Map<String, dynamic> json) =>
         'pageSize': 'page_size',
         'featuredTags': 'featured_tags',
         'maxChips': 'max_chips',
+        'tagRetapClears': 'tag_retap_clears',
         'sortOptions': 'sort_options',
       },
     );
@@ -86,17 +89,24 @@ SearchSchema _$SearchSchemaFromJson(Map<String, dynamic> json) =>
 
 SortOptionSchema _$SortOptionSchemaFromJson(Map<String, dynamic> json) =>
     $checkedCreate('SortOptionSchema', json, ($checkedConvert) {
-      $checkKeys(json, allowedKeys: const ['id', 'label', 'default']);
+      $checkKeys(
+        json,
+        allowedKeys: const ['id', 'label', 'default', 'field', 'direction'],
+      );
       final val = SortOptionSchema(
-        id: $checkedConvert('id', (v) => $enumDecode(_$SortIdEnumMap, v)),
+        id: $checkedConvert('id', (v) => v as String),
         label: $checkedConvert('label', (v) => v as String),
         isDefault: $checkedConvert('default', (v) => v as bool? ?? false),
+        field: $checkedConvert('field', (v) => v as String?),
+        direction: $checkedConvert(
+          'direction',
+          (v) => $enumDecodeNullable(_$SortDirectionEnumMap, v),
+        ),
       );
       return val;
     }, fieldKeyMap: const {'isDefault': 'default'});
 
-const _$SortIdEnumMap = {
-  SortId.newest: 'newest',
-  SortId.priceLow: 'price_low',
-  SortId.priceHigh: 'price_high',
+const _$SortDirectionEnumMap = {
+  SortDirection.asc: 'asc',
+  SortDirection.desc: 'desc',
 };

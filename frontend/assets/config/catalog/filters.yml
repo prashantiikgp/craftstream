@@ -13,13 +13,23 @@ page_size: 24
 featured_tags: [pottery, textiles, woodwork, brass, jewellery]
 max_chips: 10
 
-# Sort menu. Applied on the device to the loaded results; `newest` is the order the API returns.
-# label: the strings.yml key shown in the menu.
+# Tapping the selected tag chip again clears it (shows every tag).
+tag_retap_clears: true
+
+# Sort menu. Applied on the device to the loaded results.
+#   label      the strings.yml key shown in the menu
+#   field      the ProductSummary field (models/product_summary.yml) to sort by; none = the API's order (newest)
+#   direction  asc (low to high) or desc (high to low)
+# Adding a sort needs no Dart: add an entry and its label.
 sort_options:
   - id: newest
     label: discover.sort_newest
     default: true
   - id: price_low
     label: discover.sort_price_low
+    field: price
+    direction: asc
   - id: price_high
     label: discover.sort_price_high
+    field: price
+    direction: desc

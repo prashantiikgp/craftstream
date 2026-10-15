@@ -8,15 +8,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/config.dart';
 import '../../data/generated/models.dart';
 import '../../data/providers.dart';
-import '../../schemas/catalog/filters_schema.dart';
 
 class DiscoverQuery {
   final String text;
   final String? tag;
-  final SortId sort;
+
+  /// A sort option id from filters.yml.
+  final String sort;
   const DiscoverQuery({this.text = '', this.tag, required this.sort});
 
-  DiscoverQuery copyWith({String? text, String? Function()? tag, SortId? sort}) =>
+  DiscoverQuery copyWith({String? text, String? Function()? tag, String? sort}) =>
       DiscoverQuery(text: text ?? this.text, tag: tag == null ? this.tag : tag(), sort: sort ?? this.sort);
 }
 
@@ -28,12 +29,15 @@ class DiscoverController extends Notifier<DiscoverQuery> {
     if (text != state.text) state = state.copyWith(text: text);
   }
 
-  /// Selecting the selected tag again clears it.
-  void toggleTag(String tag) => state = state.copyWith(tag: () => state.tag == tag ? null : tag);
+  /// Selecting the selected tag again clears it (filters.yml `tag_retap_clears`).
+  void toggleTag(String tag) =>
+      state = state.copyWith(tag: () => ref.read(appConfigProvider).filters.nextTag(state.tag, tag));
+
+  void clearTag() => state = state.copyWith(tag: () => null);
 
   void showTag(String tag) => state = DiscoverQuery(tag: tag, sort: state.sort);
 
-  void setSort(SortId sort) => state = state.copyWith(sort: sort);
+  void setSort(String sort) => state = state.copyWith(sort: sort);
 
   void clear() => state = DiscoverQuery(sort: state.sort);
 }
@@ -102,7 +106,9 @@ final discoverFeedProvider = AsyncNotifierProvider<DiscoverFeedController, Disco
 final discoverResultsProvider = Provider<AsyncValue<List<ProductSummary>>>((ref) {
   final filters = ref.watch(appConfigProvider).filters;
   final sort = ref.watch(discoverControllerProvider.select((q) => q.sort));
-  return ref.watch(discoverFeedProvider).whenData((feed) => filters.sort(feed.items, sort, (p) => p.price));
+  return ref
+      .watch(discoverFeedProvider)
+      .whenData((feed) => filters.sort(feed.items, sort, (p, field) => p.toJson()[field]));
 });
 
 /// Chips: featured tags first, then the most used. Empty (chips hidden) if tags fail to load.
