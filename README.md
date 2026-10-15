@@ -13,8 +13,8 @@ Android tablets and Chrome; the backend runs entirely on Google Cloud. Built for
 | **GCP project** | `craftstream-qi0tvg`, everything in `asia-south1` |
 | **Android** | `make apk ENV=prod` builds a release APK against the same backend |
 
-In the app, the **Buy / Sell** switch at the top stands in for login: *Sell* is the artisan (upload), *Buy* is the buyer
-(search, watch, order).
+Home has two doors that stand in for login: **Sell** is the artisan (upload), **Buy** is the buyer (search, watch,
+order). **Activity log** (next to Your orders) shows every step of every upload, video and order, newest first.
 
 ## Architecture
 
@@ -22,7 +22,7 @@ In the app, the **Buy / Sell** switch at the top stands in for login: *Sell* is 
 flowchart LR
   App["Flutter app<br/>(Android phone · tablet · Chrome)"]
   API["Cloud Run<br/>craftstream-api (FastAPI)"]
-  FS[("Firestore<br/>products · orders")]
+  FS[("Firestore<br/>products · orders · activity_log")]
   UP[("GCS uploads bucket<br/>raw/&lt;id&gt;/source (private)")]
   TC["Transcoder API<br/>HLS fMP4 ladder"]
   MED[("GCS media bucket<br/>hls/&lt;id&gt;/manifest.m3u8 (public)")]
@@ -49,11 +49,56 @@ flowchart LR
   `config/<domain>/<xyz>.yml` → `schemas/<domain>/<xyz>_schema` → `domain/<domain>/<xyz>_loader` →
   `domain/<domain>/<xyz>_engine`. Schemas reject unknown keys, so a typo fails at startup; engines are pure, so they
   are trivial to test; a convention test fails if any piece is missing. The same pattern is used in Python and in Dart.
+- **Everything that describes behaviour or appearance is YAML (V2).** Screens, their building blocks ("bricks"),
+  routes, navigation, design tokens, icons, strings and status labels in the app; limits, the video life cycle,
+  storage paths, error codes, the activity log's events and the GCP resources on the backend. Dart and Python are
+  only the engines that read them. See [How to read the YAML](#how-to-read-the-yaml).
+- **Activity log.** The API records each step it sees (listing created, video landed, transcoding, ready, order
+  placed, refused calls, unexpected errors) and the app reports the ones only it sees (upload started, connection
+  dropped, resumed, finished). Entries live in Firestore for 14 days (TTL). Events, levels, groups and messages are
+  declared in `backend/config/platform/activity_log.yml`; entries never hold a buyer's name, an upload URL or a token.
 - **One contract for both sides.** `models/*.yml` and `models/endpoints.yml` are the only definition of the data and
   routes; `make gen` writes the Pydantic models, the Dart models and the Dart API client. A test fails if the FastAPI
   routes differ from `endpoints.yml` or if generated code is stale.
 
 The full picture, request flows, ladder and key decisions: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## How to read the YAML
+
+A screen is a list of bricks bound to data. `frontend/assets/config/ui/screens/logs.yml`, shortened:
+
+```yaml
+data: logs                       # the source in lib/shared/screens/sources.dart that feeds `logs.*`
+width: wide
+top:
+  - brick: top_bar               # Home / Activity log / <listing>: every crumb but the last is a link
+    crumbs:
+      - { brick: crumb, text: common.home, action: { go: / } }
+      - { brick: crumb, text: logs.title }
+body:
+  - brick: chip_row              # Uploads · Videos · Orders · System
+    bind: logs.groups
+    all: logs.all_groups
+    all_selected: logs.all_groups
+    action: { call: set_group, with: item.value }
+  - brick: list
+    bind: logs.items
+    item: { brick: log_row, listing: logs.listing, order: logs.order }
+```
+
+| To change… | Edit | Checked by |
+|---|---|---|
+| a screen's content or order | `frontend/assets/config/ui/screens/<name>.yml` | startup check + render test (every screen, 4 sizes, light and dark) |
+| a brick's look | `frontend/assets/config/ui/bricks.yml` (style, in theme tokens) | the brick catalogue test |
+| colours, type, spacing | `frontend/assets/config/ui/theme.yml` | contrast test (WCAG pairs, both modes) |
+| any text | `frontend/assets/config/ui/strings.yml` | strings test (no missing or unused keys) |
+| routes | `frontend/assets/config/app/routes.yml` | every `go:` must match a route |
+| limits, ladder, life cycle, log events | `backend/config/<domain>/*.yml` | schema (unknown keys fail), engine tests |
+| GCP resources | `infra/gcp/resources.yml` (`make infra-print` shows the commands) | infra test |
+
+Every rule file has one schema (unknown keys fail at startup), one loader and one engine named after it, plus an
+engine test; a convention test fails if any piece is missing, and a literal lint keeps colours, sizes, paths and
+status strings out of code.
 
 ## Requirements and how they are met
 
@@ -104,12 +149,13 @@ cd backend && .venv/bin/python -m pytest -q tests/unit/media     # one folder at
 cd frontend && ~/development/flutter/bin/flutter test --concurrency=1 test/core   # then test/domain, test/data, test/features/…
 ```
 
-- Backend: **101 tests**, including the convention test (every YAML has its schema, loader and engine), the
+- Backend: **265 tests**, including the convention test (every YAML has its schema, loader and engine), the
   routes-match-`endpoints.yml` test, the architecture test (import rules), and the bitrate-budget test that encodes a
   grainy clip and asserts the lowest rung stays ≤ 50 kbps.
-- Frontend: **174 tests**, including every screen at 390 / 820 / 1280 px in light and dark, the buyer flow
-  (search → product → checkout → order placed), the upload flow with a simulated drop and resume, and a check that
-  every string in the screens exists in `strings.yml` and vice versa.
+- Frontend: **239 tests**, including every screen at four sizes in light and dark, Home fitting one screen from
+  360×640 to 1920×880, the buyer flow (search → product → checkout → order placed), the upload flow with a simulated
+  drop and resume (and its steps in the activity log), orders surviving a restart, and a check that every string in
+  the screens exists in `strings.yml` and vice versa.
 
 ## Deploying
 
@@ -117,7 +163,7 @@ cd frontend && ~/development/flutter/bin/flutter test --concurrency=1 test/core 
 cp infra/gcp/config.env.example infra/gcp/config.env   # project id, region, web origins
 bash infra/gcp/setup.sh        # 01 APIs → 02 buckets → 03 Firestore → 04 IAM → 05 Cloud Run → 06 Eventarc + Pub/Sub
 backend/.venv/bin/python tools/smoke_test.py https://<cloud-run-url>   # upload → ready → search → order against the deployment
-cd frontend && make web-build ENV=prod && firebase deploy --only hosting   # web app → Firebase Hosting
+make web-build ENV=prod && (cd frontend && firebase deploy --only hosting)   # web app → Firebase Hosting
 ```
 
 Every script is idempotent. `/internal/*` accepts only Google-signed OIDC tokens from the project's events service
@@ -131,7 +177,7 @@ account. No secrets are in the repo: `.env`, `config.env` and `.mcp.json` values
 - No secrets in the repo; env files that ship in the app hold public settings only (test-enforced).
 - **Out of scope:** login/accounts, payments, shipping, reviews. The flow ends at "Order placed".
 
-## Known limits (v1)
+## Known limits
 
 - The artisan's "my products" list is kept in memory, so it is lost on reload against the real backend: there is no
   login and no "list my products" endpoint.
@@ -139,6 +185,10 @@ account. No secrets are in the repo: `.env`, `config.env` and `.mcp.json` values
   reading through content URIs would avoid the copy).
 - On Android the starting bitrate cannot be forced from Dart (`video_player` has no track-selection API). Playback
   starts low because the lowest rung is listed first in the master playlist, which was confirmed on the real GCP output.
-- The hosted web app's first load is about 3.2 MB compressed (Flutter's CanvasKit renderer). For a throttled demo,
-  load the app first, then switch the throttle on.
+- The hosted web app's first load is about 2.5 MB compressed (Flutter's CanvasKit renderer). For a throttled demo,
+  load the app first, then switch the throttle on. Repeat visits are about 6 KB: the app and its rules have
+  content-hashed names and are cached (`tools/web_bundle.py`), because Firebase Hosting never answers 304.
+- Like the rest of the app (no login, by design), the activity log is open: anyone with the URL can read it and post
+  the app's upload events (the server refuses its own events from the app). Entries hold ids, sizes and reasons
+  only, and expire after 14 days.
 - Upload progress moves per 8 MiB chunk, not per byte.

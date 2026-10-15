@@ -136,3 +136,42 @@ Caveats:
 | Firestore + keyword array | Serverless, no full-text engine needed for keyword + tag search | Algolia/Elastic (another service), Cloud SQL |
 | Public media bucket | Players fetch segments directly from Google's edge; no API in the playback path | Signed URLs per segment |
 | YAML rule files + codegen | Behaviour and contract readable and changeable without code edits; tests keep them honest | Constants in code |
+| Screens as YAML (V2) | A screen is data: bricks, bindings, actions; the app checks every screen at startup and a test draws each one at four sizes, light and dark | Hand-written Dart screens |
+| Activity log in Firestore | One place to see every step of an upload, a video and an order, from the API and from the app (which alone sees dropped connections) | Only Cloud Logging (not visible in the app) |
+| Hashed web assets | Firebase Hosting never answers 304, so content-hashed names are the only way to cache and still show a deploy at once | `no-cache` (re-downloads 700 KB per visit) |
+
+## 8. Everything in YAML (V2)
+
+```
+App:      routes.yml → screens/<name>.yml → bricks.yml (+ theme.yml, strings.yml, icons.yml, status.yml, art.yml)
+            ScreenHost draws a screen: its `data:` source gives values, each brick binds to them and runs actions
+            ({go: /path}, {back: true}, {call: name, with: value, then: …}).
+Backend:  config/<domain>/*.yml → engines (pure) → services → routers
+            limits, ladder and encoder, video life cycle, storage paths, listing rules, HTTP codes, event formats,
+            activity log events
+Infra:    infra/gcp/resources.yml → resources.py → the setup scripts (`make infra-print` = dry run)
+```
+
+- **Startup checks.** Every rule file has a schema that rejects unknown keys. The app also checks every screen: an
+  unknown brick, prop, strings key, icon, role, colour, text style or route fails with the file and position, so
+  the app never runs with half its config.
+- **Web delivery.** `tools/web_bundle.py` packs every rule YAML into one `config.<hash>.json` (read by
+  `core/config_bundle.dart`) and renames `main.dart.js` to `main.<hash>.dart.js`; both are cached for a year.
+  First visit: 19 requests; repeat visit at 45 kbps: 6 KB, Home drawn in 2.4 s.
+
+## 9. Activity log
+
+```
+API services ── record(event, product_id, order_id, **details) ──┐
+                                                                 ├─→ activity_log_engine (level, group, message
+App (upload controller) ── POST /logs (app events only) ─────────┘     from platform/activity_log.yml) → Firestore
+                                                                        activity_log (expire_at → TTL, 14 days)
+App Activity log screen ── GET /logs?group&level&product_id&cursor ── newest first, refreshed while open
+```
+
+- `record` never raises and also writes the entry to stdout, so Cloud Logging keeps every step.
+- The app reports the steps only it sees (started, connection dropped, resumed, finished, failed, too long,
+  cancelled), queued while offline. The server refuses its own events from the app (403).
+- Entries hold ids, sizes, durations, states and reasons: never a buyer's name, an upload URL (a bearer credential),
+  a token or a request body. The app reports an error's type, never its text.
+- Firestore: three composite indexes `(group | level | product_id, at desc)` merged for combined filters.

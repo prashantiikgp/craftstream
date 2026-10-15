@@ -297,6 +297,18 @@ and the light and dark theme B match the canvas.
 - [ ] Apply the indexes and the TTL policy to the GCP project and deploy (waits for the user's OK).
 - [x] `tools/smoke_test.py` checks the listing's log entries (listing_created, upload_received, order_placed).
 
+### 2.5 Activity log (app)
+- [x] `assets/config/logs/activity_log.yml` + schema, loader, engine and test: which upload steps the app reports
+      (as which server event, with which values), the offline queue size, page size, refresh, group and level
+      labels and tones.
+- [x] `ActivityReporter`: fire and forget, queued while offline, sent in order; reports the error's type, never
+      its text (which can hold the upload URL).
+- [x] `ui/screens/logs.yml` (`/logs`, `/logs/listing/:product_id`) with `log_bar` and `log_row`: newest first,
+      group and level chips, tap for details, refreshes only while open. Home: Your orders and Activity log side
+      by side (`links`); the upload screen links to that upload's log. Mock data keeps a log like the API.
+- [x] Checked end to end in local mode: a browser upload shows listing → started → landed → transcoding → ready
+      → finished; the app cannot post a server event (403).
+
 **Done when:** the backend literal lint passes, routes come from `endpoints.yml`, and the inventory's duplicates
 are gone.
 
@@ -322,7 +334,10 @@ are gone.
     Repeat visit at 45 kbps: 6 KB on the wire, Home drawn in 2.4 s.
 - [ ] Screenshot every screen in light and dark across phone, tablet and desktop (golden tests, or a
       Playwright pass on web) and compare them with the canvas.
-- [ ] **Local mode:** the full flow with `MOCK_DATA=true` and `CRAFTSTREAM_MODE=local`.
+- [x] **Local mode:** the full flow with `MOCK_DATA=true` and `CRAFTSTREAM_MODE=local`.
+  - 2026-10-15: the smoke test passes against `CRAFTSTREAM_MODE=local` (upload, ready, search, order, read back,
+    activity log); a browser upload through the local build goes live and its steps show in the Activity log.
+    Mock mode is covered by the widget tests (buyer, upload with a drop, orders after a restart, activity log).
 - [ ] **GCP:**
   - redeploy the API, re-run `infra/gcp` from `resources.yml` (no changes expected);
   - run the smoke test;
