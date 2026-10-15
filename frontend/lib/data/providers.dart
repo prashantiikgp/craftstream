@@ -19,27 +19,40 @@ import 'upload/video_picker.dart';
 bool _mock(Ref ref) => ref.watch(appConfigProvider).env.mockData;
 
 /// Overridden in tests with zero delays.
-final mockStoreProvider = Provider<MockStore>((ref) => MockStore());
+final mockStoreProvider = Provider<MockStore>((ref) => MockStore(ref.watch(appConfigProvider).mock));
 
-final catalogRepositoryProvider = Provider<CatalogRepository>((ref) => _mock(ref)
-    ? MockCatalogRepository(ref.watch(mockStoreProvider))
-    : ApiCatalogRepository(ref.watch(apiClientProvider)));
+final catalogRepositoryProvider = Provider<CatalogRepository>(
+  (ref) => _mock(ref)
+      ? MockCatalogRepository(ref.watch(mockStoreProvider))
+      : ApiCatalogRepository(ref.watch(apiClientProvider)),
+);
 
-final orderRepositoryProvider = Provider<OrderRepository>((ref) => _mock(ref)
-    ? MockOrderRepository(ref.watch(mockStoreProvider))
-    : ApiOrderRepository(ref.watch(apiClientProvider)));
+final orderRepositoryProvider = Provider<OrderRepository>(
+  (ref) =>
+      _mock(ref) ? MockOrderRepository(ref.watch(mockStoreProvider)) : ApiOrderRepository(ref.watch(apiClientProvider)),
+);
 
-final uploadRepositoryProvider = Provider<UploadRepository>((ref) => _mock(ref)
-    ? MockUploadRepository(ref.watch(mockStoreProvider))
-    : ApiUploadRepository(ref.watch(apiClientProvider), ResumableUploader(ref.watch(httpClientProvider))));
+final uploadRepositoryProvider = Provider<UploadRepository>(
+  (ref) => _mock(ref)
+      ? MockUploadRepository(ref.watch(mockStoreProvider))
+      : ApiUploadRepository(
+          ref.watch(apiClientProvider),
+          ResumableUploader(ref.watch(httpClientProvider), ref.watch(appConfigProvider).upload),
+        ),
+);
 
-final videoPickerProvider =
-    Provider<VideoPicker>((ref) => _mock(ref) ? MockVideoPicker() : const DeviceVideoPicker());
+final videoPickerProvider = Provider<VideoPicker>(
+  (ref) => _mock(ref)
+      ? MockVideoPicker(ref.watch(appConfigProvider).mock)
+      : DeviceVideoPicker(ref.watch(appConfigProvider).upload),
+);
 
-final logRepositoryProvider = Provider<LogRepository>((ref) => _mock(ref)
-    ? MockLogRepository(ref.watch(mockStoreProvider))
-    : ApiLogRepository(ref.watch(apiClientProvider)));
+final logRepositoryProvider = Provider<LogRepository>(
+  (ref) =>
+      _mock(ref) ? MockLogRepository(ref.watch(mockStoreProvider)) : ApiLogRepository(ref.watch(apiClientProvider)),
+);
 
 /// Reports upload steps to the activity log (logs/activity_log.yml); kept for the whole app session.
 final activityReporterProvider = Provider<ActivityReporter>(
-    (ref) => ActivityReporter(ref.watch(logRepositoryProvider), ref.watch(appConfigProvider).activityLog));
+  (ref) => ActivityReporter(ref.watch(logRepositoryProvider), ref.watch(appConfigProvider).activityLog),
+);

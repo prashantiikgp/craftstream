@@ -36,8 +36,55 @@ void main() {
     expect(engine.statusPollTimeout, const Duration(minutes: 30));
   });
 
+  test('upload session answers: done, continue, retry, everything else rejected', () {
+    expect(engine.answerFor(200), UploadAnswer.done);
+    expect(engine.answerFor(201), UploadAnswer.done);
+    expect(engine.answerFor(308), UploadAnswer.more);
+    for (final s in [408, 429, 500, 503, 599]) {
+      expect(engine.answerFor(s), UploadAnswer.retry, reason: '$s');
+    }
+    for (final s in [400, 403, 404, 410, 302]) {
+      expect(engine.answerFor(s), UploadAnswer.reject, reason: '$s');
+    }
+    expect(
+      () => UploadEngine(rules((t) => t.replaceFirst('done: [200, 201]', 'done: [200, 201, 503]'))),
+      throwsA(isA<UploadRulesError>()),
+      reason: '503 would be in two places',
+    );
+    expect(
+      () => UploadEngine(rules((t) => t.replaceFirst('continue: [308]', 'continue: [3oo]'))),
+      throwsA(isA<UploadRulesError>()),
+    );
+  });
+
+  test('picking: file types by extension, the dialog filter and the metadata timeout', () {
+    expect(engine.mimeTypeFor('MOV'), 'video/quicktime');
+    expect(engine.mimeTypeFor('3gp'), 'video/3gpp');
+    expect(engine.mimeTypeFor('avi'), 'video/mp4');
+    expect(engine.mimeTypeFor(null), 'video/mp4');
+    expect(engine.pickerAccept, 'video/*');
+    expect(engine.metadataTimeout, const Duration(seconds: 15));
+  });
+
+  test('tags: chips first, then the typed ones, trimmed, lower case, no repeats', () {
+    expect(engine.mergeTags({'pottery'}, ' Kitchen, ,pottery,  Blue Glaze '), ['pottery', 'kitchen', 'blue glaze']);
+    expect(engine.mergeTags(const {}, ''), isEmpty);
+  });
+
+  test('price: thousands separators ignored; not a number or below the minimum is null', () {
+    expect(engine.parsePrice('1,200', min: 1), 1200);
+    expect(engine.parsePrice(' 499.5 ', min: 1), 499.5);
+    expect(engine.parsePrice('abc', min: 1), isNull);
+    expect(engine.parsePrice('0.5', min: 1), isNull);
+    expect(engine.parsePrice('Infinity', min: 1), isNull);
+    expect(engine.currency, 'INR');
+  });
+
   test('bad files are rejected', () {
-    expect(() => UploadEngine(rules((t) => t.replaceFirst('[1, 2, 5, 10, 30]', '[]'))), throwsA(isA<UploadRulesError>()));
+    expect(
+      () => UploadEngine(rules((t) => t.replaceFirst('[1, 2, 5, 10, 30]', '[]'))),
+      throwsA(isA<UploadRulesError>()),
+    );
     expect(() => rules((t) => '$t\nchunk_size_kib: 8192\n'), throwsA(isA<ConfigError>()));
   });
 }

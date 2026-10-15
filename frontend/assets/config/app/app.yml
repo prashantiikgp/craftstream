@@ -1,0 +1,8 @@
+# The app itself. Read by app_engine.
+
+name: CraftStream          # the window and browser tab title
+initial_route: /           # where the app opens; must be a route in routes.yml
+
+# The look the app starts in: light, dark, or system (follows the device). The theme toggle in the top bars
+# switches it for the session.
+theme_mode: system

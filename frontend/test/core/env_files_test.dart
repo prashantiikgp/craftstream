@@ -5,15 +5,20 @@ import 'dart:io';
 import 'package:craftstream/core/env.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const allowedKeys = {'APP_ENV', 'API_HOST', 'THEME_MODE', 'DEV_TOOLS', 'MOCK_DATA', 'LOG_LEVEL'};
+import '../helpers/harness.dart';
+
+const allowedKeys = {'APP_ENV', 'API_HOST', 'DEV_TOOLS', 'MOCK_DATA', 'LOG_LEVEL'};
 final secretLooking = RegExp(r'KEY|SECRET|TOKEN|PASSWORD|PASSWD|CREDENTIAL|PRIVATE', caseSensitive: false);
 
 void main() {
+  final rules = testEnvRules();
   final files = Directory('env').listSync().whereType<File>().where((f) => f.path.endsWith('.json')).toList();
 
   test('there is an env file for each environment', () {
     final names = files.map((f) => f.uri.pathSegments.last).toSet();
     expect(names, containsAll(['dev.json', 'staging.json', 'prod.json']));
+    expect(AppEnv.keys.toSet(), allowedKeys, reason: 'AppEnv reads exactly the allowed keys');
+    expect(rules.names.map((n) => '$n.json'), unorderedEquals(names), reason: 'env_rules.yml has rules for each');
   });
 
   for (final file in files) {
@@ -27,7 +32,7 @@ void main() {
     });
 
     test('$name passes the AppEnv rules as a release build', () {
-      final env = AppEnv.parse(raw, releaseMode: true);
+      final env = AppEnv.parse(raw, rules: rules, releaseMode: true);
       expect(name, '${env.name.name}.json');
     });
   }

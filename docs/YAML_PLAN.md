@@ -149,18 +149,22 @@ and the convention tests run and fail on today's literals. The failing list *is*
       `reduced_motion_factor`.
 - [x] Move the contrast rules from `theme_engine.dart` into a `contrast:` block in theme.yml. The test checks
       every pair in both modes.
-- [ ] **Theme mode:** the toggle works (home); the default still comes from env THEME_MODE (prod: light); move it to `app/app.yml` (system) and add the toggle to every top bar. `app/app.yml` sets the default (system); the user can switch light and dark from the
-      header.
+- [x] **Theme mode:** `app/app.yml` sets the default (`system`; THEME_MODE left the env files, so prod no longer
+      starts in light). Every top bar ends with the light/dark toggle (`top_bar` `toggle: show`, the default); long
+      crumbs shorten first. The user's choice lasts for the session (not stored).
 - [x] ~~Rebuild `/catalog` (dev only) from YAML~~ **Dropped 2026-10-15:** the v1 `/catalog` page, the v1 widgets
       (`lib/shared/widgets/`), the v1 brand painters and the `legacy:` token block were deleted instead; the
       render test draws every real screen at four sizes in both modes, and the literal baseline is now empty.
 - [x] ~~Update the CraftStream Design System artifact~~ **Dropped:** it lives outside the repo; `theme.yml` and
       `bricks.yml` are the design system.
-- [ ] **Accessibility tokens:** focus ring (colour, width), minimum touch target 44 px, and semantics label
-      templates for cards and icon buttons, all in YAML. Reduced motion turns off lift and scale.
+- [x] **Accessibility tokens:** focus ring (colour, width), minimum touch target 44 px, and semantics label
+      templates for cards and icon buttons, all in YAML. Reduced motion turns off lift and scale. (Focus ring and
+      reduced motion were already applied in `Pressable`; `TapTarget` grows icon buttons to `focus.min_target`, which
+      fixed the 36 px refresh button and the 28 px home mark; card and link labels are `strings.yml` `a11y.*`.)
 
 ### 1.2 App, routes and navigation
-- [ ] `app/app.yml`: app name, initial route, default theme mode, dev-only routes.
+- [x] `app/app.yml`: app name, initial route (routes.yml no longer has `initial:`), default theme mode. (Dev-only
+      routes went with /catalog.)
 - [x] `app/routes.yml`: every route (path, screen file, kind `tab` / `page`, shell, guard `dev_only`) and
       redirects.
 - [x] `app/navigation.yml`: the two roles (Buy `01`, Sell `02`) with their accent, entry route and nav items
@@ -182,9 +186,10 @@ Every reusable widget becomes a brick, with variants, sizes and states in YAML.
       names an icon.
 - [x] `ui/status.yml`: each video and order status gets a label key, accent, dot and hint. This replaces about
       15 Dart switches.
-- [ ] `ui/format.yml`: currency symbols and grouping (INR ₹, Indian grouping), the minus sign, bytes and
-      duration formats.
-- [ ] Skeleton timing (1100 ms) and opacity move into theme motion.
+- [x] `ui/format.yml`: currency symbols and grouping (INR ₹, Indian grouping), the minus sign, bytes and
+      duration formats, and the activity log's date and time. `lib/shared/format/` is gone.
+- [x] Skeleton timing (1100 ms) and opacity move into theme motion (`motion.skeleton_pulse_ms`,
+      `skeleton_min_opacity`); the product grid's loading cards pulse with them and hold still under reduced motion.
 
 ### 1.4 Screens (`screens/*.yml`)
 One file per screen. Each lists its data source, its four states (loading, empty, error, data) and its bricks
@@ -211,19 +216,21 @@ per size class.
       that exposes its view model and calls. (Left: the dev-only `/catalog` page, rebuilt in 1.1.)
 
 ### 1.5 Behaviour still in Dart → YAML
-- [ ] `catalog/filters.yml`: sorts become declarative (`field`, `direction`), so adding a sort needs no Dart.
-      Re-tapping a tag clears it.
-- [ ] `media/player.yml`: master fetch timeout (20 s), HLS MIME type, web `<video>` settings, the
-      media-error recovery count. The 50 kbps budget is checked against `ladder.yml`, not a Dart constant.
-- [ ] `media/upload.yml`:
+- [x] `catalog/filters.yml`: sorts become declarative (`field`, `direction`), so adding a sort needs no Dart.
+      Re-tapping a tag clears it (`tag_retap_clears`). A sort field must be a ProductSummary field (startup check).
+- [x] `media/player.yml`: master fetch timeout (20 s), HLS MIME type, web `<video>` settings, the
+      media-error recovery count. The 50 kbps budget is checked against `ladder.yml`, not a Dart constant
+      (`lowest_rung_budget_kbps`; `player_engine_test` holds it to ladder.yml's `max_lowest_rung_total_kbps`).
+- [x] `media/upload.yml`:
   - HTTP status handling (done / continue / retry / reject);
   - extension → MIME map, picker `accept`, metadata timeout (15 s);
   - the tag split, normalise and dedupe rules;
   - the price parsing rule.
-- [ ] `app/env_rules.yml`: env policy (https outside dev; no DEV_TOOLS, MOCK_DATA or debug logging in prod),
-      the Android dev host.
-- [ ] `dev/mock.yml`: mock latency, chunk delay, processing time and the sample product fixtures (they move
-      out of `mock_products.dart`).
+- [x] `app/env_rules.yml`: env policy (https outside dev; no DEV_TOOLS, MOCK_DATA or debug logging in prod),
+      the Android dev host. Debug-run defaults too; the values stay in env/*.json.
+- [x] `dev/mock.yml`: mock latency, chunk delay, processing time and the sample product fixtures (they move
+      out of `mock_products.dart`, now deleted), plus the sample videos, the event stand-in table and the upload
+      policy stand-in.
 
 ### 1.6 Responsive check
 - [x] Phone, tablet portrait, tablet landscape and desktop for every screen, in light and dark.

@@ -4,7 +4,6 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../domain/ui/bricks_engine.dart';
-import '../format/money.dart';
 import '../screens/screen_scope.dart';
 import '../theme/app_theme.dart';
 import 'kit.dart';
@@ -24,7 +23,7 @@ Widget listingCardBrick(BuildContext context, BrickNode n) {
   final orderable = config.status.orderable('${p['video_status']}');
   return Pressable(
     accent: role.fill,
-    semanticLabel: '$title, ${config.strings.get(look.label)}',
+    semanticLabel: config.strings.get('a11y.listing_card', {'title': title, 'status': config.strings.get(look.label)}),
     onTap: orderable ? () => scope.act(context, n.prop<ActionSpec>('open')) : null,
     builder: (context, active) => Container(
       decoration: BoxDecoration(
@@ -47,7 +46,7 @@ Widget listingCardBrick(BuildContext context, BrickNode n) {
                   SizedBox(width: s.space('gap')),
                   Flexible(child: StatusTag(kind: 'video', value: '${p['video_status']}', style: s.name('tag'))),
                 ]),
-                StyledText(formatMoney(p['price'] as num? ?? 0, '${p['currency']}'),
+                StyledText(configOf(context).format.money(p['price'] as num? ?? 0, '${p['currency']}'),
                     style: s.name('price'), color: s.color('price_color')),
                 if (look.hint != null)
                   StyledText(config.strings.get(look.hint!), style: s.name('hint'), color: s.color('hint_color')),

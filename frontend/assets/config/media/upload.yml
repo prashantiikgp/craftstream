@@ -9,3 +9,35 @@ max_retries: 20                  # then show "Upload paused" and let the artisan
 # While the video processes, check the product's video_status this often, for at most this long.
 status_poll_seconds: 3
 status_poll_timeout_minutes: 30
+
+# What the resumable-upload session's HTTP answers mean (Cloud Storage, or the local fake that speaks the same
+# protocol). A status is a code (308) or a class (5xx). Any status not listed: reject (the session is gone or the
+# request was refused for good; the artisan starts a new listing).
+#   done      the whole file has arrived
+#   continue  more to send; the Range header says how much arrived
+#   retry     a hiccup: back off, ask how much arrived, continue from there
+http_status:
+  done: [200, 201]
+  continue: [308]
+  retry: [408, 429, 5xx]
+
+# Picking the video.
+picker:
+  accept: video/*                 # the browser's file dialog shows videos
+  metadata_timeout_seconds: 15    # reading the video's length on the device; past this the length is "unknown"
+  # Used when the device does not report a type (the server checks the type again). Lower-case extension -> type.
+  mime_types:
+    mp4: video/mp4
+    mov: video/quicktime
+    webm: video/webm
+    mkv: video/x-matroska
+    3gp: video/3gpp
+  default_mime_type: video/mp4    # an extension not listed above
+
+# The listing form.
+tags:
+  separator: ","                  # "Other tags": comma-separated
+  lower_case: true                # stored lower case; the chips' tags first, then the typed ones, no repeats
+price:
+  ignore: [","]                   # "1,200" reads as 1200 (thousands separators are typed by habit)
+  currency: INR                   # every listing is priced in this currency

@@ -49,7 +49,7 @@ class ScreenHost extends ConsumerWidget {
         case GoAction(:final template):
           router.go(scope.fillTemplate(template));
         case BackAction():
-          router.canPop() ? router.pop() : router.go(config.routes.initial);
+          router.canPop() ? router.pop() : router.go(config.app.initialRoute);
         case ToggleThemeAction():
           ref.read(themeChoiceProvider.notifier).toggle(MediaQuery.platformBrightnessOf(context));
       }

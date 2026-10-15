@@ -1,7 +1,6 @@
 {
   "APP_ENV": "staging",
   "API_HOST": "https://craftstream-api-staging.example.run.app",
-  "THEME_MODE": "system",
   "DEV_TOOLS": true,
   "MOCK_DATA": false,
   "LOG_LEVEL": "info"

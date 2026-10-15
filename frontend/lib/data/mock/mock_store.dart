@@ -1,12 +1,14 @@
 /// In-app fake backend for MOCK_DATA=true: believable products, the same search rules as the API
 /// (ready products only, every word must match, tag filter), orders and a simulated resumable upload.
 /// Small delays make loading states visible. It keeps an activity log the way the API does (a few entries
-/// for the sample products, then one per step). Nothing here is used when MOCK_DATA=false.
+/// for the sample products, then one per step). Timing, sample products and the stand-ins for the API's
+/// policy and event catalogue come from dev/mock.yml (MockEngine). Nothing here is used when MOCK_DATA=false.
 library;
 
+import '../../domain/dev/mock_engine.dart';
+import '../../schemas/dev/mock_schema.dart';
 import '../generated/models.dart';
 import '../upload/picked_video.dart';
-import 'mock_products.dart';
 
 class MockNotFound implements Exception {
   final String id;
@@ -16,28 +18,48 @@ class MockNotFound implements Exception {
 }
 
 class MockStore {
+  final MockEngine rules;
   final Duration latency;
   final Duration chunkDelay;
 
   /// How long a finished upload stays "processing" before it turns ready.
   final Duration processingTime;
 
-  final Map<String, Product> _products = {for (final p in mockProducts) p.id: p};
-  final List<String> _mine = [...mockMyProductIds];
+  final Map<String, Product> _products = {};
+  final List<String> _mine;
   final Map<String, int> _confirmed = {};
   final Map<String, DateTime> _readyAt = {};
   int _seq = 0;
 
-  MockStore({
-    this.latency = const Duration(milliseconds: 450),
-    this.chunkDelay = const Duration(milliseconds: 140),
-    this.processingTime = const Duration(seconds: 8),
-  }) {
-    for (final p in mockProducts) {
+  /// Delays default to mock.yml's; tests pass zero.
+  MockStore(this.rules, {Duration? latency, Duration? chunkDelay, Duration? processingTime})
+    : latency = latency ?? rules.latency,
+      chunkDelay = chunkDelay ?? rules.chunkDelay,
+      processingTime = processingTime ?? rules.processingTime,
+      _mine = rules.myProductIds {
+    for (final fixture in rules.products) {
+      final p = _productOf(fixture);
+      _products[p.id] = p;
       log('listing_created', productId: p.id, at: p.createdAt);
-      if (p.videoStatus == 'ready') log('transcode_succeeded', productId: p.id, at: p.createdAt.add(processingTime));
+      if (p.videoStatus == 'ready') {
+        log('transcode_succeeded', productId: p.id, at: p.createdAt.add(this.processingTime));
+      }
     }
   }
+
+  /// A sample listing from mock.yml as the API would return it.
+  Product _productOf(MockProductSchema p) => Product(
+    id: p.id,
+    title: p.title,
+    description: p.description,
+    price: p.price,
+    currency: rules.currency,
+    tags: p.tags,
+    artisanName: p.artisan,
+    videoStatus: p.status,
+    hlsUrl: p.status == 'ready' ? rules.hlsUrlFor(p.id) : null,
+    createdAt: rules.createdAt(p),
+  );
 
   Future<void> wait([Duration? d]) => Future.delayed(d ?? latency);
 
@@ -58,7 +80,7 @@ class MockStore {
       final at = hits.indexWhere((p) => p.id == cursor);
       rest = at < 0 ? [] : hits.sublist(at + 1);
     }
-    final size = limit ?? 24;
+    final size = limit ?? rules.productPageSize;
     final page = rest.take(size).toList();
     final next = rest.length > size ? page.last.id : null;
     return ProductPage(items: [for (final p in page) summaryOf(p)], nextCursor: next);
@@ -114,10 +136,10 @@ class MockStore {
 
   // ---- uploads
 
-  UploadPolicy get policy => const UploadPolicy(
-    maxDurationSeconds: 900,
-    allowedMimeTypes: ['video/mp4', 'video/quicktime', 'video/webm', 'video/x-matroska', 'video/3gpp'],
-    chunkSizeBytes: 8 * 1024 * 1024,
+  UploadPolicy get policy => UploadPolicy(
+    maxDurationSeconds: rules.uploadPolicy.maxDurationSeconds,
+    allowedMimeTypes: rules.uploadPolicy.allowedMimeTypes,
+    chunkSizeBytes: rules.uploadPolicy.chunkSizeBytes,
   );
 
   UploadTicket createListing(ProductCreate body) {
@@ -138,7 +160,7 @@ class MockStore {
     log('listing_created', productId: p.id);
     return UploadTicket(
       product: p,
-      uploadUrl: 'mock://uploads/${p.id}',
+      uploadUrl: rules.uploadUrlFor(p.id),
       uploadMethod: 'PUT',
       chunkSizeBytes: policy.chunkSizeBytes,
     );
@@ -167,22 +189,6 @@ class MockStore {
 
   // ---- activity log
 
-  /// A stand-in for backend/config/platform/activity_log.yml: each event's group, level and message.
-  static const _events = <String, (String, String, String)>{
-    'listing_created': ('upload', 'info', 'Listing created; waiting for its video'),
-    'upload_received': ('upload', 'info', 'Video received'),
-    'transcode_submitted': ('video', 'info', 'Making the streaming versions (144p and up)'),
-    'transcode_succeeded': ('video', 'info', 'Video is live'),
-    'order_placed': ('order', 'info', 'Order placed'),
-    'upload_too_long': ('upload', 'warning', 'Video is longer than the limit; not uploaded'),
-    'upload_started': ('upload', 'info', 'Upload started'),
-    'upload_interrupted': ('upload', 'warning', 'Connection dropped; the upload will resume'),
-    'upload_resumed': ('upload', 'info', 'Upload resumed where the server had it'),
-    'upload_finished': ('upload', 'info', 'Upload finished'),
-    'upload_failed': ('upload', 'error', 'Upload failed'),
-    'upload_cancelled': ('upload', 'info', 'Upload cancelled'),
-  };
-
   final List<LogEntry> _logs = [];
 
   /// Adds an entry the way the API would (unknown events are refused, as the API does).
@@ -194,7 +200,8 @@ class MockStore {
     String source = 'api',
     DateTime? at,
   }) {
-    final (group, level, message) = _events[event] ?? (throw StateError('unknown event $event'));
+    // mock.yml log_events: a stand-in for backend/config/platform/activity_log.yml.
+    final e = rules.event(event) ?? (throw StateError('unknown event $event'));
     _seq++;
     final entry = LogEntry(
       id: 'log_$_seq',
@@ -202,10 +209,10 @@ class MockStore {
       productId: productId,
       orderId: orderId,
       details: details,
-      level: level,
-      group: group,
+      level: e.level,
+      group: e.group,
       source: source,
-      message: message,
+      message: e.message,
       at: at ?? DateTime.now(),
     );
     _logs.add(entry);
@@ -232,7 +239,7 @@ class MockStore {
       final at = hits.indexWhere((e) => e.id == cursor);
       rest = at < 0 ? [] : hits.sublist(at + 1);
     }
-    final size = limit ?? 30;
+    final size = limit ?? rules.logPageSize;
     final page = rest.take(size).toList();
     return LogPage(items: page, nextCursor: rest.length > size ? page.last.id : null);
   }
@@ -243,7 +250,7 @@ class MockStore {
   Product _advance(Product p) {
     final at = _readyAt[p.id];
     if (p.videoStatus == 'processing' && at != null && !DateTime.now().isBefore(at)) {
-      final ready = _withStatus(p, 'ready', hlsUrl: 'mock://media/${p.id}/master.m3u8');
+      final ready = _withStatus(p, 'ready', hlsUrl: rules.hlsUrlFor(p.id));
       _products[p.id] = ready;
       log('transcode_succeeded', productId: p.id);
       return ready;

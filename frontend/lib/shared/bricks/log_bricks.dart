@@ -54,12 +54,14 @@ Widget logBarBrick(BuildContext context, BrickNode n) {
           accent: brand.fill,
           semanticLabel: refreshLabel,
           onTap: m['refreshing'] == true ? null : () => scope.act(context, n.prop<ActionSpec>('action')),
-          builder: (context, active) => Container(
-            width: s.number('box'),
-            height: s.number('box'),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(border: Border.all(color: active ? brand.line : s.color('border'))),
-            child: YamlIcon(s.name('refresh_icon'), size: s.number('icon'), color: t.text),
+          builder: (context, active) => TapTarget(
+            child: Container(
+              width: s.number('box'),
+              height: s.number('box'),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(border: Border.all(color: active ? brand.line : s.color('border'))),
+              child: YamlIcon(s.name('refresh_icon'), size: s.number('icon'), color: t.text),
+            ),
           ),
         ),
       ),

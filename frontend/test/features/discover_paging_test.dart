@@ -18,7 +18,7 @@ const pageCap = 5;
 
 /// MockStore search with small pages, a switch to fail the next call and an optional gate to hold one.
 class PagingRepo implements CatalogRepository {
-  final MockStore store = MockStore(latency: Duration.zero, chunkDelay: Duration.zero, processingTime: Duration.zero);
+  final MockStore store = quietMockStore();
   bool failNext = false;
   Completer<void>? gate;
   final cursors = <String?>[];

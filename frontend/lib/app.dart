@@ -16,7 +16,7 @@ class CraftStreamApp extends ConsumerWidget {
     final config = ref.watch(appConfigProvider);
     final mode = ref.watch(themeChoiceProvider);
     return MaterialApp.router(
-      title: 'CraftStream',
+      title: config.app.name,
       debugShowCheckedModeBanner: false,
       theme: buildTheme(config.theme.light),
       darkTheme: buildTheme(config.theme.dark),

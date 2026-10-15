@@ -4,7 +4,6 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../domain/ui/bricks_engine.dart';
-import '../format/money.dart';
 import '../screens/screen_scope.dart';
 import '../theme/app_theme.dart';
 import 'kit.dart';
@@ -14,7 +13,7 @@ Widget productSummaryBrick(BuildContext context, BrickNode n) {
   final p = BrickScope.of(context).lookup(n.need('bind'));
   if (p is! Map) return const SizedBox.shrink();
   final strings = configOf(context).strings;
-  final price = formatMoney(p['price'] as num? ?? 0, '${p['currency']}');
+  final price = configOf(context).format.money(p['price'] as num? ?? 0, '${p['currency']}');
   return Container(
     padding: EdgeInsets.all(s.space('padding')),
     decoration: BoxDecoration(color: s.color('background'), border: Border.all(color: s.color('border'))),
@@ -171,7 +170,7 @@ Widget amountRowBrick(BuildContext context, BrickNode n) {
     decoration: BoxDecoration(border: Border(top: BorderSide(color: s.color('border')))),
     child: Row(crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, children: [
       Expanded(child: StyledText(say(context, n.need('label')), style: s.name('label'), color: s.color('label_color'))),
-      StyledText(formatMoney(amount, '${scope.lookup(n.need('currency'))}'), style: s.name('amount'),
+      StyledText(configOf(context).format.money(amount, '${scope.lookup(n.need('currency'))}'), style: s.name('amount'),
           color: s.color('amount_color')),
     ]),
   );

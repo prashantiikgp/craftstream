@@ -16,7 +16,8 @@ final httpClientProvider = Provider<http.Client>((ref) {
 });
 
 final apiClientProvider = Provider<ApiClient>((ref) {
-  final env = ref.watch(appConfigProvider).env;
+  final config = ref.watch(appConfigProvider);
   final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-  return ApiClient(env.apiHostFor(isAndroid: isAndroid).toString(), client: ref.watch(httpClientProvider));
+  final host = config.env.apiHostFor(config.envRules, isAndroid: isAndroid);
+  return ApiClient(host.toString(), client: ref.watch(httpClientProvider));
 });

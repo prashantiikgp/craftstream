@@ -9,7 +9,8 @@ import '../shared/screens/screen_host.dart';
 import 'config.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final routes = ref.watch(appConfigProvider).routes;
+  final config = ref.watch(appConfigProvider);
+  final routes = config.routes;
 
   // Rebuild the nesting routes.yml declares, so a nested route (`/product/:id/buy`) keeps its parent below it.
   List<RouteBase> build(String parent) => [
@@ -22,5 +23,5 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
       ];
 
-  return GoRouter(initialLocation: routes.initial, routes: build(''));
+  return GoRouter(initialLocation: config.app.initialRoute, routes: build(''));
 });

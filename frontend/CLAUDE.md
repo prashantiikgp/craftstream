@@ -22,19 +22,23 @@ Read with the root `CLAUDE.md`. Full plan: `docs/FRONTEND_PLAN.md`.
   (`strings_engine_test` fails on a missing or unused key);
 - colours and spacing come from `theme_engine`;
 - breakpoints and columns come from `layout_engine`;
-- player settings come from `player_engine`.
+- player settings come from `player_engine`;
+- money, file sizes, video lengths, dates and times are written by `format_engine` (`ui/format.yml`):
+  `configOf(context).format.money(...)` in bricks, `config.format` in sources.
 
 Upload limits are **not** frontend YAML: read them from `GET /api/v1/upload-policy`. Form limits mirror
 `models/*.yml` as constants in the controllers; `test/features/model_limits_test.dart` keeps them in step.
 
 **Real or mock data:** `lib/data/providers.dart` is the only place that chooses. `MOCK_DATA=true` (dev) uses
-`MockStore` (sample products, the API's search rules, a simulated resumable upload); otherwise the generated
+`MockStore` (the API's search rules, a simulated resumable upload; sample products, delays and API stand-ins come from
+`assets/config/dev/mock.yml`); otherwise the generated
 API client. Screens and controllers only see the repository interfaces.
 
 ## Screens are YAML (V2, docs/YAML_PLAN.md)
 
 | File | Says |
 |---|---|
+| `assets/config/app/app.yml` | the app name (tab title), the first route and the starting theme (`system`) |
 | `assets/config/app/routes.yml` | every route; each shows a screen YAML (`screen:`) |
 | `assets/config/app/navigation.yml` | the Buy (01, orange) and Sell (02, pink) roles |
 | `assets/config/ui/screens/<name>.yml` | one screen: `data` source, `width`, `fill`, `backdrop`, and `top` / `body` / `bottom` / `empty` / `error` bricks |
@@ -86,8 +90,10 @@ API client. Screens and controllers only see the repository interfaces.
 
 - `env/dev.json`, `env/staging.json`, `env/prod.json` → `--dart-define-from-file`; `make web ENV=dev`, `make apk ENV=prod`.
 - **Everything in an env file ships inside the app.** Public settings only; secrets stay on the backend.
-- `core/env.dart` validates at startup (https outside dev, no credentials in API_HOST, no DEV_TOOLS or debug logs in
-  prod, APP_ENV required in release). `test/core/env_files_test.dart` rejects unknown or secret-looking keys.
+- `core/env.dart` checks each value's shape at startup (no credentials in API_HOST, APP_ENV required in release);
+  the policy per environment is `assets/config/app/env_rules.yml` (https outside dev, no DEV_TOOLS, MOCK_DATA or
+  debug logs in prod, the Android dev host, the defaults of a debug run without an env file).
+  `test/core/env_files_test.dart` rejects unknown or secret-looking keys.
 - New key: add it to `AppEnv`, all three env files, `env/README.md` and the test's allow-list.
 
 ## Recipe: add a rule file
@@ -132,7 +138,7 @@ Every data screen handles four states: loading, empty, error and ready (`ScreenD
 
 - Use the Linux Flutter SDK (`~/development/flutter`), never the Windows one under `/mnt/d`.
 - **Web:** `make web ENV=dev` (web-server on :8080), then open it in Windows Chrome.
-- **Android emulator:** use the same `env/dev.json`; `AppEnv.apiHostFor` maps `localhost` to `10.0.2.2` in dev.
+- **Android emulator:** use the same `env/dev.json`; `env_rules.yml` (`android_hosts`) maps `localhost` to `10.0.2.2` in dev.
   WSL has no `/dev/kvm`, so the emulator runs on Windows: `/mnt/c/Users/<you>/AppData/Local/Android/Sdk/emulator/emulator.exe`
   and `platform-tools/adb.exe` (the Windows adb, not a Linux one). Gotchas on this 8 GB machine: launch headless with
   `-no-window -no-snapshot -no-audio -memory 1536`; a Linux `adb` server also bound to :5037 (mirrored networking) blocks

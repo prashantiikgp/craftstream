@@ -29,7 +29,7 @@ class RoutesEngine {
   final RoutesSchema rules;
   final List<RouteEntry> entries = [];
 
-  /// Validates: paths are well formed and unique, the initial route exists.
+  /// Validates: paths are well formed and unique.
   RoutesEngine(this.rules) {
     void walk(List<RouteSchema> routes, String parent) {
       for (final r in routes) {
@@ -54,12 +54,7 @@ class RoutesEngine {
     }
 
     walk(rules.routes, '');
-    if (!entries.any((e) => e.path == rules.initial)) {
-      throw RoutesRulesError('initial "${rules.initial}" is not a route');
-    }
   }
-
-  String get initial => rules.initial;
 
   Set<String> get screenNames => {for (final e in entries) e.screen};
 

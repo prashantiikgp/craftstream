@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 import '../../domain/ui/bricks_engine.dart';
 import '../../schemas/app/navigation_schema.dart';
-import '../format/money.dart';
 import '../screens/screen_scope.dart';
 import '../theme/app_theme.dart';
 import 'browse_bricks.dart';
@@ -142,18 +141,23 @@ Widget _wordmark(BuildContext context, BrickNode n) {
   );
 }
 
-Widget _themeToggle(BuildContext context, BrickNode n) {
+Widget _themeToggle(BuildContext context, BrickNode n) => Align(
+      alignment: n.need<String>('align') == 'start' ? Alignment.centerLeft : Alignment.centerRight,
+      child: _themeToggleButton(context),
+    );
+
+/// The light/dark switch (theme_toggle's look), on its own (Home) or at the end of a top bar.
+Widget _themeToggleButton(BuildContext context) {
   final s = BrickStyle.of(context, 'theme_toggle');
   final t = context.tokens;
   final brand = t.tone('brand');
   final strings = configOf(context).strings;
-  return Align(
-    alignment: n.need<String>('align') == 'start' ? Alignment.centerLeft : Alignment.centerRight,
-    child: Pressable(
-      accent: brand.fill,
-      semanticLabel: strings.get(t.isDark ? 'theme.to_light' : 'theme.to_dark'),
-      onTap: () => BrickScope.of(context).act(context, const ToggleThemeAction()),
-      builder: (context, active) => Container(
+  return Pressable(
+    accent: brand.fill,
+    semanticLabel: strings.get(t.isDark ? 'theme.to_light' : 'theme.to_dark'),
+    onTap: () => BrickScope.of(context).act(context, const ToggleThemeAction()),
+    builder: (context, active) => TapTarget(
+      child: Container(
         width: s.number('box'),
         height: s.number('box'),
         alignment: Alignment.center,
@@ -209,7 +213,7 @@ Widget _door(BuildContext context, BrickNode n) {
   return Pressable(
     accent: accent.fill,
     lift: t.doorHoverLift,
-    semanticLabel: body == null ? title : '$title. ${say(context, body)}',
+    semanticLabel: body == null ? title : config.strings.get('a11y.door', {'title': title, 'body': say(context, body)}),
     onTap: () => _act(context, n),
     builder: (context, active) => Container(
       constraints: BoxConstraints(minHeight: s.number('min_height')),
@@ -275,7 +279,8 @@ Widget _linkRow(BuildContext context, BrickNode n) {
   final count = countPath == null ? null : BrickScope.of(context).lookup(countPath);
   return Pressable(
     accent: tone.fill,
-    semanticLabel: count == null ? label : '$label, $count',
+    semanticLabel:
+        count == null ? label : configOf(context).strings.get('a11y.link_count', {'label': label, 'count': '$count'}),
     onTap: () => _act(context, n),
     builder: (context, active) => Container(
       height: s.number('height'),
@@ -330,15 +335,17 @@ Widget _topBar(BuildContext context, BrickNode n) {
           accent: brand.fill,
           semanticLabel: label == null ? config.strings.get('common.back') : say(context, label),
           onTap: () => _act(context, n),
-          builder: (context, active) => home
-              ? Stripes(size: s.number('mark'), accents: s.names('stripes'))
-              : Container(
-                  width: s.number('box'),
-                  height: s.number('box'),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(border: Border.all(color: active ? brand.line : s.color('border'))),
-                  child: YamlIcon(s.name('back_icon'), size: s.number('icon'), color: t.text),
-                ),
+          builder: (context, active) => TapTarget(
+            child: home
+                ? Stripes(size: s.number('mark'), accents: s.names('stripes'))
+                : Container(
+                    width: s.number('box'),
+                    height: s.number('box'),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(border: Border.all(color: active ? brand.line : s.color('border'))),
+                    child: YamlIcon(s.name('back_icon'), size: s.number('icon'), color: t.text),
+                  ),
+          ),
         ),
         SizedBox(width: s.space('padding')),
         Expanded(
@@ -347,6 +354,10 @@ Widget _topBar(BuildContext context, BrickNode n) {
             child: _crumbs(context, s, n.prop<List<BrickNode>>('crumbs') ?? const [], role),
           ),
         ),
+        if (n.need<String>('toggle') == 'show') ...[
+          SizedBox(width: s.space('padding')),
+          _themeToggleButton(context),
+        ],
       ],
     ),
   );
@@ -476,7 +487,7 @@ Widget _receipt(BuildContext context, BrickNode n) {
               line(
                 _say(context, n, 'total'),
                 StyledText(
-                  formatMoney(record['total'] as num? ?? 0, '${record['currency']}'),
+                  configOf(context).format.money(record['total'] as num? ?? 0, '${record['currency']}'),
                   style: s.name('total_value'),
                 ),
               ),
@@ -584,10 +595,10 @@ Widget _orderCard(BuildContext context, BrickNode n) {
   final brand = t.tone('brand');
   final highlight = s.flag('highlight_first') && scope.index == 0;
   final title = '${o['product_title'] ?? ''}';
-  final total = formatMoney(o['total'] as num? ?? 0, '${o['currency']}');
+  final total = configOf(context).format.money(o['total'] as num? ?? 0, '${o['currency']}');
   return Pressable(
     accent: brand.fill,
-    semanticLabel: '$title, $total',
+    semanticLabel: configOf(context).strings.get('a11y.order_card', {'title': title, 'total': total}),
     onTap: n.prop<ActionSpec>('action') == null ? null : () => _act(context, n),
     builder: (context, active) => Container(
       decoration: BoxDecoration(

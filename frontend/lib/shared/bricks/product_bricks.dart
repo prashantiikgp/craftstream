@@ -9,8 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/config.dart';
 import '../../domain/ui/bricks_engine.dart';
-import '../format/bytes.dart';
-import '../format/money.dart';
 import '../player/playback.dart';
 import '../screens/screen_scope.dart';
 import '../theme/app_theme.dart';
@@ -86,7 +84,9 @@ Widget artisanRowBrick(BuildContext context, BrickNode n) {
   final t = context.tokens;
   final name = '${scope.lookup(n.need('name')) ?? ''}';
   final initials = name.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).take(s.number('initials').toInt()).map((w) => w[0]).join();
-  final price = formatMoney(scope.lookup(n.need('price')) as num? ?? 0, '${scope.lookup(n.need('currency'))}');
+  final price = configOf(context)
+      .format
+      .money(scope.lookup(n.need('price')) as num? ?? 0, '${scope.lookup(n.need('currency'))}');
   final avatar = t.accent(s.name('avatar_accent'));
   return Container(
     padding: EdgeInsets.symmetric(vertical: s.space('padding')),
@@ -144,7 +144,9 @@ Widget buyBarBrick(BuildContext context, BrickNode n) {
   final t = context.tokens;
   final enabled = truthy(scope.lookup(n.need('enabled')));
   final tone = t.tone(enabled ? n.need('tone') : 'neutral');
-  final price = formatMoney(scope.lookup(n.need('price')) as num? ?? 0, '${scope.lookup(n.need('currency'))}');
+  final price = configOf(context)
+      .format
+      .money(scope.lookup(n.need('price')) as num? ?? 0, '${scope.lookup(n.need('currency'))}');
   final label = say(context, n.need('label'));
   return Row(children: [
     Expanded(child: StyledText(price, style: s.name('price'), color: s.color('price_color'))),
@@ -406,7 +408,10 @@ class _Controls extends StatelessWidget {
         ),
         SizedBox(width: s.space('pill_gap')),
         StyledText(
-          strings.get(n.need('time'), {'position': formatDuration(state.position), 'duration': formatDuration(state.duration)}),
+          strings.get(n.need('time'), {
+            'position': configOf(context).format.duration(state.position),
+            'duration': configOf(context).format.duration(state.duration),
+          }),
           style: s.name('time_style'),
           color: s.color('on_bar'),
         ),

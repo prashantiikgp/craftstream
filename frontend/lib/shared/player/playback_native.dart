@@ -61,13 +61,12 @@ class NativePlayback implements Playback {
   /// cannot be fetched or has a single rung (then ExoPlayer has nothing to get wrong).
   Future<Uri> _startUri() async {
     try {
-      final res = await http.get(stream).timeout(const Duration(seconds: 20));
+      final res = await http.get(stream).timeout(rules.masterFetchTimeout);
       if (res.statusCode == 200) {
         _variants = parseMasterPlaylist(res.body);
         final lowest = lowestRungOnly(res.body, stream);
         if (lowest != null) {
-          return _lowestUri =
-              Uri.dataFromString(lowest, mimeType: 'application/vnd.apple.mpegurl', encoding: utf8, base64: true);
+          return _lowestUri = Uri.dataFromString(lowest, mimeType: rules.hlsMimeType, encoding: utf8, base64: true);
         }
       }
     } catch (_) {
@@ -88,20 +87,22 @@ class NativePlayback implements Playback {
     final ended = v.isInitialized && v.duration > Duration.zero && v.position >= v.duration && !v.isPlaying;
     final height = v.size.height.round();
     final variant = height > 0 ? variantForHeight(_variants, height) : null;
-    _set(_state.value.copyWith(
-      phase: ended
-          ? PlaybackPhase.ended
-          : v.isPlaying
-              ? PlaybackPhase.playing
-              : v.isInitialized
-                  ? PlaybackPhase.paused
-                  : PlaybackPhase.loading,
-      buffering: v.isBuffering || !v.isInitialized,
-      firstFrame: v.isInitialized && (v.position > Duration.zero || v.isPlaying && !v.isBuffering),
-      position: v.position,
-      duration: v.duration,
-      rung: height > 0 ? Rung(height: variant?.height ?? height, bitrateBps: variant?.bandwidthBps ?? 0) : null,
-    ));
+    _set(
+      _state.value.copyWith(
+        phase: ended
+            ? PlaybackPhase.ended
+            : v.isPlaying
+            ? PlaybackPhase.playing
+            : v.isInitialized
+            ? PlaybackPhase.paused
+            : PlaybackPhase.loading,
+        buffering: v.isBuffering || !v.isInitialized,
+        firstFrame: v.isInitialized && (v.position > Duration.zero || v.isPlaying && !v.isBuffering),
+        position: v.position,
+        duration: v.duration,
+        rung: height > 0 ? Rung(height: variant?.height ?? height, bitrateBps: variant?.bandwidthBps ?? 0) : null,
+      ),
+    );
     if (!_fullLadder && !_switching && v.isInitialized && v.isPlaying) {
       final ahead = bufferedAhead(v);
       if (rules.shouldUpswitchNative(bufferedAhead: ahead, position: v.position)) unawaited(_upswitch(c));
@@ -178,16 +179,18 @@ class NativePlayback implements Playback {
 
   @override
   Widget view() => ValueListenableBuilder(
-        valueListenable: _ctrl,
-        builder: (_, c, _) => c == null
-            ? const SizedBox.expand()
-            : ValueListenableBuilder(
-                valueListenable: c,
-                builder: (_, v, _) => v.isInitialized
-                    ? Center(child: AspectRatio(aspectRatio: v.aspectRatio, child: VideoPlayer(c)))
-                    : const SizedBox.expand(),
-              ),
-      );
+    valueListenable: _ctrl,
+    builder: (_, c, _) => c == null
+        ? const SizedBox.expand()
+        : ValueListenableBuilder(
+            valueListenable: c,
+            builder: (_, v, _) => v.isInitialized
+                ? Center(
+                    child: AspectRatio(aspectRatio: v.aspectRatio, child: VideoPlayer(c)),
+                  )
+                : const SizedBox.expand(),
+          ),
+  );
 
   @override
   void dispose() {

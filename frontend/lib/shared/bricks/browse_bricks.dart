@@ -6,7 +6,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../domain/ui/bricks_engine.dart';
-import '../format/money.dart';
 import '../screens/screen_scope.dart';
 import '../theme/app_theme.dart';
 import 'kit.dart';
@@ -224,7 +223,50 @@ Widget productGridBrick(BuildContext context, BrickNode n) {
   });
 }
 
-Widget _skeleton(BuildContext context, BrickStyle s, double aspect) => Container(
+/// A loading placeholder's soft pulse: fades between theme.yml `motion.skeleton_min_opacity` and full, one way
+/// every `motion.skeleton_pulse_ms`. Still under reduced motion.
+class SkeletonPulse extends StatefulWidget {
+  final Widget child;
+  const SkeletonPulse({super.key, required this.child});
+
+  @override
+  State<SkeletonPulse> createState() => _SkeletonPulseState();
+}
+
+class _SkeletonPulseState extends State<SkeletonPulse> with SingleTickerProviderStateMixin {
+  AnimationController? _c;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final still = MediaQuery.disableAnimationsOf(context);
+    if (still) {
+      _c?.dispose();
+      _c = null;
+    } else {
+      _c ??= AnimationController(vsync: this, duration: context.tokens.skeletonPulse)..repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _c?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = _c;
+    if (c == null) return widget.child;
+    final from = context.tokens.skeletonMinOpacity;
+    return FadeTransition(opacity: Tween(begin: from, end: 1.0).animate(c), child: widget.child);
+  }
+}
+
+Widget _skeleton(BuildContext context, BrickStyle s, double aspect) =>
+    SkeletonPulse(child: _skeletonCard(context, s, aspect));
+
+Widget _skeletonCard(BuildContext context, BrickStyle s, double aspect) => Container(
       decoration: BoxDecoration(color: s.color('background'), border: Border.all(color: s.color('border'))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         AspectRatio(aspectRatio: aspect, child: ColoredBox(color: s.color('skeleton'))),
@@ -250,10 +292,11 @@ Widget _card(BuildContext context, BrickNode n, BrickStyle s, double aspect) {
   if (p is! Map) return const SizedBox.shrink();
   final brand = t.tone('brand');
   final title = '${p['title'] ?? ''}', artisan = '${p['artisan_name'] ?? ''}';
-  final price = formatMoney(p['price'] as num? ?? 0, '${p['currency']}');
+  final config = configOf(context);
+  final price = config.format.money(p['price'] as num? ?? 0, '${p['currency']}');
   return Pressable(
     accent: brand.fill,
-    semanticLabel: '$title, $artisan, $price',
+    semanticLabel: config.strings.get('a11y.product_card', {'title': title, 'artisan': artisan, 'price': price}),
     onTap: () => scope.act(context, n.prop<ActionSpec>('action')),
     builder: (context, active) => Container(
       decoration: BoxDecoration(

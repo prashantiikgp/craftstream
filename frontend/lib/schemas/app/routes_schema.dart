@@ -7,10 +7,9 @@ part 'routes_schema.g.dart';
 
 @JsonSerializable()
 class RoutesSchema {
-  final String initial;
   final List<RouteSchema> routes;
 
-  const RoutesSchema({required this.initial, required this.routes});
+  const RoutesSchema({required this.routes});
 
   factory RoutesSchema.fromJson(Map<String, dynamic> json) => _$RoutesSchemaFromJson(json);
 }

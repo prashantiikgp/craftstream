@@ -36,6 +36,7 @@ flutter:
     - assets/config/media/
     - assets/config/orders/
     - assets/config/logs/
+    - assets/config/dev/
   # Bundled + subset by tools/subset_fonts.sh (Latin + ₹, ~137 KB total). Never fetched at runtime.
   # Family names must match `fonts:` in assets/config/ui/theme.yml.
   fonts:

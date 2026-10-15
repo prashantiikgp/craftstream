@@ -57,7 +57,8 @@ class WebPlayback implements Playback {
   final _state = ValueNotifier(const PlaybackState());
   web.HTMLVideoElement? _video;
   _Hls? _hls;
-  bool _started = false, _loaded = false, _disposed = false, _mediaRecovered = false;
+  bool _started = false, _loaded = false, _disposed = false;
+  int _mediaRecoveries = 0;
 
   WebPlayback(this.stream, this.rules);
 
@@ -72,13 +73,15 @@ class WebPlayback implements Playback {
 
   void _attach(Object element) {
     final v = element as web.HTMLVideoElement;
+    final settings = rules.webVideo;
     _video = v
+      // Fills the platform view; how the picture sits inside it is player.yml's object_fit.
       ..style.width = '100%'
       ..style.height = '100%'
-      ..style.objectFit = 'contain'
-      ..playsInline = true
-      ..controls = false
-      ..preload = 'none';
+      ..style.objectFit = settings.objectFit
+      ..playsInline = settings.playsInline
+      ..controls = settings.controls
+      ..preload = settings.preload;
     void on(String type, void Function() f) => v.addEventListener(type, ((web.Event _) => f()).toJS);
     on('waiting', () => _set(_s.copyWith(buffering: true)));
     on('playing', () => _set(_s.copyWith(phase: PlaybackPhase.playing, buffering: false)));
@@ -104,22 +107,28 @@ class WebPlayback implements Playback {
       _hls = hls;
       hls.on('hlsManifestParsed', ((JSString _, JSObject _) => _play()).toJS);
       hls.on('hlsFragChanged', ((JSString _, _FragData d) => _showLevel(d.frag.level)).toJS);
-      hls.on('hlsFragLoaded', ((JSString _, JSObject _) {
-        final bps = hls.bandwidthEstimate;
-        if (bps.isFinite && bps > 0) _set(_s.copyWith(estimateBps: bps.round()));
-      }).toJS);
-      hls.on('hlsError', ((JSString _, _ErrorData d) {
-        if (!d.fatal) return;
-        if (d.type == 'mediaError' && !_mediaRecovered) {
-          _mediaRecovered = true;
-          hls.recoverMediaError();
-        } else {
-          _fail();
-        }
-      }).toJS);
+      hls.on(
+        'hlsFragLoaded',
+        ((JSString _, JSObject _) {
+          final bps = hls.bandwidthEstimate;
+          if (bps.isFinite && bps > 0) _set(_s.copyWith(estimateBps: bps.round()));
+        }).toJS,
+      );
+      hls.on(
+        'hlsError',
+        ((JSString _, _ErrorData d) {
+          if (!d.fatal) return;
+          if (d.type == 'mediaError' && _mediaRecoveries < rules.mediaErrorRecoveries) {
+            _mediaRecoveries++;
+            hls.recoverMediaError();
+          } else {
+            _fail();
+          }
+        }).toJS,
+      );
       hls.loadSource(stream.toString());
       hls.attachMedia(v);
-    } else if (v.canPlayType('application/vnd.apple.mpegurl').isNotEmpty) {
+    } else if (v.canPlayType(rules.hlsMimeType).isNotEmpty) {
       v.src = stream.toString(); // Safari plays HLS itself
       _play();
     } else {
@@ -131,16 +140,25 @@ class WebPlayback implements Playback {
     final levels = _hls?.levels.toDart;
     if (levels == null || index < 0 || index >= levels.length) return;
     final l = levels[index];
-    _set(_s.copyWith(rung: Rung(height: l.height, bitrateBps: l.bitrate)));
+    _set(
+      _s.copyWith(
+        rung: Rung(height: l.height, bitrateBps: l.bitrate),
+      ),
+    );
   }
 
   void _play() {
     final v = _video;
     if (v == null || _disposed) return;
-    unawaited(v.play().toDart.then((_) {}, onError: (Object _) {
-      // The browser refused to start playback (no user gesture yet): wait for the play button.
-      _set(_s.copyWith(phase: PlaybackPhase.paused, buffering: false));
-    }));
+    unawaited(
+      v.play().toDart.then(
+        (_) {},
+        onError: (Object _) {
+          // The browser refused to start playback (no user gesture yet): wait for the play button.
+          _set(_s.copyWith(phase: PlaybackPhase.paused, buffering: false));
+        },
+      ),
+    );
   }
 
   void _fail() => _set(_s.copyWith(phase: PlaybackPhase.error, buffering: false));

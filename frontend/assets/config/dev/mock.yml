@@ -1,0 +1,174 @@
+# MOCK_DATA=true (dev): the in-app fake backend, lib/data/mock/mock_store.dart. It follows the API's rules (search,
+# paging, upload, activity log); this file holds its timing and its sample data. Read by mock_engine.
+# Tests replace the store with one that has no delays (test/helpers/harness.dart).
+
+# Delays that make loading states visible.
+latency_ms: 450                # every call
+chunk_delay_ms: 140            # each upload chunk
+processing_seconds: 8          # a finished upload stays "processing" this long, then turns ready
+
+# This device's artisan: the upload form starts with this name.
+artisan_name: Meera Devi
+
+# Stand-ins for what the API would say.
+currency: INR                  # new listings
+page_sizes: { products: 24, logs: 30 }   # when a call gives no limit
+upload_policy:                 # GET /upload-policy
+  max_duration_seconds: 900
+  allowed_mime_types: [video/mp4, video/quicktime, video/webm, video/x-matroska, video/3gpp]
+  chunk_size_bytes: 8388608    # 8 MiB
+# mock:// addresses: player.yml plays its sample stream for any mock:// video. {id} is the product id.
+hls_url: "mock://media/{id}/master.m3u8"
+upload_url: "mock://uploads/{id}"
+
+# A stand-in for backend/config/platform/activity_log.yml: each event's group, level and message.
+log_events:
+  listing_created: { group: upload, level: info, message: "Listing created; waiting for its video" }
+  upload_received: { group: upload, level: info, message: "Video received" }
+  transcode_submitted: { group: video, level: info, message: "Making the streaming versions (144p and up)" }
+  transcode_succeeded: { group: video, level: info, message: "Video is live" }
+  order_placed: { group: order, level: info, message: "Order placed" }
+  upload_too_long: { group: upload, level: warning, message: "Video is longer than the limit; not uploaded" }
+  upload_started: { group: upload, level: info, message: "Upload started" }
+  upload_interrupted: { group: upload, level: warning, message: "Connection dropped; the upload will resume" }
+  upload_resumed: { group: upload, level: info, message: "Upload resumed where the server had it" }
+  upload_finished: { group: upload, level: info, message: "Upload finished" }
+  upload_failed: { group: upload, level: error, message: "Upload failed" }
+  upload_cancelled: { group: upload, level: info, message: "Upload cancelled" }
+
+# What "pick a video" returns, in turn: one that fits the 15:00 limit and one that does not, so both paths show.
+videos:
+  - { name: clay-mug-process.mp4, size_bytes: 432013312, mime_type: video/mp4, seconds: 760 }
+  - { name: loom-full-day.mov, size_bytes: 2254438400, mime_type: video/quicktime, seconds: 1085 }
+
+# Sample listings. status is a video status (ui/status.yml); mine: true = this device's artisan owns it (Your
+# products shows one live, one processing, one failed). created_at is local time. Search shows ready ones only.
+products:
+  - id: p_01
+    title: Hand-thrown clay mug
+    artisan: Meera Devi
+    price: 450
+    tags: [pottery, kitchen]
+    status: ready
+    mine: true
+    created_at: "2026-10-01T01:00:00"
+    description: "Wheel-thrown from Khurja clay, dried for two days and fired twice. The video follows one mug from a lump of clay to the glaze kiln. Each piece is a little different."
+
+  - id: p_02
+    title: Blue pottery planter
+    artisan: Gopal Prajapat
+    price: 1200
+    tags: [pottery, home]
+    status: ready
+    created_at: "2026-09-30T16:00:00"
+    description: "Jaipur blue pottery made from quartz paste, not clay. Watch the cobalt pattern painted freehand and the low firing that keeps the glaze glassy."
+
+  - id: p_03
+    title: Kantha-stitched throw
+    artisan: Rina Das
+    price: 3800
+    tags: [textiles, kantha]
+    status: ready
+    created_at: "2026-09-30T07:00:00"
+    description: "Five layers of old cotton saris joined with running stitch. The video shows the motif traced, the layers basted and three weeks of stitching in twelve minutes."
+
+  - id: p_04
+    title: Ikat silk stole
+    artisan: Lakshmi Reddy
+    price: 2450
+    tags: [textiles, ikat]
+    status: ready
+    created_at: "2026-09-29T22:00:00"
+    description: "Pochampally double ikat: the threads are tied and dyed before weaving, so the pattern appears on the loom. Watch the resist-tying and the first metres woven."
+
+  - id: p_05
+    title: Channapatna wooden train
+    artisan: Imran Pasha
+    price: 890
+    tags: [woodwork, toys]
+    status: ready
+    created_at: "2026-09-29T13:00:00"
+    description: "Turned from ivory wood on a lathe and coloured with lac and vegetable dyes. Safe for small hands; no paint, no varnish."
+
+  - id: p_06
+    title: Sheesham serving board
+    artisan: Harish Suthar
+    price: 1650
+    tags: [woodwork, kitchen]
+    status: ready
+    created_at: "2026-09-29T04:00:00"
+    description: "Cut from a single sheesham plank, hand-planed and finished with food-safe oil. The video shows the grain being read before the first cut."
+
+  - id: p_07
+    title: Dhokra brass elephant
+    artisan: Sukru Mal
+    price: 2999
+    tags: [brass, dhokra]
+    status: ready
+    created_at: "2026-09-28T19:00:00"
+    description: "Lost-wax casting from Bastar: a clay core, beeswax threads, a clay mould, then molten brass. The wax model is destroyed, so no two are the same."
+
+  - id: p_08
+    title: Bidri jewellery box
+    artisan: Abdul Qadir
+    price: 5400
+    tags: [metalwork, bidri]
+    status: ready
+    created_at: "2026-09-28T10:00:00"
+    description: "Zinc alloy inlaid with silver wire, then blackened with soil from the Bidar fort. Watch the pattern engraved and the silver hammered into the grooves."
+
+  - id: p_09
+    title: Kundan drop earrings
+    artisan: Neha Soni
+    price: 6800
+    tags: [jewellery, kundan]
+    status: ready
+    created_at: "2026-09-28T01:00:00"
+    description: "Uncut glass stones set in gold foil the Bikaner way. The video shows the lac base, the foil pressed in and the enamel on the back."
+
+  - id: p_10
+    title: Terracotta diya set of six
+    artisan: Meera Devi
+    price: 350
+    tags: [pottery, festive]
+    status: ready
+    created_at: "2026-09-27T16:00:00"
+    description: "Small oil lamps pinched and shaped by hand, sun-dried and fired in a wood kiln. Made in batches before Diwali."
+
+  - id: p_11
+    title: Bamboo market basket
+    artisan: Tomba Singh
+    price: 780
+    tags: [bamboo, home]
+    status: ready
+    created_at: "2026-09-27T07:00:00"
+    description: "Split bamboo from Imphal woven in a twill pattern with a reinforced rim. The video shows the strips cut, smoothed and woven from the base up."
+
+  - id: p_12
+    title: Hammered brass diya
+    artisan: Salim Ansari
+    price: 1150
+    tags: [brass, festive]
+    status: ready
+    created_at: "2026-09-26T22:00:00"
+    description: "Moradabad sheet brass shaped by hammer over a stake, then polished. Every dent is a hammer blow you can see in the video."
+
+  - id: p_13
+    title: Glazed serving bowl
+    artisan: Meera Devi
+    price: 1250
+    tags: [pottery, kitchen]
+    status: processing
+    mine: true
+    created_at: "2026-09-26T13:00:00"
+    description: "A wide bowl with a celadon glaze, thrown in one go."
+
+  - id: p_14
+    title: Clay water bottle
+    artisan: Meera Devi
+    price: 600
+    tags: [pottery, kitchen]
+    status: failed
+    mine: true
+    created_at: "2026-09-26T04:00:00"
+    description: "Unglazed clay keeps water cool by evaporation."
