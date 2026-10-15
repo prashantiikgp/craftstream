@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/ui/strings.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "locale": {
+      "type": "string"
+    },
+    "strings": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "locale",
+    "strings"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/ui/bricks.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "bricks": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/BrickSchema"
+      }
+    }
+  },
+  "required": [
+    "bricks"
+  ],
+  "definitions": {
+    "BrickSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "about": {
+          "type": "string"
+        },
+        "props": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/PropSchema"
+          }
+        },
+        "style": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "about",
+        "props"
+      ]
+    },
+    "PropSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {},
+        "required": {
+          "type": "boolean",
+          "default": false
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "default": {}
+      },
+      "required": [
+        "type"
+      ]
+    }
+  }
+}

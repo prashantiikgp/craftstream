@@ -1,0 +1,4574 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/ui/screens/<name>.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "about": {
+      "type": "string"
+    },
+    "data": {
+      "type": "string"
+    },
+    "width": {
+      "enum": [
+        "narrow",
+        "wide",
+        "auto"
+      ]
+    },
+    "gap": {
+      "type": "string",
+      "default": "lg"
+    },
+    "fill": {
+      "type": "boolean",
+      "default": false
+    },
+    "backdrop": {
+      "type": "string"
+    },
+    "top": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/node"
+      }
+    },
+    "body": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/node"
+      }
+    },
+    "bottom": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/node"
+      }
+    },
+    "empty": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/node"
+      }
+    },
+    "error": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/node"
+      }
+    }
+  },
+  "required": [
+    "about",
+    "body"
+  ],
+  "definitions": {
+    "node": {
+      "type": "object",
+      "required": [
+        "brick"
+      ],
+      "properties": {
+        "brick": {
+          "enum": [
+            "text",
+            "wordmark",
+            "theme_toggle",
+            "doors",
+            "door",
+            "links",
+            "link_row",
+            "top_bar",
+            "crumb",
+            "mark",
+            "receipt",
+            "button",
+            "list",
+            "order_card",
+            "empty_state",
+            "search_field",
+            "chip_row",
+            "results_bar",
+            "product_grid",
+            "log_bar",
+            "log_row",
+            "load_more",
+            "split",
+            "value",
+            "tag_row",
+            "artisan_row",
+            "notice",
+            "buy_bar",
+            "video_player",
+            "product_summary",
+            "text_field",
+            "stepper",
+            "amount_row",
+            "listing_card",
+            "tag_picker",
+            "video_pick",
+            "progress_bar",
+            "steps",
+            "burst",
+            "spacer"
+          ]
+        },
+        "when": {
+          "type": "string",
+          "description": "shown only when this binding is truthy"
+        },
+        "unless": {
+          "type": "string",
+          "description": "hidden when this binding is truthy"
+        },
+        "only": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "compact",
+              "medium",
+              "expanded",
+              "large"
+            ]
+          },
+          "description": "shown only at these size classes"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "text"
+              }
+            }
+          },
+          "then": {
+            "description": "One line or paragraph of copy in a theme text style.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "text": {
+                "type": "string",
+                "description": "text"
+              },
+              "args": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "args"
+              },
+              "fallback": {
+                "type": "string",
+                "description": "text"
+              },
+              "style": {
+                "enum": [
+                  "hero",
+                  "display",
+                  "h1",
+                  "h2",
+                  "h3",
+                  "title",
+                  "body",
+                  "body_strong",
+                  "label",
+                  "caption",
+                  "eyebrow",
+                  "mono",
+                  "price",
+                  "price_sm"
+                ],
+                "description": "style",
+                "default": "body"
+              },
+              "color": {
+                "type": "string",
+                "description": "color",
+                "default": "text"
+              },
+              "align": {
+                "enum": [
+                  "start",
+                  "center",
+                  "end"
+                ],
+                "description": "enum",
+                "default": "start"
+              }
+            },
+            "required": [
+              "text"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "wordmark"
+              }
+            }
+          },
+          "then": {
+            "description": "The CraftStream stripes and name, with an optional tagline under it.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "size": {
+                "enum": [
+                  "sm",
+                  "lg"
+                ],
+                "description": "enum",
+                "default": "lg"
+              },
+              "tagline": {
+                "type": "string",
+                "description": "text"
+              }
+            },
+            "required": []
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "theme_toggle"
+              }
+            }
+          },
+          "then": {
+            "description": "Switches between light and dark. Shows a sun in dark mode and a moon in light mode.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "align": {
+                "enum": [
+                  "start",
+                  "end"
+                ],
+                "description": "enum",
+                "default": "end"
+              }
+            },
+            "required": []
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "doors"
+              }
+            }
+          },
+          "then": {
+            "description": "The Buy and Sell doors. Stacked and sharing the height on phones, side by side on wider screens.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/node"
+                },
+                "description": "nodes"
+              }
+            },
+            "required": [
+              "items"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "door"
+              }
+            }
+          },
+          "then": {
+            "description": "A big tappable box for one role. Lifts and glows in the role's colour on hover and press.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "role": {
+                "enum": [
+                  "buy",
+                  "sell"
+                ],
+                "description": "role"
+              },
+              "title": {
+                "type": "string",
+                "description": "text"
+              },
+              "body": {
+                "type": "string",
+                "description": "text"
+              },
+              "art": {
+                "type": "string",
+                "description": "door_art"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "role",
+              "title",
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "links"
+              }
+            }
+          },
+          "then": {
+            "description": "A few link_rows side by side, sharing the width (Your orders · Activity log on Home).",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/node"
+                },
+                "description": "nodes"
+              }
+            },
+            "required": [
+              "items"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "link_row"
+              }
+            }
+          },
+          "then": {
+            "description": "A full-width row that leads somewhere, with an icon and an optional count (Your orders · 3 →).",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "icon": {
+                "enum": [
+                  "back",
+                  "arrow",
+                  "close",
+                  "check",
+                  "plus",
+                  "minus",
+                  "search",
+                  "orders",
+                  "play",
+                  "video",
+                  "info",
+                  "shop",
+                  "sort",
+                  "pause",
+                  "signal",
+                  "gauge",
+                  "log",
+                  "retry",
+                  "sun",
+                  "moon"
+                ],
+                "description": "icon"
+              },
+              "label": {
+                "type": "string",
+                "description": "text"
+              },
+              "count": {
+                "type": "string",
+                "description": "bind"
+              },
+              "tone": {
+                "enum": [
+                  "brand",
+                  "success",
+                  "danger",
+                  "info",
+                  "warning",
+                  "neutral"
+                ],
+                "description": "tone",
+                "default": "success"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "icon",
+              "label",
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "top_bar"
+              }
+            }
+          },
+          "then": {
+            "description": "The bar at the top of an inner screen: the logo (home) or a back button, then where you are as a trail of crumbs, like a web page (Home / Buy / Hand-thrown clay mug / Order). Every crumb but the last leads back.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "leading": {
+                "enum": [
+                  "home",
+                  "back"
+                ],
+                "description": "enum",
+                "default": "home"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              },
+              "label": {
+                "type": "string",
+                "description": "text"
+              },
+              "role": {
+                "enum": [
+                  "buy",
+                  "sell"
+                ],
+                "description": "role"
+              },
+              "crumbs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/node"
+                },
+                "description": "nodes"
+              }
+            },
+            "required": [
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "crumb"
+              }
+            }
+          },
+          "then": {
+            "description": "One step of the top bar's trail. Its text is a strings key, a role (its name, Buy or Sell) or data (a title).",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "text": {
+                "type": "string",
+                "description": "text"
+              },
+              "role": {
+                "enum": [
+                  "buy",
+                  "sell"
+                ],
+                "description": "role"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": []
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "mark"
+              }
+            }
+          },
+          "then": {
+            "description": "A filled square with an icon, used as a big status mark (the check on Order placed).",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "icon": {
+                "enum": [
+                  "back",
+                  "arrow",
+                  "close",
+                  "check",
+                  "plus",
+                  "minus",
+                  "search",
+                  "orders",
+                  "play",
+                  "video",
+                  "info",
+                  "shop",
+                  "sort",
+                  "pause",
+                  "signal",
+                  "gauge",
+                  "log",
+                  "retry",
+                  "sun",
+                  "moon"
+                ],
+                "description": "icon"
+              },
+              "tone": {
+                "enum": [
+                  "brand",
+                  "success",
+                  "danger",
+                  "info",
+                  "warning",
+                  "neutral"
+                ],
+                "description": "tone",
+                "default": "brand"
+              }
+            },
+            "required": [
+              "icon"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "receipt"
+              }
+            }
+          },
+          "then": {
+            "description": "An order receipt. Order number and status on top, then label/value rows, then the total.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "number": {
+                "type": "string",
+                "description": "text"
+              },
+              "rows": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "rows"
+              },
+              "total": {
+                "type": "string",
+                "description": "text"
+              }
+            },
+            "required": [
+              "bind",
+              "number",
+              "total"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "button"
+              }
+            }
+          },
+          "then": {
+            "description": "A full-width action. Primary is filled in the tone's colour; ghost is outlined.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "label": {
+                "type": "string",
+                "description": "text"
+              },
+              "icon": {
+                "enum": [
+                  "back",
+                  "arrow",
+                  "close",
+                  "check",
+                  "plus",
+                  "minus",
+                  "search",
+                  "orders",
+                  "play",
+                  "video",
+                  "info",
+                  "shop",
+                  "sort",
+                  "pause",
+                  "signal",
+                  "gauge",
+                  "log",
+                  "retry",
+                  "sun",
+                  "moon"
+                ],
+                "description": "icon"
+              },
+              "variant": {
+                "enum": [
+                  "primary",
+                  "ghost"
+                ],
+                "description": "enum",
+                "default": "primary"
+              },
+              "tone": {
+                "enum": [
+                  "brand",
+                  "success",
+                  "danger",
+                  "info",
+                  "warning",
+                  "neutral"
+                ],
+                "description": "tone",
+                "default": "brand"
+              },
+              "enabled": {
+                "type": "string",
+                "description": "bind"
+              },
+              "busy": {
+                "type": "string",
+                "description": "bind"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "label",
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "list"
+              }
+            }
+          },
+          "then": {
+            "description": "Repeats one brick for every item of a bound list; inside it, `item` is the current entry.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "item": {
+                "$ref": "#/definitions/node",
+                "description": "node"
+              },
+              "gap": {
+                "enum": [
+                  "xxs",
+                  "xs",
+                  "sm",
+                  "md",
+                  "lg",
+                  "xl",
+                  "xxl",
+                  "xxxl",
+                  "section"
+                ],
+                "description": "space",
+                "default": "md"
+              },
+              "layout": {
+                "enum": [
+                  "stack",
+                  "cards"
+                ],
+                "description": "enum",
+                "default": "stack"
+              }
+            },
+            "required": [
+              "bind",
+              "item"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "order_card"
+              }
+            }
+          },
+          "then": {
+            "description": "One placed order. Poster, product, quantity and artisan, total and status; the order number below.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind",
+                "default": "item"
+              },
+              "line": {
+                "type": "string",
+                "description": "text"
+              },
+              "args": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "args"
+              },
+              "number": {
+                "type": "string",
+                "description": "text"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "line",
+              "number"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "empty_state"
+              }
+            }
+          },
+          "then": {
+            "description": "Nothing to show yet, with one way forward.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "icon": {
+                "enum": [
+                  "back",
+                  "arrow",
+                  "close",
+                  "check",
+                  "plus",
+                  "minus",
+                  "search",
+                  "orders",
+                  "play",
+                  "video",
+                  "info",
+                  "shop",
+                  "sort",
+                  "pause",
+                  "signal",
+                  "gauge",
+                  "log",
+                  "retry",
+                  "sun",
+                  "moon"
+                ],
+                "description": "icon"
+              },
+              "title": {
+                "type": "string",
+                "description": "text"
+              },
+              "message": {
+                "type": "string",
+                "description": "text"
+              },
+              "button": {
+                "type": "string",
+                "description": "text"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "icon",
+              "title"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "search_field"
+              }
+            }
+          },
+          "then": {
+            "description": "The search box. Sends its text through `action` once typing pauses (or on Enter); has a clear button.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "hint": {
+                "type": "string",
+                "description": "text"
+              },
+              "clear": {
+                "type": "string",
+                "description": "text"
+              },
+              "debounce": {
+                "type": "string",
+                "description": "bind"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "bind",
+              "hint",
+              "clear",
+              "debounce",
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "chip_row"
+              }
+            }
+          },
+          "then": {
+            "description": "A row of tag chips that scrolls sideways, starting with \"All\". One can be selected.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "all": {
+                "type": "string",
+                "description": "text"
+              },
+              "all_selected": {
+                "type": "string",
+                "description": "bind"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "bind",
+              "all",
+              "all_selected",
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "results_bar"
+              }
+            }
+          },
+          "then": {
+            "description": "How many results there are (and the tag filter in use), with the sort menu on the right.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "searching": {
+                "type": "string",
+                "description": "text"
+              },
+              "one": {
+                "type": "string",
+                "description": "text"
+              },
+              "many": {
+                "type": "string",
+                "description": "text"
+              },
+              "more": {
+                "type": "string",
+                "description": "text"
+              },
+              "tag": {
+                "type": "string",
+                "description": "text"
+              },
+              "sorts": {
+                "type": "string",
+                "description": "bind"
+              },
+              "sort_label": {
+                "type": "string",
+                "description": "text"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "bind",
+              "searching",
+              "one",
+              "many",
+              "more",
+              "tag",
+              "sorts",
+              "sort_label",
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "product_grid"
+              }
+            }
+          },
+          "then": {
+            "description": "Product cards in a grid (columns from ui/layout.yml). Posters only, never video. Skeletons while loading.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "loading": {
+                "type": "string",
+                "description": "bind"
+              },
+              "video_tag": {
+                "type": "string",
+                "description": "text"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "bind",
+              "loading",
+              "video_tag",
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "log_bar"
+              }
+            }
+          },
+          "then": {
+            "description": "Above the activity log: how many entries are shown, or the one listing they belong to with a way back to all, and a refresh button. The log also refreshes by itself while open (logs/activity_log.yml).",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "one": {
+                "type": "string",
+                "description": "text"
+              },
+              "many": {
+                "type": "string",
+                "description": "text"
+              },
+              "more": {
+                "type": "string",
+                "description": "text"
+              },
+              "listing": {
+                "type": "string",
+                "description": "text"
+              },
+              "clear": {
+                "type": "string",
+                "description": "text"
+              },
+              "refresh": {
+                "type": "string",
+                "description": "text"
+              },
+              "clear_action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "bind",
+              "one",
+              "many",
+              "more",
+              "listing",
+              "clear",
+              "refresh",
+              "clear_action",
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "log_row"
+              }
+            }
+          },
+          "then": {
+            "description": "One activity log entry: a bar in its level's tone, the message, then when, the event and the listing. Tapping it shows its details (key and value); the listing opens that listing's own log.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind",
+                "default": "item"
+              },
+              "listing": {
+                "type": "string",
+                "description": "text"
+              },
+              "order": {
+                "type": "string",
+                "description": "text"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "listing",
+              "order"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "load_more"
+              }
+            }
+          },
+          "then": {
+            "description": "Fetches the next page on request (no auto-loading on slow networks). Keeps the results when it fails.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "label": {
+                "type": "string",
+                "description": "text"
+              },
+              "retry": {
+                "type": "string",
+                "description": "text"
+              },
+              "error": {
+                "type": "string",
+                "description": "text"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "bind",
+              "label",
+              "retry",
+              "error",
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "split"
+              }
+            }
+          },
+          "then": {
+            "description": "Two columns side by side on wide screens (layout.yml product_layout), stacked on phones and tablets.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "first": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/node"
+                },
+                "description": "nodes"
+              },
+              "second": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/node"
+                },
+                "description": "nodes"
+              },
+              "gap": {
+                "enum": [
+                  "xxs",
+                  "xs",
+                  "sm",
+                  "md",
+                  "lg",
+                  "xl",
+                  "xxl",
+                  "xxxl",
+                  "section"
+                ],
+                "description": "space",
+                "default": "lg"
+              },
+              "side_gap": {
+                "enum": [
+                  "xxs",
+                  "xs",
+                  "sm",
+                  "md",
+                  "lg",
+                  "xl",
+                  "xxl",
+                  "xxxl",
+                  "section"
+                ],
+                "description": "space",
+                "default": "xxl"
+              }
+            },
+            "required": [
+              "first",
+              "second"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "value"
+              }
+            }
+          },
+          "then": {
+            "description": "A piece of data shown as text (a product's title or description), in a theme text style.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "style": {
+                "enum": [
+                  "hero",
+                  "display",
+                  "h1",
+                  "h2",
+                  "h3",
+                  "title",
+                  "body",
+                  "body_strong",
+                  "label",
+                  "caption",
+                  "eyebrow",
+                  "mono",
+                  "price",
+                  "price_sm"
+                ],
+                "description": "style",
+                "default": "body"
+              },
+              "color": {
+                "type": "string",
+                "description": "color",
+                "default": "text"
+              }
+            },
+            "required": [
+              "bind"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "tag_row"
+              }
+            }
+          },
+          "then": {
+            "description": "A product's tags as outlined chips in rotating accents. Tapping one passes it to `action` as item.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "bind"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "artisan_row"
+              }
+            }
+          },
+          "then": {
+            "description": "Who made it (initials square, name, a caption) with the price on the right, between hairlines.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "name": {
+                "type": "string",
+                "description": "bind"
+              },
+              "caption": {
+                "type": "string",
+                "description": "text"
+              },
+              "price": {
+                "type": "string",
+                "description": "bind"
+              },
+              "currency": {
+                "type": "string",
+                "description": "bind"
+              }
+            },
+            "required": [
+              "name",
+              "caption",
+              "price",
+              "currency"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "notice"
+              }
+            }
+          },
+          "then": {
+            "description": "A tinted box with an icon, a title and a message, in a tone (info, warning, danger, success).",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "tone": {
+                "enum": [
+                  "brand",
+                  "success",
+                  "danger",
+                  "info",
+                  "warning",
+                  "neutral"
+                ],
+                "description": "tone",
+                "default": "info"
+              },
+              "icon": {
+                "enum": [
+                  "back",
+                  "arrow",
+                  "close",
+                  "check",
+                  "plus",
+                  "minus",
+                  "search",
+                  "orders",
+                  "play",
+                  "video",
+                  "info",
+                  "shop",
+                  "sort",
+                  "pause",
+                  "signal",
+                  "gauge",
+                  "log",
+                  "retry",
+                  "sun",
+                  "moon"
+                ],
+                "description": "icon",
+                "default": "info"
+              },
+              "title": {
+                "type": "string",
+                "description": "text"
+              },
+              "message": {
+                "type": "string",
+                "description": "text"
+              },
+              "args": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "args"
+              },
+              "detail": {
+                "type": "string",
+                "description": "bind"
+              }
+            },
+            "required": [
+              "title"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "buy_bar"
+              }
+            }
+          },
+          "then": {
+            "description": "The price and a Buy button, pinned to the bottom of the screen on phones so buying is one tap away.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "price": {
+                "type": "string",
+                "description": "bind"
+              },
+              "currency": {
+                "type": "string",
+                "description": "bind"
+              },
+              "label": {
+                "type": "string",
+                "description": "text"
+              },
+              "enabled": {
+                "type": "string",
+                "description": "bind"
+              },
+              "tone": {
+                "enum": [
+                  "brand",
+                  "success",
+                  "danger",
+                  "info",
+                  "warning",
+                  "neutral"
+                ],
+                "description": "tone",
+                "default": "brand"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "price",
+              "currency",
+              "label",
+              "enabled",
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "video_player"
+              }
+            }
+          },
+          "then": {
+            "description": "The process video for slow connections. Nothing loads until play is tapped; it starts on the lowest rung (media/player.yml) and a pill shows the rung (\"144p · 47 kbps\"). Tap the picture to pause.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "play": {
+                "type": "string",
+                "description": "text",
+                "default": "product.play"
+              },
+              "pause": {
+                "type": "string",
+                "description": "text",
+                "default": "product.pause"
+              },
+              "slow_note": {
+                "type": "string",
+                "description": "text",
+                "default": "product.slow_network_note"
+              },
+              "rung": {
+                "type": "string",
+                "description": "text",
+                "default": "product.rung"
+              },
+              "rung_height_only": {
+                "type": "string",
+                "description": "text",
+                "default": "product.rung_height_only"
+              },
+              "estimate": {
+                "type": "string",
+                "description": "text",
+                "default": "product.network_estimate"
+              },
+              "buffering": {
+                "type": "string",
+                "description": "text",
+                "default": "product.buffering"
+              },
+              "error": {
+                "type": "string",
+                "description": "text",
+                "default": "product.video_error"
+              },
+              "retry": {
+                "type": "string",
+                "description": "text",
+                "default": "common.retry"
+              },
+              "seek": {
+                "type": "string",
+                "description": "text",
+                "default": "product.seek"
+              },
+              "time": {
+                "type": "string",
+                "description": "text",
+                "default": "product.time"
+              }
+            },
+            "required": [
+              "bind"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "product_summary"
+              }
+            }
+          },
+          "then": {
+            "description": "A small card for the product being ordered. Poster, title, who made it and the unit price.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "artisan": {
+                "type": "string",
+                "description": "text"
+              },
+              "each": {
+                "type": "string",
+                "description": "text"
+              }
+            },
+            "required": [
+              "bind",
+              "artisan",
+              "each"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "text_field"
+              }
+            }
+          },
+          "then": {
+            "description": "A labelled text input. Sends each change through `action`; shows the source's error under it.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "label": {
+                "type": "string",
+                "description": "text"
+              },
+              "hint": {
+                "type": "string",
+                "description": "text"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "error": {
+                "type": "string",
+                "description": "bind"
+              },
+              "lines": {
+                "type": "number",
+                "description": "number",
+                "default": 1
+              },
+              "prefix": {
+                "type": "string",
+                "description": "text"
+              },
+              "helper": {
+                "type": "string",
+                "description": "text"
+              },
+              "helper_args": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "args"
+              },
+              "keyboard": {
+                "enum": [
+                  "text",
+                  "decimal"
+                ],
+                "description": "enum",
+                "default": "text"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "label",
+              "hint",
+              "bind",
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "stepper"
+              }
+            }
+          },
+          "then": {
+            "description": "− value + within limits (the buttons stop at min and max), with an optional limit note beside it.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "min": {
+                "type": "string",
+                "description": "bind"
+              },
+              "max": {
+                "type": "string",
+                "description": "bind"
+              },
+              "less": {
+                "type": "string",
+                "description": "text"
+              },
+              "more": {
+                "type": "string",
+                "description": "text"
+              },
+              "limit": {
+                "type": "string",
+                "description": "text"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "bind",
+              "min",
+              "max",
+              "less",
+              "more",
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "amount_row"
+              }
+            }
+          },
+          "then": {
+            "description": "A label and an amount of money, under a hairline (the order total).",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "label": {
+                "type": "string",
+                "description": "text"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "currency": {
+                "type": "string",
+                "description": "bind"
+              }
+            },
+            "required": [
+              "label",
+              "bind",
+              "currency"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "listing_card"
+              }
+            }
+          },
+          "then": {
+            "description": "One of the artisan's products: poster, title, price and its video status from ui/status.yml (tag, hint, a progress bar while processing, \"Upload again\" when it failed). Opens the product once it is live.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind",
+                "default": "item"
+              },
+              "role": {
+                "enum": [
+                  "buy",
+                  "sell"
+                ],
+                "description": "role"
+              },
+              "open": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              },
+              "retry": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              },
+              "retry_label": {
+                "type": "string",
+                "description": "text"
+              }
+            },
+            "required": [
+              "role",
+              "retry_label"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "tag_picker"
+              }
+            }
+          },
+          "then": {
+            "description": "Tags to choose for a product; several can be on. Each passes its value to `action` as item.value.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "role": {
+                "enum": [
+                  "buy",
+                  "sell"
+                ],
+                "description": "role"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "bind",
+              "role",
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "video_pick"
+              }
+            }
+          },
+          "then": {
+            "description": "Choose the process video. Before: a big area with Choose video and the length limit; after: its name, size and length with Change. The length check is shown by notices in the screen YAML.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "role": {
+                "enum": [
+                  "buy",
+                  "sell"
+                ],
+                "description": "role"
+              },
+              "label": {
+                "type": "string",
+                "description": "text"
+              },
+              "empty_title": {
+                "type": "string",
+                "description": "text"
+              },
+              "empty_message": {
+                "type": "string",
+                "description": "text"
+              },
+              "empty_loading": {
+                "type": "string",
+                "description": "text"
+              },
+              "choose": {
+                "type": "string",
+                "description": "text"
+              },
+              "change": {
+                "type": "string",
+                "description": "text"
+              },
+              "required": {
+                "type": "string",
+                "description": "text"
+              },
+              "action": {
+                "$ref": "#/definitions/action",
+                "description": "action"
+              }
+            },
+            "required": [
+              "bind",
+              "role",
+              "label",
+              "empty_title",
+              "empty_message",
+              "empty_loading",
+              "choose",
+              "change",
+              "required",
+              "action"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "progress_bar"
+              }
+            }
+          },
+          "then": {
+            "description": "A bar for a bound fraction (0–1). With `indeterminate` true it moves without a value.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "indeterminate": {
+                "type": "string",
+                "description": "bind"
+              },
+              "role": {
+                "enum": [
+                  "buy",
+                  "sell"
+                ],
+                "description": "role"
+              },
+              "tone": {
+                "enum": [
+                  "brand",
+                  "success",
+                  "danger",
+                  "info",
+                  "warning",
+                  "neutral"
+                ],
+                "description": "tone",
+                "default": "brand"
+              },
+              "size": {
+                "enum": [
+                  "thin",
+                  "thick"
+                ],
+                "description": "enum",
+                "default": "thick"
+              }
+            },
+            "required": [
+              "bind"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "steps"
+              }
+            }
+          },
+          "then": {
+            "description": "Numbered steps. Done ones get a check, the current one is filled in the role's colour.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "steps"
+              },
+              "bind": {
+                "type": "string",
+                "description": "bind"
+              },
+              "role": {
+                "enum": [
+                  "buy",
+                  "sell"
+                ],
+                "description": "role"
+              }
+            },
+            "required": [
+              "items",
+              "bind",
+              "role"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "burst"
+              }
+            }
+          },
+          "then": {
+            "description": "A one-shot celebration (the client portal's celebration_burst): small squares in the accent colours fly out from behind its item and fade. Plays once when the screen opens; skipped when the device asks for less motion.",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              },
+              "item": {
+                "$ref": "#/definitions/node",
+                "description": "node"
+              }
+            },
+            "required": [
+              "item"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "brick": {
+                "const": "spacer"
+              }
+            }
+          },
+          "then": {
+            "description": "Takes the free height, pushing what follows to the bottom (only inside a screen with `fill: true`).",
+            "additionalProperties": false,
+            "properties": {
+              "brick": {
+                "enum": [
+                  "text",
+                  "wordmark",
+                  "theme_toggle",
+                  "doors",
+                  "door",
+                  "links",
+                  "link_row",
+                  "top_bar",
+                  "crumb",
+                  "mark",
+                  "receipt",
+                  "button",
+                  "list",
+                  "order_card",
+                  "empty_state",
+                  "search_field",
+                  "chip_row",
+                  "results_bar",
+                  "product_grid",
+                  "log_bar",
+                  "log_row",
+                  "load_more",
+                  "split",
+                  "value",
+                  "tag_row",
+                  "artisan_row",
+                  "notice",
+                  "buy_bar",
+                  "video_player",
+                  "product_summary",
+                  "text_field",
+                  "stepper",
+                  "amount_row",
+                  "listing_card",
+                  "tag_picker",
+                  "video_pick",
+                  "progress_bar",
+                  "steps",
+                  "burst",
+                  "spacer"
+                ]
+              },
+              "when": {
+                "type": "string",
+                "description": "shown only when this binding is truthy"
+              },
+              "unless": {
+                "type": "string",
+                "description": "hidden when this binding is truthy"
+              },
+              "only": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "compact",
+                    "medium",
+                    "expanded",
+                    "large"
+                  ]
+                },
+                "description": "shown only at these size classes"
+              }
+            },
+            "required": []
+          }
+        }
+      ]
+    },
+    "action": {
+      "type": "object",
+      "description": "{go: /path}, {back: true}, {toggle_theme: true} or {call: name, with: value, then: action}",
+      "additionalProperties": false,
+      "properties": {
+        "go": {
+          "type": "string"
+        },
+        "back": {
+          "const": true
+        },
+        "toggle_theme": {
+          "const": true
+        },
+        "call": {
+          "type": "string"
+        },
+        "with": {},
+        "then": {
+          "$ref": "#/definitions/action"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/orders/orders.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "storage_key": {
+      "type": "string"
+    },
+    "keep": {
+      "type": "integer"
+    },
+    "refresh_on_start": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "storage_key",
+    "keep",
+    "refresh_on_start"
+  ]
+}

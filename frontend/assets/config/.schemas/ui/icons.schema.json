@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/ui/icons.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "view_box": {
+      "type": "number"
+    },
+    "stroke_width": {
+      "type": "number"
+    },
+    "icons": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/IconSchema"
+      }
+    }
+  },
+  "required": [
+    "view_box",
+    "stroke_width",
+    "icons"
+  ],
+  "definitions": {
+    "IconSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stroke": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fill": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "circles": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    }
+  }
+}

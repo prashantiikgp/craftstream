@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/app/navigation.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "roles": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/RoleSchema"
+      }
+    }
+  },
+  "required": [
+    "roles"
+  ],
+  "definitions": {
+    "RoleSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "number": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "accent": {
+          "type": "string"
+        },
+        "home": {
+          "type": "string"
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "number",
+        "label",
+        "accent",
+        "home",
+        "paths"
+      ]
+    }
+  }
+}

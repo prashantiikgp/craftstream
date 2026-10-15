@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/app/routes.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "initial": {
+      "type": "string"
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/RouteSchema"
+      }
+    }
+  },
+  "required": [
+    "initial",
+    "routes"
+  ],
+  "definitions": {
+    "RouteSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "screen": {
+          "type": "string"
+        },
+        "routes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RouteSchema"
+          }
+        }
+      },
+      "required": [
+        "path",
+        "screen"
+      ]
+    }
+  }
+}

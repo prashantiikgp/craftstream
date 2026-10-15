@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/ui/layout.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "size_classes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/SizeClassSchema"
+      }
+    },
+    "max_content_width": {
+      "type": "number"
+    },
+    "product_card": {
+      "$ref": "#/definitions/ProductCardSchema"
+    },
+    "list_card": {
+      "$ref": "#/definitions/ListCardSchema"
+    },
+    "form_max_width": {
+      "type": "number"
+    },
+    "side_by_side_video_fraction": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "size_classes",
+    "max_content_width",
+    "product_card",
+    "list_card",
+    "form_max_width",
+    "side_by_side_video_fraction"
+  ],
+  "definitions": {
+    "ListCardSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min_width": {
+          "type": "number"
+        },
+        "max_columns": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "min_width",
+        "max_columns"
+      ]
+    },
+    "ProductCardSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "aspect_ratio": {
+          "type": "number"
+        },
+        "min_width": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "aspect_ratio",
+        "min_width"
+      ]
+    },
+    "SizeClassSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "min_width": {
+          "type": "number"
+        },
+        "grid_columns": {
+          "type": "integer"
+        },
+        "gutter": {
+          "type": "number"
+        },
+        "page_padding": {
+          "type": "number"
+        },
+        "navigation": {
+          "enum": [
+            "bottom_bar",
+            "rail"
+          ]
+        },
+        "product_layout": {
+          "enum": [
+            "stacked",
+            "side_by_side"
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "min_width",
+        "grid_columns",
+        "gutter",
+        "page_padding",
+        "navigation",
+        "product_layout"
+      ]
+    }
+  }
+}

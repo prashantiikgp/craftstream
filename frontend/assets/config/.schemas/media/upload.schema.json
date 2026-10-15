@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/media/upload.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "retry_backoff_seconds": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "max_retries": {
+      "type": "integer"
+    },
+    "status_poll_seconds": {
+      "type": "integer"
+    },
+    "status_poll_timeout_minutes": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "retry_backoff_seconds",
+    "max_retries",
+    "status_poll_seconds",
+    "status_poll_timeout_minutes"
+  ]
+}

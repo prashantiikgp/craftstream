@@ -1,0 +1,559 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/ui/theme.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "colors": {
+      "$ref": "#/definitions/ModesSchema_ModeColorsSchema"
+    },
+    "accents": {
+      "$ref": "#/definitions/ModesSchema_MapStringAccentSchema"
+    },
+    "tones": {
+      "$ref": "#/definitions/TonesSchema"
+    },
+    "fonts": {
+      "$ref": "#/definitions/FontsSchema"
+    },
+    "styles": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/TextStyleSchema"
+      }
+    },
+    "spacing": {
+      "$ref": "#/definitions/SpacingSchema"
+    },
+    "radius": {
+      "$ref": "#/definitions/RadiusSchema"
+    },
+    "shadows": {
+      "$ref": "#/definitions/ModesSchema_ShadowSetSchema"
+    },
+    "motion": {
+      "$ref": "#/definitions/MotionSchema"
+    },
+    "focus": {
+      "$ref": "#/definitions/FocusSchema"
+    },
+    "contrast": {
+      "$ref": "#/definitions/ContrastSchema"
+    }
+  },
+  "required": [
+    "colors",
+    "accents",
+    "tones",
+    "fonts",
+    "styles",
+    "spacing",
+    "radius",
+    "shadows",
+    "motion",
+    "focus",
+    "contrast"
+  ],
+  "definitions": {
+    "AccentSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fill": {
+          "type": "string"
+        },
+        "on_fill": {
+          "type": "string"
+        },
+        "ink": {
+          "type": "string"
+        },
+        "wash": {
+          "type": "string"
+        },
+        "line": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "fill",
+        "on_fill",
+        "ink",
+        "wash",
+        "line"
+      ]
+    },
+    "ContrastPairSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fg": {
+          "type": "string"
+        },
+        "bg": {
+          "type": "string"
+        },
+        "min": {
+          "type": "number"
+        },
+        "why": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "fg",
+        "bg",
+        "min",
+        "why"
+      ]
+    },
+    "ContrastSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pairs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContrastPairSchema"
+          }
+        },
+        "each_accent": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContrastPairSchema"
+          }
+        }
+      },
+      "required": [
+        "pairs",
+        "each_accent"
+      ]
+    },
+    "CurvesSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "smooth": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "out": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "in": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "spring": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "required": [
+        "smooth",
+        "out",
+        "in",
+        "spring"
+      ]
+    },
+    "DurationsSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fast": {
+          "type": "integer"
+        },
+        "medium": {
+          "type": "integer"
+        },
+        "slow": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "fast",
+        "medium",
+        "slow"
+      ]
+    },
+    "FocusSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ring_width": {
+          "type": "number"
+        },
+        "ring_tone": {
+          "type": "string"
+        },
+        "min_target": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "ring_width",
+        "ring_tone",
+        "min_target"
+      ]
+    },
+    "FontsSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sans": {
+          "type": "string"
+        },
+        "mono": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "sans",
+        "mono"
+      ]
+    },
+    "ModeColorsSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ground": {
+          "type": "string"
+        },
+        "surface": {
+          "type": "string"
+        },
+        "surface_alt": {
+          "type": "string"
+        },
+        "line": {
+          "type": "string"
+        },
+        "line_strong": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "text_muted": {
+          "type": "string"
+        },
+        "text_faint": {
+          "type": "string"
+        },
+        "scrim": {
+          "type": "string"
+        },
+        "on_scrim": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ground",
+        "surface",
+        "surface_alt",
+        "line",
+        "line_strong",
+        "text",
+        "text_muted",
+        "text_faint",
+        "scrim",
+        "on_scrim"
+      ]
+    },
+    "ModesSchema_MapStringAccentSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "light": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/AccentSchema"
+          }
+        },
+        "dark": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/AccentSchema"
+          }
+        }
+      },
+      "required": [
+        "light",
+        "dark"
+      ]
+    },
+    "ModesSchema_ModeColorsSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "light": {
+          "$ref": "#/definitions/ModeColorsSchema"
+        },
+        "dark": {
+          "$ref": "#/definitions/ModeColorsSchema"
+        }
+      },
+      "required": [
+        "light",
+        "dark"
+      ]
+    },
+    "ModesSchema_ShadowSetSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "light": {
+          "$ref": "#/definitions/ShadowSetSchema"
+        },
+        "dark": {
+          "$ref": "#/definitions/ShadowSetSchema"
+        }
+      },
+      "required": [
+        "light",
+        "dark"
+      ]
+    },
+    "MotionSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "durations": {
+          "$ref": "#/definitions/DurationsSchema"
+        },
+        "curves": {
+          "$ref": "#/definitions/CurvesSchema"
+        },
+        "reduced_motion_factor": {
+          "type": "number"
+        },
+        "hover_lift": {
+          "type": "number"
+        },
+        "door_hover_lift": {
+          "type": "number"
+        },
+        "press_scale": {
+          "type": "number"
+        },
+        "skeleton_pulse_ms": {
+          "type": "integer"
+        },
+        "skeleton_min_opacity": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "durations",
+        "curves",
+        "reduced_motion_factor",
+        "hover_lift",
+        "door_hover_lift",
+        "press_scale",
+        "skeleton_pulse_ms",
+        "skeleton_min_opacity"
+      ]
+    },
+    "RadiusSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "none": {
+          "type": "number"
+        },
+        "sharp": {
+          "type": "number"
+        },
+        "card": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "none",
+        "sharp",
+        "card"
+      ]
+    },
+    "ShadowLayerSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "blur": {
+          "type": "number"
+        },
+        "spread": {
+          "type": "number"
+        },
+        "color": {
+          "type": "string"
+        },
+        "opacity": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "blur",
+        "spread",
+        "color",
+        "opacity"
+      ]
+    },
+    "ShadowSetSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rest": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ShadowLayerSchema"
+          }
+        },
+        "lift": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ShadowLayerSchema"
+          }
+        },
+        "float": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ShadowLayerSchema"
+          }
+        }
+      },
+      "required": [
+        "rest",
+        "lift",
+        "float"
+      ]
+    },
+    "SpacingSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "xxs": {
+          "type": "number"
+        },
+        "xs": {
+          "type": "number"
+        },
+        "sm": {
+          "type": "number"
+        },
+        "md": {
+          "type": "number"
+        },
+        "lg": {
+          "type": "number"
+        },
+        "xl": {
+          "type": "number"
+        },
+        "xxl": {
+          "type": "number"
+        },
+        "xxxl": {
+          "type": "number"
+        },
+        "section": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "xxs",
+        "xs",
+        "sm",
+        "md",
+        "lg",
+        "xl",
+        "xxl",
+        "xxxl",
+        "section"
+      ]
+    },
+    "TextStyleSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "font": {
+          "enum": [
+            "sans",
+            "mono"
+          ]
+        },
+        "size": {
+          "type": "number"
+        },
+        "weight": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "number"
+        },
+        "tracking": {
+          "type": "number"
+        },
+        "upper": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "font",
+        "size",
+        "weight",
+        "height",
+        "tracking"
+      ]
+    },
+    "TonesSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "brand": {
+          "type": "string"
+        },
+        "success": {
+          "type": "string"
+        },
+        "danger": {
+          "type": "string"
+        },
+        "info": {
+          "type": "string"
+        },
+        "warning": {
+          "type": "string"
+        },
+        "neutral": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "brand",
+        "success",
+        "danger",
+        "info",
+        "warning",
+        "neutral"
+      ]
+    }
+  }
+}

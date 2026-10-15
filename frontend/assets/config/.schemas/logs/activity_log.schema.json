@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/logs/activity_log.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "report": {
+      "type": "boolean"
+    },
+    "steps": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/LogStepSchema"
+      }
+    },
+    "pending_max": {
+      "type": "integer"
+    },
+    "page_size": {
+      "type": "integer"
+    },
+    "refresh_seconds": {
+      "type": "integer"
+    },
+    "groups": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "levels": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/LogLevelSchema"
+      }
+    }
+  },
+  "required": [
+    "report",
+    "steps",
+    "pending_max",
+    "page_size",
+    "refresh_seconds",
+    "groups",
+    "levels"
+  ],
+  "definitions": {
+    "LogLevelSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tone": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tone",
+        "label"
+      ]
+    },
+    "LogStepSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "event",
+        "details"
+      ]
+    }
+  }
+}

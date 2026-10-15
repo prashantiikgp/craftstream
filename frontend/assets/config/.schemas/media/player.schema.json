@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/media/player.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "start_on_lowest_rung": {
+      "type": "boolean"
+    },
+    "initial_bandwidth_bps": {
+      "type": "integer"
+    },
+    "min_buffer_to_start_seconds": {
+      "type": "number"
+    },
+    "max_buffer_seconds": {
+      "type": "number"
+    },
+    "upswitch_safety_factor": {
+      "type": "number"
+    },
+    "native_upswitch_when_buffered_seconds": {
+      "type": "number"
+    },
+    "native_upswitch_within_seconds": {
+      "type": "number"
+    },
+    "poster": {
+      "$ref": "#/definitions/PosterSchema"
+    },
+    "autoplay_in_grids": {
+      "type": "boolean"
+    },
+    "autoplay_on_product_page": {
+      "type": "boolean"
+    },
+    "sample_stream_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "start_on_lowest_rung",
+    "initial_bandwidth_bps",
+    "min_buffer_to_start_seconds",
+    "max_buffer_seconds",
+    "upswitch_safety_factor",
+    "native_upswitch_when_buffered_seconds",
+    "native_upswitch_within_seconds",
+    "poster",
+    "autoplay_in_grids",
+    "autoplay_on_product_page",
+    "sample_stream_url"
+  ],
+  "definitions": {
+    "PosterSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "show_until_first_frame": {
+          "type": "boolean"
+        },
+        "buffering_indicator_after_ms": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "show_until_first_frame",
+        "buffering_indicator_after_ms"
+      ]
+    }
+  }
+}

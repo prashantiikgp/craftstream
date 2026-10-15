@@ -1,0 +1,163 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/ui/art.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "backdrops": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ShapeSchema"
+        }
+      }
+    },
+    "doors": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ShapeSchema"
+        }
+      }
+    },
+    "poster": {
+      "$ref": "#/definitions/PosterSchema"
+    }
+  },
+  "required": [
+    "backdrops",
+    "doors",
+    "poster"
+  ],
+  "definitions": {
+    "PosterBarSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "thickness": {
+          "type": "number"
+        },
+        "y": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "rotate": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "required": [
+        "thickness",
+        "y",
+        "rotate"
+      ]
+    },
+    "PosterCircleSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "size": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "x": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "y": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "required": [
+        "size",
+        "x",
+        "y"
+      ]
+    },
+    "PosterSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "colors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "circle": {
+          "$ref": "#/definitions/PosterCircleSchema"
+        },
+        "bar": {
+          "$ref": "#/definitions/PosterBarSchema"
+        }
+      },
+      "required": [
+        "colors",
+        "circle",
+        "bar"
+      ]
+    },
+    "ShapeSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "shape": {
+          "enum": [
+            "circle",
+            "square",
+            "bar"
+          ]
+        },
+        "accent": {
+          "type": "string"
+        },
+        "opacity": {
+          "type": "number",
+          "default": 1
+        },
+        "size": {
+          "type": "number"
+        },
+        "w": {
+          "type": "number"
+        },
+        "h": {
+          "type": "number"
+        },
+        "left": {
+          "type": "number"
+        },
+        "right": {
+          "type": "number"
+        },
+        "top": {
+          "type": "number"
+        },
+        "bottom": {
+          "type": "number"
+        },
+        "rotate": {
+          "type": "number",
+          "default": 0
+        }
+      },
+      "required": [
+        "shape",
+        "accent"
+      ]
+    }
+  }
+}

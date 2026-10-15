@@ -14,9 +14,10 @@ help:            ## Show this list
 setup:           ## Create backend/.venv and install backend + dev dependencies
 	python3 -m venv $(VENV) && $(PY) -m pip install -U pip && $(PY) -m pip install -r backend/requirements-dev.txt
 
-gen:             ## Regenerate code from models/*.yml + JSON Schemas for backend/config/*.yml
+gen:             ## Regenerate code from models/*.yml + JSON Schemas (and modelines) for every rule YAML, both sides
 	$(PY) tools/codegen.py
 	$(PY) tools/export_rule_schemas.py
+	cd frontend && $(dir $(FLUTTER))dart run tool/export_rule_schemas.dart
 
 test:            ## Run all backend tests
 	cd backend && .venv/bin/python -m pytest -q

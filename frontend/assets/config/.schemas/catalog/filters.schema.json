@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/catalog/filters.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "search": {
+      "$ref": "#/definitions/SearchSchema"
+    },
+    "page_size": {
+      "type": "integer"
+    },
+    "featured_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "max_chips": {
+      "type": "integer"
+    },
+    "sort_options": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/SortOptionSchema"
+      }
+    }
+  },
+  "required": [
+    "search",
+    "page_size",
+    "featured_tags",
+    "max_chips",
+    "sort_options"
+  ],
+  "definitions": {
+    "SearchSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "debounce_ms": {
+          "type": "integer"
+        },
+        "min_query_length": {
+          "type": "integer"
+        },
+        "max_query_length": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "debounce_ms",
+        "min_query_length",
+        "max_query_length"
+      ]
+    },
+    "SortOptionSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "enum": [
+            "newest",
+            "price_low",
+            "price_high"
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "default": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ]
+    }
+  }
+}
