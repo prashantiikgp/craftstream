@@ -184,7 +184,8 @@ Every reusable widget becomes a brick, with variants, sizes and states in YAML.
       15 Dart switches.
 - [x] `ui/format.yml`: currency symbols and grouping (INR ₹, Indian grouping), the minus sign, bytes and
       duration formats, and the activity log's date and time. `lib/shared/format/` is gone.
-- [ ] Skeleton timing (1100 ms) and opacity move into theme motion.
+- [x] Skeleton timing (1100 ms) and opacity move into theme motion (`motion.skeleton_pulse_ms`,
+      `skeleton_min_opacity`); the product grid's loading cards pulse with them and hold still under reduced motion.
 
 ### 1.4 Screens (`screens/*.yml`)
 One file per screen. Each lists its data source, its four states (loading, empty, error, data) and its bricks

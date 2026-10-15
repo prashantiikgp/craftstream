@@ -223,7 +223,50 @@ Widget productGridBrick(BuildContext context, BrickNode n) {
   });
 }
 
-Widget _skeleton(BuildContext context, BrickStyle s, double aspect) => Container(
+/// A loading placeholder's soft pulse: fades between theme.yml `motion.skeleton_min_opacity` and full, one way
+/// every `motion.skeleton_pulse_ms`. Still under reduced motion.
+class SkeletonPulse extends StatefulWidget {
+  final Widget child;
+  const SkeletonPulse({super.key, required this.child});
+
+  @override
+  State<SkeletonPulse> createState() => _SkeletonPulseState();
+}
+
+class _SkeletonPulseState extends State<SkeletonPulse> with SingleTickerProviderStateMixin {
+  AnimationController? _c;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final still = MediaQuery.disableAnimationsOf(context);
+    if (still) {
+      _c?.dispose();
+      _c = null;
+    } else {
+      _c ??= AnimationController(vsync: this, duration: context.tokens.skeletonPulse)..repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _c?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = _c;
+    if (c == null) return widget.child;
+    final from = context.tokens.skeletonMinOpacity;
+    return FadeTransition(opacity: Tween(begin: from, end: 1.0).animate(c), child: widget.child);
+  }
+}
+
+Widget _skeleton(BuildContext context, BrickStyle s, double aspect) =>
+    SkeletonPulse(child: _skeletonCard(context, s, aspect));
+
+Widget _skeletonCard(BuildContext context, BrickStyle s, double aspect) => Container(
       decoration: BoxDecoration(color: s.color('background'), border: Border.all(color: s.color('border'))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         AspectRatio(aspectRatio: aspect, child: ColoredBox(color: s.color('skeleton'))),
