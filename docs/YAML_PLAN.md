@@ -114,8 +114,8 @@ Sets up what every later phase needs, so Phases 1 and 2 are mostly "move the lit
   - [x] Binding resolver: `bind: product.title` reads from the screen's controller view model.
   - [ ] Action dispatcher: `go`, `back`, `toggle_theme` done; `submit`, `retry`, `set_filter` come with the screens
         that need them (1.4).
-- [ ] **Backend:** the shared YAML helper can read rule folders; `settings` reads non-secret defaults from
-      `config/app/app.yml`.
+- [x] **Backend:** the shared YAML helper can read rule folders (`load_yaml_folder`); `settings` reads non-secret
+      defaults from `config/app/app.yml`.
 - [ ] `make test` and the Flutter test batches are green on the branch before Phase 1 starts.
 
 - [x] **Vertical slice first:** take **Home → Order placed → Your orders** through every layer (tokens, bricks,
@@ -238,8 +238,10 @@ and the light and dark theme B match the canvas.
 ## Phase 2: Backend (everything in YAML)
 
 ### 2.1 App and API
-- [ ] `config/app/app.yml`: API title and version, GZip minimum size, log format, required-in-GCP settings
-      list. Env vars keep only values that change per environment (project, buckets, origins).
+- [x] `config/app/app.yml`: setting defaults (mode, region, CORS origins, log level), log format per mode,
+      the settings each mode requires (GCP: project, buckets, OIDC, topic). API title and version and the GZip
+      minimum size were already in `api/http.yml`. Env vars still override every default; per-environment values
+      (project, buckets, origins, OIDC, topic) come only from the environment.
 - [ ] `models/endpoints.yml` becomes the single source for routes:
   - the API **mounts routes from it** (handlers by name), instead of hand-written decorators;
   - query params gain constraints (`max_length`, `minimum`);

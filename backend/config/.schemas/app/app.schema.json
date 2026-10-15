@@ -1,0 +1,111 @@
+{
+  "$defs": {
+    "LoggingRules": {
+      "additionalProperties": false,
+      "properties": {
+        "logger": {
+          "minLength": 1,
+          "title": "Logger",
+          "type": "string"
+        },
+        "format": {
+          "additionalProperties": {
+            "enum": [
+              "json",
+              "plain"
+            ],
+            "type": "string"
+          },
+          "propertyNames": {
+            "enum": [
+              "local",
+              "gcp"
+            ]
+          },
+          "title": "Format",
+          "type": "object"
+        }
+      },
+      "required": [
+        "logger",
+        "format"
+      ],
+      "title": "LoggingRules",
+      "type": "object"
+    },
+    "SettingDefaults": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "local",
+            "gcp"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "gcp_region": {
+          "minLength": 1,
+          "title": "Gcp Region",
+          "type": "string"
+        },
+        "cors_origins": {
+          "minLength": 1,
+          "title": "Cors Origins",
+          "type": "string"
+        },
+        "log_level": {
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+            "CRITICAL"
+          ],
+          "title": "Log Level",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode",
+        "gcp_region",
+        "cors_origins",
+        "log_level"
+      ],
+      "title": "SettingDefaults",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "defaults": {
+      "$ref": "#/$defs/SettingDefaults"
+    },
+    "required": {
+      "additionalProperties": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "propertyNames": {
+        "enum": [
+          "local",
+          "gcp"
+        ]
+      },
+      "title": "Required",
+      "type": "object"
+    },
+    "logging": {
+      "$ref": "#/$defs/LoggingRules"
+    }
+  },
+  "required": [
+    "defaults",
+    "logging"
+  ],
+  "title": "AppRules",
+  "type": "object",
+  "$comment": "GENERATED from the Pydantic schema by tools/export_rule_schemas.py for app.yml."
+}

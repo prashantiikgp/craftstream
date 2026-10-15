@@ -1,15 +1,22 @@
-"""Settings, read from environment variables (see .env.example). Validated at startup."""
+"""Settings, read from environment variables (see .env.example). Validated at startup.
+
+Defaults, and the settings each mode requires, come from config/app/app.yml; an environment variable (or .env)
+overrides every default. Per-environment values default to "" (unset).
+"""
 
 from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.domain.app import app_engine
+from app.schemas.app.app_schema import Mode
+
 _BACKEND = Path(__file__).resolve().parents[2]
+_DEFAULTS = app_engine.setting_defaults()
 
 
 class Settings(BaseSettings):
@@ -19,13 +26,13 @@ class Settings(BaseSettings):
 
     # "local" = in-memory database + fake upload/transcode (for development and tests).
     # "gcp"   = Firestore + Cloud Storage + Transcoder API.
-    mode: Literal["local", "gcp"] = Field("local", validation_alias="CRAFTSTREAM_MODE")
+    mode: Mode = Field(_DEFAULTS.mode, validation_alias="CRAFTSTREAM_MODE")
     gcp_project: str = ""
-    gcp_region: str = "asia-south1"
+    gcp_region: str = _DEFAULTS.gcp_region
     upload_bucket: str = ""   # raw artisan uploads (private)
     media_bucket: str = ""    # HLS output (public read)
-    cors_origins: str = "*"
-    log_level: str = "INFO"
+    cors_origins: str = _DEFAULTS.cors_origins
+    log_level: str = _DEFAULTS.log_level
     # /internal/* callers (gcp mode): the OIDC audiences and the service account(s) Eventarc and Pub/Sub sign
     # their tokens as, both comma-separated. Audiences are our Cloud Run URLs: Eventarc mints tokens for the
     # service's hash URL (…-<hash>-el.a.run.app), our Pub/Sub push for the deterministic one.
@@ -34,13 +41,10 @@ class Settings(BaseSettings):
     transcode_topic: str = ""   # Pub/Sub topic id the Transcoder publishes job results to
 
     @model_validator(mode="after")
-    def _gcp_needs_resources(self) -> Settings:
-        if self.mode == "gcp":
-            needed = ("gcp_project", "upload_bucket", "media_bucket", "internal_audience", "internal_invokers",
-                      "transcode_topic")
-            missing = [k for k in needed if not getattr(self, k)]
-            if missing:
-                raise ValueError(f"CRAFTSTREAM_MODE=gcp needs {', '.join(m.upper() for m in missing)}")
+    def _mode_has_what_it_needs(self) -> Settings:
+        missing = app_engine.missing_settings(self.mode, self.model_dump())
+        if missing:
+            raise ValueError(f"CRAFTSTREAM_MODE={self.mode} needs {', '.join(m.upper() for m in missing)}")
         return self
 
     @property

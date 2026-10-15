@@ -5,6 +5,9 @@ Each loader stays a one-liner (and owns its own cache):
     @lru_cache(maxsize=1)
     def load_xyz_rules() -> XyzRules:
         return load_yaml("<domain>/<xyz>.yml", XyzRules)
+
+A rule folder (config/<domain>/<xyzs>/*.yml, one schema for every file in it) loads with
+`load_yaml_folder("<domain>/<xyzs>", XyzRules)`, which returns {file stem: rules}.
 """
 
 from __future__ import annotations
@@ -36,3 +39,13 @@ def load_yaml(relative_path: str, schema: type[T], config_dir: Path = CONFIG_DIR
         return schema.model_validate(data)
     except ValidationError as e:
         raise RuleFileError(f"{path} does not match {schema.__name__}:\n{e}") from e
+
+
+def load_yaml_folder(relative_dir: str, schema: type[T], config_dir: Path = CONFIG_DIR) -> dict[str, T]:
+    """A rule folder: every `*.yml` in `relative_dir`, each validated by the folder's one schema, keyed by file
+    stem in name order. A missing or empty folder is an error, like a missing rule file."""
+    folder = config_dir / relative_dir
+    files = sorted(folder.glob("*.yml"))
+    if not files:
+        raise RuleFileError(f"rule folder has no .yml files: {folder}")
+    return {f.stem: load_yaml(f.relative_to(config_dir).as_posix(), schema, config_dir) for f in files}

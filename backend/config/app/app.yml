@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=../.schemas/app/app.schema.json
+# The API's own start-up defaults, read by core/settings.py and core/logging.py. Nothing secret and nothing
+# that differs per environment lives here: an environment variable (or a .env file) overrides every default,
+# and the per-environment values (project, buckets, OIDC audience and invokers, Pub/Sub topic) come only from
+# the environment. API title, version, CORS and compression are in api/http.yml.
+
+# Used when the environment does not set them. Keys are Settings fields; the variable is the key in capitals.
+defaults:
+  mode: local              # CRAFTSTREAM_MODE. local: in-memory data, fake upload and transcode. gcp: the real thing.
+  gcp_region: asia-south1  # GCP_REGION
+  cors_origins: "*"        # CORS_ORIGINS, comma-separated. The deployed API names the web app's origins.
+  log_level: INFO          # LOG_LEVEL
+
+# Settings a mode refuses to start without (empty counts as missing). Local mode needs none.
+required:
+  gcp: [gcp_project, upload_bucket, media_bucket, internal_audience, internal_invokers, transcode_topic]
+
+logging:
+  logger: app              # the logger tree configured at start-up; modules log via logging.getLogger(__name__)
+  format:                  # json: one object per line, which Cloud Logging parses; plain: readable text
+    local: plain
+    gcp: json
