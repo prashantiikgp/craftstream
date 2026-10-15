@@ -88,7 +88,7 @@ Sets up what every later phase needs, so Phases 1 and 2 are mostly "move the lit
 - [x] Branch `v2-yaml`; tag `v1.0` on the current head.
 - [x] Update the root, frontend and backend `CLAUDE.md`: the rule becomes "everything YAML". Add the
       "what stays in code" list from Principle 2.
-- [ ] **Convention tests, both sides:**
+- [x] **Convention tests, both sides:**
   - [x] **Create the frontend convention test.** None exists today; only the backend has
         `test_rule_files.py`, although the root CLAUDE.md says both sides have one. Every
         `assets/config/**.yml` needs its schema, loader, engine and engine test, and must be listed in
@@ -101,7 +101,7 @@ Sets up what every later phase needs, so Phases 1 and 2 are mostly "move the lit
         `lib/shared/bricks/**`. Baseline at the start: about 180 literals in 26 files (`literal_baseline.yml`).
   - [x] Literal lint (backend): no status strings, paths or collection names in `app/domain/**/*_service.py`
         and `app/infra/**`. Baseline at the start: 52 literals in 13 files.
-  - [ ] Every engine has a unit test file (backend check, mirrored in Dart).
+  - [x] Every engine has a unit test file (backend check in `test_rule_files.py`, mirrored in Dart).
 - [ ] **Editor support:**
   - Export JSON Schemas for the frontend YAML too, like `backend/config/.schemas` does.
   - Add a `# yaml-language-server: $schema=` modeline to every rule file, so VS Code autocompletes and flags

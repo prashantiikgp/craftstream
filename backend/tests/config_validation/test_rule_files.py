@@ -4,6 +4,7 @@ For config/<domain>/<xyz>.yml there must be:
     app/schemas/<domain>/<xyz>_schema.py
     app/domain/<domain>/<xyz>_loader.py   (exactly one load_* function, returning a model from that schema)
     app/domain/<domain>/<xyz>_engine.py
+    tests/unit/<domain>/test_<xyz>_engine.py   (every engine, wherever it sits under app/domain/)
 and the other way round: no schema, loader or engine without its YAML. Every file must load, and its
 editor JSON Schema (config/.schemas/) must be current.
 """
@@ -73,3 +74,16 @@ def test_nothing_without_a_rule_file(kind: str, suffix: str):
     orphans = [p.relative_to(BACKEND) for p in (APP / kind).glob(f"*/*{suffix}.py")
                if not (CONFIG / p.parent.name / f"{p.stem.removesuffix(suffix)}.yml").exists()]
     assert not orphans, f"no matching config/<domain>/<xyz>.yml for: {orphans}"
+
+
+ENGINES = sorted(APP.glob("domain/**/*_engine.py"))
+
+
+def test_there_are_engines():
+    assert ENGINES
+
+
+@pytest.mark.parametrize("engine", ENGINES, ids=[e.stem for e in ENGINES])
+def test_each_engine_has_a_unit_test_file(engine: Path):
+    tests = list((BACKEND / "tests" / "unit").rglob(f"test_{engine.stem}.py"))
+    assert tests, f"{engine.relative_to(BACKEND)} needs tests/unit/<domain>/test_{engine.stem}.py"
