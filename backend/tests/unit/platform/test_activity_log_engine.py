@@ -45,7 +45,7 @@ def test_server_entry_fills_level_group_message():
     e = al.server_entry("transcode_submitted", entry_id="e1", at=AT, product_id="p1",
                         details={"seconds": 12.3456, "cut_at_seconds": None, "job": "jobs/1"})
     assert (e.level, e.group, e.source) == ("info", "video", "api")
-    assert e.message == "Transcoding started for 12.35 s of video"
+    assert e.message == "Making the streaming versions (144p and up)"
     assert [(d.key, d.value) for d in e.details] == [("seconds", "12.35"), ("job", "jobs/1")]  # None is left out
     assert e.product_id == "p1" and e.at == AT and e.id == "e1"
 
@@ -65,14 +65,21 @@ def test_client_entry_for_a_client_event():
     e = al.client_entry(_client("upload_interrupted", sent="3 MB", size="40 MB", reason="network dropped"),
                         entry_id="e", at=AT)
     assert (e.level, e.group, e.source) == ("warning", "upload", "app")
-    assert e.message == "Upload interrupted after 3 MB of 40 MB (network dropped); resuming"
+    assert e.message == "Connection dropped during the upload; it will resume"
+    assert [(d.key, d.value) for d in e.details] == [("sent", "3 MB"), ("size", "40 MB"), ("reason", "network dropped")]
+
+
+def test_client_template_fills_from_the_details():
+    e = al.client_entry(_client("upload_failed", reason="UploadRejected"), entry_id="e", at=AT)
+    assert (e.level, e.message) == ("error", "Upload failed: UploadRejected")
 
 
 def test_upload_too_long_needs_no_product():
     e = al.client_entry(LogEntryCreate(event="upload_too_long", details=[LogDetail(key="seconds", value="1085"),
                                                                          LogDetail(key="max", value="900")]),
                         entry_id="e", at=AT)
-    assert e.product_id is None and "1085" in e.message and "900" in e.message
+    assert e.product_id is None and e.level == "warning"
+    assert [(d.key, d.value) for d in e.details] == [("seconds", "1085"), ("max", "900")]
 
 
 def test_unknown_events_are_refused():

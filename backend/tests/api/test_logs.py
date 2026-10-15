@@ -77,7 +77,7 @@ def test_the_app_reports_a_client_event(client):
     assert resp.status_code == 201, resp.text
     entry = resp.json()
     assert (entry["level"], entry["group"], entry["source"]) == ("warning", "upload", "app")
-    assert entry["message"] == "Upload interrupted after 3 MB of 40 MB (offline); resuming"
+    assert entry["message"] == "Connection dropped during the upload; it will resume"
     assert entry["id"] and entry["at"]
     assert _logs(client, product_id=pid, level="warning")["items"] == [entry]
 

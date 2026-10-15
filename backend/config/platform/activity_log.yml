@@ -67,7 +67,7 @@ events:
     group: video
     level: info
     details: [seconds, cut_at_seconds, job]
-    message: Transcoding started for {seconds} s of video
+    message: Making the streaming versions (144p and up)
   transcode_succeeded:
     source: api
     group: video
@@ -121,25 +121,25 @@ events:
     group: upload
     level: info
     details: [size, chunks]
-    message: Upload started ({size} in {chunks} chunks)
+    message: Upload started, straight to storage
   upload_interrupted:
     source: app
     group: upload
     level: warning
     details: [sent, size, reason]
-    message: Upload interrupted after {sent} of {size} ({reason}); resuming
+    message: Connection dropped during the upload; it will resume
   upload_resumed:
     source: app
     group: upload
     level: info
     details: [from, size]
-    message: Upload resumed from {from} of {size}
+    message: Upload resumed where storage had it
   upload_finished:
     source: app
     group: upload
     level: info
     details: [size, seconds]
-    message: Upload finished ({size} in {seconds} s)
+    message: Upload finished
   upload_failed:
     source: app
     group: upload
@@ -151,10 +151,10 @@ events:
     group: upload
     level: warning
     details: [seconds, max]
-    message: Video is {seconds} s long; the limit is {max} s, so it was not uploaded
+    message: Video is longer than the limit, so it was not uploaded
   upload_cancelled:
     source: app
     group: upload
     level: info
     details: [sent, size]
-    message: Upload cancelled after {sent} of {size}
+    message: Upload cancelled
