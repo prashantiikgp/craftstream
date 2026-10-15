@@ -1,4 +1,4 @@
-"""Verify that a call to an internal route (platform/events.yml) really comes from our Eventarc trigger or
+"""Verify that a call to an internal route (`internal` in models/endpoints.yml) really comes from our Eventarc trigger or
 Pub/Sub subscription.
 
 Both send `Authorization: Bearer <Google-signed OIDC ID token>` minted for a service account we choose.

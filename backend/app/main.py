@@ -1,5 +1,6 @@
-"""CraftStream API: the app factory. Routes must match models/endpoints.yml (enforced by tests); the base path
-comes from it (via app/generated/api.py), and title, CORS and compression from api/http.yml.
+"""CraftStream API: the app factory. Routes are mounted from models/endpoints.yml (via app/generated/api.py): each
+router registers its handlers by endpoint name and api/endpoints.py adds them with the YAML's method, path and
+status. Title, CORS and compression come from api/http.yml; defaults and the log format from app/app.yml.
 
     uvicorn app.main:app          # settings from the environment / .env
     create_app(Settings(...))     # tests: fresh app with its own in-memory data
@@ -12,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
 from app.api.deps import Container, build_container
+from app.api.endpoints import mount
 from app.api.routers import health, internal, logs, orders, products, uploads
 from app.core.errors import install_error_handlers
 from app.core.logging import configure_logging
@@ -40,12 +42,8 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     install_error_handlers(app, on_unhandled=lambda path, exc: app.state.container.activity.record(
         "unhandled_error", path=path, error=type(exc).__name__))  # the type only: messages may carry data
 
-    for router in (products.router, orders.router, uploads.router, logs.router):
-        app.include_router(router, prefix=API)
-    app.include_router(internal.router)
-    app.include_router(health.router)
-    if settings.mode == "local":
-        app.include_router(uploads.local_router)
+    mount(app, (products.endpoints, orders.endpoints, uploads.endpoints, logs.endpoints, internal.endpoints,
+                health.endpoints), settings.mode)
     return app
 
 

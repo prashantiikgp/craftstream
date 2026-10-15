@@ -10,8 +10,9 @@ thumbnails, playlists and video segments all share 45 kbps down and 45 kbps up.
     python3 tools/throttle_proxy.py --kbps 45 --rtt-ms 300            # listens on 127.0.0.1:8045
     emulator.exe -avd <name> -http-proxy http://127.0.0.1:8045 ...    # WSL mirrored networking: Windows reaches it
 
-Every 10 s it prints the measured throughput, so the recording can show the cap holds.
-Standard library only.
+Every few seconds it prints the measured throughput, so the recording can show the cap holds.
+Defaults (cap, delay, address, chunk and burst sizes, report interval) are in tools/tools.yml.
+Standard library + PyYAML (backend/.venv/bin/python, or any python3 that has PyYAML).
 """
 
 from __future__ import annotations
@@ -19,10 +20,17 @@ from __future__ import annotations
 import argparse
 import asyncio
 import contextlib
+import sys
 import time
 from dataclasses import dataclass, field
+from pathlib import Path
 
-CHUNK = 512  # bytes per relay step: small enough that one connection cannot hog the budget
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from tools_loader import load_tools_config
+
+CFG = load_tools_config().throttle_proxy
+CHUNK = CFG.chunk_bytes  # bytes per relay step: small enough that one connection cannot hog the budget
 
 
 class TokenBucket:
@@ -105,7 +113,7 @@ def _target(head: bytes) -> tuple[str, int, bytes | None]:
 class Proxy:
     def __init__(self, kbps: float, rtt_ms: int, verbose: bool = False):
         rate = kbps * 1000 / 8
-        burst = max(CHUNK, int(rate * 0.1))  # at most 100 ms worth of data in one go
+        burst = max(CHUNK, int(rate * CFG.burst_ms / 1000))  # at most this much time's worth of data in one go
         self.down = TokenBucket(rate, burst)
         self.up = TokenBucket(rate, burst)
         self.rtt = rtt_ms / 1000
@@ -151,7 +159,7 @@ class Proxy:
             print(f"  close {host}:{port} after {secs:.0f}s: down {conn.down / 1000:.1f} KB, up {conn.up / 1000:.1f} KB",
                   flush=True)
 
-    async def report(self, every: float = 10.0) -> None:
+    async def report(self, every: float = CFG.report_every_s) -> None:
         last = (self.meter.down, self.meter.up, time.monotonic())
         while True:
             await asyncio.sleep(every)
@@ -165,17 +173,19 @@ class Proxy:
             last = (d, u, t)
             if self.verbose and self.active:
                 prev = getattr(self, "_seen", {})
-                rates = sorted(((m.down - prev.get(k, 0), k) for k, m in self.active.items()), reverse=True)[:3]
+                rates = sorted(((m.down - prev.get(k, 0), k) for k, m in self.active.items()),
+                               reverse=True)[:CFG.top_talkers]
                 self._seen = {k: m.down for k, m in self.active.items()}
                 print("    top: " + ", ".join(f"{k.split('#')[0]} {b / 1000:.0f} KB" for b, k in rates if b > 0), flush=True)
 
 
 async def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--kbps", type=float, default=45, help="cap per direction, kilobits per second (default 45)")
-    ap.add_argument("--rtt-ms", type=int, default=300, help="extra delay per new connection (default 300)")
-    ap.add_argument("--host", default="127.0.0.1")
-    ap.add_argument("--port", type=int, default=8045)
+    ap.add_argument("--kbps", type=float, default=CFG.kbps,
+                    help="cap per direction, kilobits per second (default %(default)g)")
+    ap.add_argument("--rtt-ms", type=int, default=CFG.rtt_ms, help="extra delay per new connection (default %(default)s)")
+    ap.add_argument("--host", default=CFG.host, help="(default %(default)s)")
+    ap.add_argument("--port", type=int, default=CFG.port, help="(default %(default)s)")
     ap.add_argument("-v", "--verbose", action="store_true", help="log each connection")
     a = ap.parse_args()
     proxy = Proxy(a.kbps, a.rtt_ms, a.verbose)

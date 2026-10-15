@@ -6,7 +6,9 @@
     backend/.venv/bin/python tools/smoke_test.py http://localhost:8000
     backend/.venv/bin/python tools/smoke_test.py https://craftstream-api-<n>.asia-south1.run.app --video my.mp4
 
-Without --video it makes a 12 s test clip with FFmpeg. Exits non-zero on the first failure.
+Without --video it makes a short test clip with FFmpeg. Exits non-zero on the first failure.
+Routes (base path, paths by endpoint name) come from models/endpoints.yml; timeouts, the polling interval, the
+listing and order it creates and the clip settings from tools/tools.yml.
 """
 
 from __future__ import annotations
@@ -20,6 +22,20 @@ import uuid
 from pathlib import Path
 
 import httpx
+import yaml
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from tools_loader import load_tools_config
+
+CFG = load_tools_config().smoke_test
+API_SPEC = yaml.safe_load((Path(__file__).resolve().parents[1] / "models" / "endpoints.yml").read_text())
+
+
+def path(name: str, **params: str) -> str:
+    """An endpoint's path from models/endpoints.yml (public ones relative to the base path)."""
+    (ep,) = [e for e in API_SPEC["endpoints"] + API_SPEC["internal"] if e["name"] == name]
+    return ep["path"].format(**params)
 
 
 def ok(msg: str) -> None:
@@ -31,18 +47,19 @@ def fail(msg: str) -> None:
     sys.exit(1)
 
 
-def make_clip(path: Path) -> Path:
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "testsrc2=size=640x360:rate=24",
-                    "-f", "lavfi", "-i", "sine=frequency=440", "-t", "12", "-c:v", "libx264", "-preset", "veryfast",
-                    "-c:a", "aac", "-movflags", "+faststart", str(path)], check=True)
-    return path
+def make_clip(dst: Path) -> Path:
+    c = CFG.clip
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", f"testsrc2=size={c.size}:rate={c.fps}",
+                    "-f", "lavfi", "-i", f"sine=frequency={c.tone_hz}", "-t", str(c.seconds), "-c:v", "libx264",
+                    "-preset", c.preset, "-c:a", "aac", "-movflags", "+faststart", str(dst)], check=True)
+    return dst
 
 
 def upload(url: str, video: Path, chunk: int) -> None:
     """GCS resumable protocol: PUT chunks with Content-Range; 308 + Range means "send the next one"."""
     total = video.stat().st_size
     sent = 0
-    with video.open("rb") as f, httpx.Client(timeout=120) as http:
+    with video.open("rb") as f, httpx.Client(timeout=CFG.upload_timeout_s) as http:
         while sent < total:
             data = f.read(chunk)
             end = sent + len(data) - 1
@@ -53,19 +70,19 @@ def upload(url: str, video: Path, chunk: int) -> None:
             elif r.status_code in (200, 201):
                 sent = total
             else:
-                fail(f"upload chunk at {sent}: HTTP {r.status_code} {r.text[:200]}")
+                fail(f"upload chunk at {sent}: HTTP {r.status_code} {r.text[:CFG.error_text_chars]}")
     ok(f"uploaded {total:,} bytes in {chunk:,}-byte chunks")
 
 
 def check_activity_log(api: httpx.Client, pid: str, order_id: str, buyer_name: str) -> None:
     """The API logged this listing's steps. In gcp mode the transcode entries come from Pub/Sub and may lag, so
     only the steps written inside our own requests are required."""
-    r = api.get("/logs", params={"product_id": pid})
+    r = api.get(path("listLogs"), params={"product_id": pid})
     if r.status_code != 200:
-        fail(f"activity log: HTTP {r.status_code} {r.text[:200]}")
+        fail(f"activity log: HTTP {r.status_code} {r.text[:CFG.error_text_chars]}")
     items = r.json()["items"]
     events = {e["event"] for e in items}
-    missing = {"listing_created", "upload_received", "order_placed"} - events
+    missing = set(CFG.log_events) - events
     if missing:
         fail(f"activity log for {pid} lacks {sorted(missing)}; has {sorted(events)}")
     if not any(e["event"] == "order_placed" and e["order_id"] == order_id for e in items):
@@ -79,21 +96,24 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("base_url")
     ap.add_argument("--video", type=Path)
-    ap.add_argument("--timeout", type=int, default=1800, help="seconds to wait for transcoding")
+    ap.add_argument("--timeout", type=int, default=CFG.transcode_timeout_s,
+                    help="seconds to wait for transcoding (default %(default)s)")
     a = ap.parse_args()
     base = a.base_url.rstrip("/")
-    api = httpx.Client(base_url=f"{base}/api/v1", timeout=30)
-    tag = f"smoke{uuid.uuid4().hex[:6]}"
+    api = httpx.Client(base_url=f"{base}{API_SPEC['base_path']}", timeout=CFG.request_timeout_s)
+    tag = f"{CFG.tag_prefix}{uuid.uuid4().hex[:6]}"
+    listing = CFG.listing
 
     print(f"Smoke test against {base}")
-    health = httpx.get(f"{base}/health", timeout=30).json()
+    health = httpx.get(f"{base}{path('health')}", timeout=CFG.request_timeout_s).json()
     ok(f"health: mode={health['mode']}")
 
-    policy = api.get("/upload-policy").json()
+    policy = api.get(path("getUploadPolicy")).json()
     ok(f"upload policy: max {policy['max_duration_seconds']} s, chunk {policy['chunk_size_bytes']:,} bytes")
 
-    r = api.post("/products", json={"title": "Smoke test bowl", "description": "Turned on a lathe, oiled by hand.",
-                                     "price": 499.5, "tags": [tag, "woodwork"], "artisan_name": "Smoke Bot"})
+    r = api.post(path("createProduct"), json={"title": listing.title, "description": listing.description,
+                                              "price": listing.price, "tags": [tag, *listing.tags],
+                                              "artisan_name": listing.artisan_name})
     if r.status_code != 201:
         fail(f"create product: {r.status_code} {r.text}")
     ticket = r.json()
@@ -106,37 +126,39 @@ def main() -> None:
 
     deadline = time.monotonic() + a.timeout
     while True:
-        product = api.get(f"/products/{pid}").json()
+        product = api.get(path("getProduct", product_id=pid)).json()
         if product["video_status"] in ("ready", "failed"):
             break
         if time.monotonic() > deadline:
             fail(f"still {product['video_status']} after {a.timeout} s")
-        time.sleep(10)
+        time.sleep(CFG.poll_every_s)
     if product["video_status"] != "ready":
         fail("transcoding failed")
     ok(f"video ready: {product['hls_url']}")
 
-    manifest = httpx.get(product["hls_url"], timeout=30)
+    manifest = httpx.get(product["hls_url"], timeout=CFG.request_timeout_s)
     if manifest.status_code != 200 or "#EXTM3U" not in manifest.text:
         fail(f"manifest not playable: HTTP {manifest.status_code}")
     ok(f"manifest served ({len(manifest.text.splitlines())} lines, cache: {manifest.headers.get('cache-control')})")
 
-    page = api.get("/products", params={"q": "lathe bowl", "tag": tag}).json()
+    page = api.get(path("listProducts"), params={"q": CFG.search, "tag": tag}).json()
     if [p["id"] for p in page["items"]] != [pid]:
         fail(f"search did not find exactly the new product: {page}")
     ok("search by keyword + tag finds it")
 
-    order = api.post("/orders", json={"product_id": pid, "buyer_name": "Smoke Buyer", "quantity": 2}).json()
-    if order.get("status") != "placed" or order.get("total") != 999.0:
+    buyer = CFG.order
+    order = api.post(path("createOrder"), json={"product_id": pid, "buyer_name": buyer.buyer_name,
+                                                "quantity": buyer.quantity}).json()
+    if order.get("status") != "placed" or order.get("total") != listing.price * buyer.quantity:
         fail(f"order: {order}")
     ok(f"order {order['id']} placed, total {order['currency']} {order['total']}")
 
-    again = api.get(f"/orders/{order['id']}").json()
+    again = api.get(path("getOrder", order_id=order["id"])).json()
     if again != order:
         fail(f"order read back differs: {again}")
     ok("order reads back by id (Your orders after a restart)")
 
-    check_activity_log(api, pid, order["id"], "Smoke Buyer")
+    check_activity_log(api, pid, order["id"], buyer.buyer_name)
     print("PASS")
 
 

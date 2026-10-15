@@ -11,12 +11,12 @@ Read with the root `CLAUDE.md`. Full plan: `docs/BACKEND_PLAN.md`.
 | Loaders | `app/domain/<domain>/<xyz>_loader.py` | call `core.yaml_loader.load_yaml`, cache with `lru_cache` | do anything else |
 | Engines | `app/domain/<domain>/<xyz>_engine.py` | pure functions/classes over loaded rules | import FastAPI, repositories, `infra/` or GCP |
 | Services | `app/domain/<domain>/<domain>_service.py` | wire engines + repositories + `infra/gcp` | know about HTTP (no `Request`, no `HTTPException`) |
-| Routers | `app/api/routers/*.py` | parse request, call one service, return a generated model | contain business rules |
+| Routers | `app/api/routers/*.py` | register typed handlers by endpoint name (`@endpoints.handler("getOrder")`), call one service, return a generated model | declare paths, methods, statuses or query limits (those are `models/endpoints.yml`); contain business rules |
 | Repositories | `app/db/repositories/` | Protocol + InMemory + Firestore implementations | contain business rules |
 | GCP wrappers | `app/infra/gcp/` | thin wrappers over Google SDKs (lazy imports) | be imported by engines |
 | Local fakes | `app/infra/local/` | same methods as the GCP wrappers, no network | be used in gcp mode |
 | Wiring | `app/api/deps.py` | `build_container(settings)` picks GCP or local parts; `*Dep` types for routers | hold logic |
-| Generated | `app/generated/models.py` | be imported everywhere | be edited by hand |
+| Generated | `app/generated/models.py`, `api.py` (base path + endpoint table) | be imported everywhere | be edited by hand |
 
 **Dependency direction:** `routers → services → engines`; services also use `repositories` and `infra/`. Never the other way. `tests/config_validation/test_architecture.py` enforces this by reading imports.
 
@@ -49,18 +49,30 @@ YAML gotcha: bare `on`, `off`, `yes`, `no` are booleans. Quote them in string li
 
 ## Recipe: add an endpoint
 
+`models/endpoints.yml` is the only place a route is declared: name, method, path, success status, body and return
+models, query params with their limits, `mode: local` for local-only ones. `public` endpoints (under `base_path`)
+are in the Dart client and `/docs`; `internal` ones are neither.
+
 1. Add it (and any new types) to `models/endpoints.yml` / `models/*.yml`
-2. `make gen`
+2. `make gen` (writes the endpoint table in `app/generated/api.py` and the Dart client)
 3. Service method in `app/domain/<domain>/<domain>_service.py`
-4. Router function in `app/api/routers/`, typed with the generated models
-5. `tests/api/` test. The routes-match-endpoints test fails until steps 1–4 agree.
+4. Handler in `app/api/routers/<x>.py`, registered by name and typed with the generated models:
+   ```python
+   @endpoints.handler("listProducts")
+   def list_products(catalog: CatalogDep, q: str | None = None, limit: int | None = None) -> ProductPage:
+   ```
+   Query params are plain `T | None = None`; their limits come from the YAML. A new router module also goes in
+   `mount(...)` in `app/main.py`. `app/api/endpoints.py` refuses, at import, a handler whose name, path params,
+   query params, body or return type disagree with the YAML, and `mount` refuses to start if an endpoint has no
+   handler.
+5. `tests/api/` test. The routes test checks every endpoint has exactly one handler and nothing else is mounted.
 
 ## Tests
 
 - `tests/unit/<domain>/`: engines, pure and fast, no fixtures beyond rules
-- `tests/api/`: `client` fixture (`tests/conftest.py`) = fresh app + fresh in-memory data per test; build a custom `Container` to swap a part (see `test_internal.py`)
+- `tests/api/`: routes == `endpoints.yml` and `/openapi.json`; `client` fixture (`tests/conftest.py`) = fresh app + fresh in-memory data per test; build a custom `Container` to swap a part (see `test_internal.py`)
 - `tests/config_validation/`:
-  - every YAML loads; naming convention; routes == `endpoints.yml`;
+  - every YAML loads; naming convention (schema, loader, engine and engine test per rule file);
   - **literal lint** (`test_literal_lint.py`): no status strings, storage paths, collection names or tunable
     numbers in Python. Files still being migrated are in `literal_baseline.yml`, which may only shrink.
 - Bitrate budget test (needs FFmpeg; skipped with a clear reason if it's missing)

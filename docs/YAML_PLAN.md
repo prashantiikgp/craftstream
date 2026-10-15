@@ -90,7 +90,7 @@ Sets up what every later phase needs, so Phases 1 and 2 are mostly "move the lit
 - [x] Branch `v2-yaml`; tag `v1.0` on the current head.
 - [x] Update the root, frontend and backend `CLAUDE.md`: the rule becomes "everything YAML". Add the
       "what stays in code" list from Principle 2.
-- [ ] **Convention tests, both sides:**
+- [x] **Convention tests, both sides:**
   - [x] **Create the frontend convention test.** None exists today; only the backend has
         `test_rule_files.py`, although the root CLAUDE.md says both sides have one. Every
         `assets/config/**.yml` needs its schema, loader, engine and engine test, and must be listed in
@@ -103,7 +103,7 @@ Sets up what every later phase needs, so Phases 1 and 2 are mostly "move the lit
         `lib/shared/bricks/**`. Baseline at the start: about 180 literals in 26 files (`literal_baseline.yml`).
   - [x] Literal lint (backend): no status strings, paths or collection names in `app/domain/**/*_service.py`
         and `app/infra/**`. Baseline at the start: 52 literals in 13 files.
-  - [ ] Every engine has a unit test file (backend check, mirrored in Dart).
+  - [x] Every engine has a unit test file (backend check in `test_rule_files.py`, mirrored in Dart).
 - [ ] **Editor support:**
   - Export JSON Schemas for the frontend YAML too, like `backend/config/.schemas` does.
   - Add a `# yaml-language-server: $schema=` modeline to every rule file, so VS Code autocompletes and flags
@@ -116,8 +116,8 @@ Sets up what every later phase needs, so Phases 1 and 2 are mostly "move the lit
   - [x] Binding resolver: `bind: product.title` reads from the screen's controller view model.
   - [x] Action dispatcher: `go`, `back`, `toggle_theme`, and `call` (a source's named call with `with:` and
         `then:`), which covers submit, retry and the filters.
-- [ ] **Backend:** the shared YAML helper can read rule folders; `settings` reads non-secret defaults from
-      `config/app/app.yml`.
+- [x] **Backend:** the shared YAML helper can read rule folders (`load_yaml_folder`); `settings` reads non-secret
+      defaults from `config/app/app.yml`.
 - [x] `make test` and the Flutter test batches are green on the branch before Phase 1 starts.
 
 - [x] **Vertical slice first:** take **Home → Order placed → Your orders** through every layer (tokens, bricks,
@@ -242,11 +242,15 @@ and the light and dark theme B match the canvas.
 ## Phase 2: Backend (everything in YAML)
 
 ### 2.1 App and API
-- [ ] `config/app/app.yml`: API title and version, GZip minimum size, log format, required-in-GCP settings
-      list. Env vars keep only values that change per environment (project, buckets, origins).
-- [ ] `models/endpoints.yml` becomes the single source for routes:
-  - the API **mounts routes from it** (handlers by name), instead of hand-written decorators;
-  - query params gain constraints (`max_length`, `minimum`);
+- [x] `config/app/app.yml`: setting defaults (mode, region, CORS origins, log level), log format per mode,
+      the settings each mode requires (GCP: project, buckets, OIDC, topic). API title and version and the GZip
+      minimum size were already in `api/http.yml`. Env vars still override every default; per-environment values
+      (project, buckets, origins, OIDC, topic) come only from the environment.
+- [x] `models/endpoints.yml` becomes the single source for routes:
+  - the API **mounts routes from it** (handlers by name), instead of hand-written decorators. *(Done: `make gen`
+    writes an endpoint table to `app/generated/api.py`; routers register `@endpoints.handler("<name>")` and
+    `app/api/endpoints.py` mounts them with the YAML's method, path, status, mode and docs visibility.)*
+  - query params gain constraints (`max_length`, `minimum`); *(done: the handlers' `Query(...)` limits moved here)*
   - `base_path` is read from it; `/api/v1` disappears from code. *(Done: `make gen` writes it to
     `app/generated/api.py`, since `models/` is not in the server image.)*
 - [x] `config/api/http.yml`:
@@ -255,8 +259,9 @@ and the light and dark theme B match the canvas.
   - Add `product_not_ready` to `models/error_response.yml`.
 - [x] `GET /orders/{order_id}` (needed by 1.4's Your orders): handler, Firestore read, API test, smoke test step.
       (Code done; the Cloud Run deploy waits for the user's OK.)
-- [ ] Keep `/docs` (OpenAPI) correct when routes are mounted from `endpoints.yml`: the handlers keep their typed
-      signatures, and the YAML maps path and method to a handler name.
+- [x] Keep `/docs` (OpenAPI) correct when routes are mounted from `endpoints.yml`: the handlers keep their typed
+      signatures, and the YAML maps path and method to a handler name. The OpenAPI document is unchanged except
+      that operationId is the endpoint name and the summary is the YAML's; `tests/api/test_api.py` checks it.
 
 ### 2.2 Domain rules
 - [x] `config/media/video_lifecycle.yml`:
@@ -273,7 +278,8 @@ and the light and dark theme B match the canvas.
 - [x] `config/catalog/listing.yml`: ID length and format, tag normalisation, tag sort, Firestore candidate
       limit (500), cursor strategy, collection names. (The cursor stays "the last id on the page": there is
       only one strategy, so it is not a setting.)
-- [x] `config/platform/events.yml`: internal path prefix, Pub/Sub envelope keys, accepted Eventarc event type.
+- [x] `config/platform/events.yml`: Pub/Sub envelope keys, accepted Eventarc event type. (The internal paths moved
+      to `models/endpoints.yml`, the one source for routes.)
 
 ### 2.3 Infra and tools
 - [x] `infra/gcp/resources.yml`: one place for:
@@ -287,7 +293,8 @@ and the light and dark theme B match the canvas.
       *(2026-10-15: the live service's env vars, the buckets' CORS, lifecycle and IAM matched the printout; the
       user approved; the scripts ran clean.)*
 - [x] A test cross-checks `resources.yml` against `storage_layout.yml` and the Firestore queries.
-- [ ] `tools/tools.yml`: smoke test, throttle proxy and local_hls defaults.
+- [x] `tools/tools.yml`: smoke test, throttle proxy and local_hls defaults (read by `tools/tools_loader.py`, which
+      rejects unknown and missing keys; the smoke test takes its routes from `models/endpoints.yml`).
 
 ### 2.4 Activity log (backend)
 - [x] Contract: `models/log_entry.yml`, `log_detail.yml`, `log_page.yml`; `GET /logs` and `POST /logs`.

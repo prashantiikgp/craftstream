@@ -1,14 +1,11 @@
 # yaml-language-server: $schema=../.schemas/platform/events.schema.json
-# The GCP callbacks into the API: where they arrive and what their bodies look like. Used by
-# api/routers/internal.py. The paths must match `internal` in models/endpoints.yml (a test checks the routes),
-# and infra/gcp/resources.yml points the Eventarc trigger and the Pub/Sub push subscription at them.
-
-# Only Eventarc and Pub/Sub call these routes (OIDC-checked); they are not in the public docs or the Dart client.
-internal_prefix: /internal/media
+# The GCP callbacks into the API: what their bodies look like. Used by api/routers/internal.py.
+# Their routes are mediaUploaded and mediaTranscoded under `internal` in models/endpoints.yml (OIDC-checked, not in
+# the public docs or the Dart client); infra/gcp/resources.yml points the Eventarc trigger and the Pub/Sub push
+# subscription at them (a test checks).
 
 # Eventarc: an object was finalized in the uploads bucket. The body is the GCS object.
 upload_finalized:
-  path: /uploaded
   # Eventarc sends CloudEvents in binary mode: the event type is a header. Other types are ignored;
   # a call without the header (local mode, tests) is accepted.
   event_type_header: ce-type
@@ -18,7 +15,6 @@ upload_finalized:
 # Pub/Sub push: a Transcoder job changed state.
 # Body: {"message": {"data": <base64 JSON>}}, and the JSON is {"job": {"name": ..., "state": ...}}.
 transcode_result:
-  path: /transcoded
   envelope_keys: [message, data]     # where the base64 payload sits in the push body
   job_key: job
   job_name_key: name

@@ -1,6 +1,9 @@
-# The API contract. The backend test suite checks that FastAPI serves exactly these routes
-# (method, path and success status), and `make gen` turns `endpoints` into the Flutter API client.
-# Every error response uses the ErrorResponse model.
+# The API contract and the only place routes are declared. `make gen` turns `endpoints` into the Flutter API
+# client, and every endpoint into a row of backend/app/generated/api.py, from which the API mounts its handlers
+# by `name` (app/api/endpoints.py): method, path, success status, query limits and whether /docs shows it all
+# come from here. Every error response uses the ErrorResponse model.
+#
+# Query params: `name: {type: string|integer, max_length: n, minimum: n, maximum: n}` (limits optional).
 
 base_path: /api/v1
 
@@ -18,10 +21,10 @@ endpoints:
     method: GET
     path: /products
     query:
-      q: string        # keywords over title, description, tags (rules in catalog/search.yml)
-      tag: string      # exact tag filter
-      cursor: string   # next_cursor from the previous page
-      limit: integer   # page size (capped by the server)
+      q: {type: string, max_length: 200}       # keywords over title, description, tags (rules in catalog/search.yml)
+      tag: {type: string, max_length: 50}      # exact tag filter
+      cursor: {type: string, max_length: 100}  # next_cursor from the previous page
+      limit: {type: integer, minimum: 1}       # page size (capped by the server)
     returns: ProductPage
     status: 200
     summary: Search and filter products whose video is ready, one page at a time.
@@ -66,11 +69,11 @@ endpoints:
     method: GET
     path: /logs
     query:
-      group: string        # upload | video | order | system
-      level: string        # info | warning | error
-      product_id: string   # one listing's steps
-      cursor: string       # next_cursor from the previous page
-      limit: integer       # page size (capped by the server)
+      group: {type: string, max_length: 20}        # upload | video | order | system
+      level: {type: string, max_length: 20}        # info | warning | error
+      product_id: {type: string, max_length: 100}  # one listing's steps
+      cursor: {type: string, max_length: 100}      # next_cursor from the previous page
+      limit: {type: integer, minimum: 1}           # page size (capped by the server)
     returns: LogPage
     status: 200
     summary: The activity log, newest first, optionally narrowed to a group, level or listing.
@@ -83,7 +86,8 @@ endpoints:
     status: 201
     summary: The app reports an upload step only it sees (started, network dropped, resumed, finished, failed).
 
-# Not called by the app, so not in the Dart client. Full paths (no base_path).
+# Not called by the app, so not in the Dart client or /docs. Full paths (no base_path).
+# `mode: local` mounts the endpoint only when CRAFTSTREAM_MODE=local.
 internal:
   - name: health
     method: GET

@@ -6,8 +6,9 @@
 # Values that change per environment stay in config.env (PROJECT_ID, REGION, SERVICE, WEB_ORIGINS,
 # RAW_RETENTION_DAYS); `${NAME}` below is filled from it. PROJECT_NUMBER is looked up from the project.
 # The backend must agree with this file: object names (backend/config/media/storage_layout.yml), Firestore
-# collections (catalog/listing.yml, platform/activity_log.yml), callback paths and event type (platform/events.yml)
-# and the Firestore queries in product_repo.py and log_repo.py. backend/tests/config_validation/test_infra_resources.py checks them.
+# collections (catalog/listing.yml, platform/activity_log.yml), callback paths (models/endpoints.yml), the event type
+# (platform/events.yml) and the Firestore queries in product_repo.py and log_repo.py.
+# backend/tests/config_validation/test_infra_resources.py checks them.
 
 # APIs to enable.
 apis:

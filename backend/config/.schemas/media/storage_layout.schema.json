@@ -3,17 +3,12 @@
     "LocalLayout": {
       "additionalProperties": false,
       "properties": {
-        "upload_path": {
-          "title": "Upload Path",
-          "type": "string"
-        },
         "sample_stream": {
           "title": "Sample Stream",
           "type": "string"
         }
       },
       "required": [
-        "upload_path",
         "sample_stream"
       ],
       "title": "LocalLayout",

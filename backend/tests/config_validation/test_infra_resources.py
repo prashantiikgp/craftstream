@@ -16,6 +16,7 @@ from app.domain.catalog.listing_loader import load_listing_rules
 from app.domain.media.storage_layout_loader import load_storage_layout_rules
 from app.domain.platform.activity_log_loader import load_activity_log_rules
 from app.domain.platform.events_loader import load_events_rules
+from app.generated.api import ENDPOINTS
 from app.generated.models import LogEntry, Product
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -53,10 +54,10 @@ def test_buckets_are_private_for_uploads_and_public_for_media():
 
 def test_callbacks_point_at_the_internal_routes():
     ev = load_events_rules()
-    assert DATA["eventarc"]["path"] == ev.internal_prefix + ev.upload_finalized.path
+    assert DATA["eventarc"]["path"] == ENDPOINTS["mediaUploaded"].path
     assert DATA["eventarc"]["event_type"] in ev.upload_finalized.accepted_event_types
     assert DATA["eventarc"]["bucket"] == "uploads"
-    assert DATA["pubsub"]["subscription"]["push_path"] == ev.internal_prefix + ev.transcode_result.path
+    assert DATA["pubsub"]["subscription"]["push_path"] == ENDPOINTS["mediaTranscoded"].path
 
 
 def _queries() -> list[list[str]]:

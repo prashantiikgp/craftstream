@@ -120,7 +120,7 @@ models/          shared data models + endpoints (YAML) → `make gen` → code f
 backend/         FastAPI service on Cloud Run       (rules in config/, layers in app/, tests/)
 frontend/        Flutter app                         (rules in assets/config/, layers in lib/, test/)
 infra/gcp/       idempotent gcloud scripts: project, buckets, Firestore, IAM, deploy, Eventarc/Pub/Sub
-tools/           codegen.py, local_hls.py (FFmpeg ladder for local testing), smoke_test.py
+tools/           codegen.py, local_hls.py (FFmpeg ladder for local testing), smoke_test.py; defaults in tools.yml
 docs/            INTENT, ARCHITECTURE, PLAN, BACKEND_PLAN, FRONTEND_PLAN, EVIDENCE
 ```
 

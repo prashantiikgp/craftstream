@@ -1,5 +1,5 @@
-"""Reading the GCP callbacks: route paths, the accepted Eventarc event types and the Pub/Sub push envelope.
-Pure logic over EventsRules; api/routers/internal.py serves the routes.
+"""Reading the GCP callbacks: the accepted Eventarc event types and the Pub/Sub push envelope.
+Pure logic over EventsRules; api/routers/internal.py serves the routes (declared in models/endpoints.yml).
 """
 
 from __future__ import annotations
@@ -19,18 +19,6 @@ class NotAJobResult(ValueError):
 
 def _rules(rules: EventsRules | None) -> EventsRules:
     return rules or load_events_rules()
-
-
-def internal_prefix(rules: EventsRules | None = None) -> str:
-    return _rules(rules).internal_prefix
-
-
-def upload_path(rules: EventsRules | None = None) -> str:
-    return _rules(rules).upload_finalized.path
-
-
-def transcode_path(rules: EventsRules | None = None) -> str:
-    return _rules(rules).transcode_result.path
 
 
 def messages(rules: EventsRules | None = None) -> Messages:

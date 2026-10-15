@@ -1,12 +1,16 @@
 """End-to-end API tests in local mode, plus the contract check against models/endpoints.yml."""
 
+import importlib
+import pkgutil
 import uuid
+from collections import Counter
 from pathlib import Path
 
 import pytest
 import yaml
 from fastapi.routing import APIRoute
 
+from app.api import routers
 from app.core.settings import Settings
 from app.main import API, create_app
 
@@ -41,14 +45,72 @@ def _unique_tag() -> str:
     return f"t{uuid.uuid4().hex[:8]}"
 
 
+def _app(mode: str):
+    settings = Settings(mode=mode, gcp_project="p", upload_bucket="u", media_bucket="m", internal_audience="https://api.test", internal_invokers="sa@p.iam.gserviceaccount.com", transcode_topic="t", _env_file=None)
+    return create_app(settings, container=object())  # routes only; nothing is called
+
+
+def _router_modules():
+    return [importlib.import_module(f"app.api.routers.{m.name}") for m in pkgutil.iter_modules(routers.__path__)]
+
+
+def test_every_endpoint_has_exactly_one_handler():
+    """Read from models/endpoints.yml itself (public and internal, every mode), not from the generated table."""
+    declared = [e["name"] for e in SPEC["endpoints"] + SPEC["internal"]]
+    handled = Counter(name for module in _router_modules() for name in module.endpoints.handlers)
+    assert sorted(handled) == sorted(declared), f"no handler: {set(declared) - set(handled)}"
+    assert set(handled.values()) == {1}, f"handled twice: {[n for n, c in handled.items() if c > 1]}"
+
+
 @pytest.mark.parametrize("mode", ["local", "gcp"])
 def test_routes_match_spec_exactly(mode):
-    settings = Settings(mode=mode, gcp_project="p", upload_bucket="u", media_bucket="m", internal_audience="https://api.test", internal_invokers="sa@p.iam.gserviceaccount.com", transcode_topic="t", _env_file=None)
-    app = create_app(settings, container=object())  # routes only; nothing is called
-    served = {(m, r.path, r.status_code or 200) for r in app.routes if isinstance(r, APIRoute) for m in r.methods}
-    expected = {(e["method"], SPEC["base_path"] + e["path"], e["status"]) for e in SPEC["endpoints"]}
-    expected |= {(e["method"], e["path"], e["status"]) for e in SPEC["internal"] if e.get("mode") in (None, mode)}
+    """Each endpoint of this mode is mounted once, under its name, with its method, path and status; nothing else."""
+    app = _app(mode)
+    routes = [r for r in app.routes if isinstance(r, APIRoute)]
+    served = {(r.name, m, r.path, r.status_code) for r in routes for m in r.methods}
+    expected = {(e["name"], e["method"], SPEC["base_path"] + e["path"], e["status"]) for e in SPEC["endpoints"]}
+    expected |= {(e["name"], e["method"], e["path"], e["status"])
+                 for e in SPEC["internal"] if e.get("mode") in (None, mode)}
     assert served == expected, f"missing: {expected - served}; not in models/endpoints.yml: {served - expected}"
+    assert len(routes) == len(expected)
+    others = {r.path for r in app.routes if not isinstance(r, APIRoute)}
+    assert others <= {app.openapi_url, app.docs_url, app.redoc_url, app.swagger_ui_oauth2_redirect_url}
+
+
+def test_openapi_documents_the_public_endpoints(client):
+    """/docs stays correct: request and response models, path and query params with their limits, statuses."""
+    doc = client.get("/openapi.json").json()
+    public = {(e["method"].lower(), SPEC["base_path"] + e["path"]) for e in SPEC["endpoints"]}
+    assert {(m, p) for p, ops in doc["paths"].items() for m in ops} == public  # internal ones stay hidden
+
+    def schema_ref(content: dict) -> str:
+        return content["application/json"]["schema"]["$ref"].rsplit("/", 1)[-1]
+
+    create = doc["paths"][f"{API}/products"]["post"]
+    assert create["operationId"] == "createProduct"
+    assert schema_ref(create["requestBody"]["content"]) == "ProductCreate"
+    assert create["requestBody"]["required"] is True
+    assert schema_ref(create["responses"]["201"]["content"]) == "UploadTicket"
+    assert "422" in create["responses"]
+
+    search = doc["paths"][f"{API}/products"]["get"]
+    assert schema_ref(search["responses"]["200"]["content"]) == "ProductPage"
+    query = {p["name"]: p for p in search["parameters"] if p["in"] == "query"}
+    assert set(query) == {"q", "tag", "cursor", "limit"}
+    assert query["q"]["schema"]["anyOf"][0] == {"type": "string", "maxLength": 200}
+    assert query["limit"]["schema"]["anyOf"][0] == {"type": "integer", "minimum": 1}
+
+    order = doc["paths"][f"{API}/orders/{{order_id}}"]["get"]
+    assert [(p["name"], p["in"], p["required"]) for p in order["parameters"]] == [("order_id", "path", True)]
+    assert schema_ref(order["responses"]["200"]["content"]) == "Order"
+    assert schema_ref(doc["paths"][f"{API}/logs"]["post"]["responses"]["201"]["content"]) == "LogEntry"
+
+
+def test_query_limits_from_the_yaml_are_enforced(client):
+    assert client.get(f"{API}/products", params={"q": "x" * 201}).status_code == 422
+    assert client.get(f"{API}/products", params={"limit": 0}).status_code == 422
+    assert client.get(f"{API}/logs", params={"group": "g" * 21}).status_code == 422
+    assert client.get(f"{API}/products", params={"q": "x" * 200, "limit": 1}).status_code == 200
 
 
 def test_full_artisan_to_buyer_flow(client):

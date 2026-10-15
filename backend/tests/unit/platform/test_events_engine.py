@@ -1,27 +1,17 @@
-"""GCP callback formats: routes match endpoints.yml, Eventarc types are filtered, Pub/Sub envelopes decode."""
+"""GCP callback formats: Eventarc types are filtered, Pub/Sub envelopes decode."""
 
 import base64
 import json
-from pathlib import Path
 
 import pytest
-import yaml
 
 from app.domain.platform import events_engine as ev
 from app.domain.platform.events_loader import load_events_rules
 from app.schemas.platform.events_schema import EventsRules
 
-ENDPOINTS = Path(__file__).resolve().parents[4] / "models" / "endpoints.yml"
-
 
 def _push(payload) -> dict:
     return {"message": {"data": base64.b64encode(json.dumps(payload).encode()).decode()}, "subscription": "s"}
-
-
-def test_routes_are_the_internal_endpoints():
-    internal = {e["path"] for e in yaml.safe_load(ENDPOINTS.read_text())["internal"]}
-    assert ev.internal_prefix() + ev.upload_path() in internal
-    assert ev.internal_prefix() + ev.transcode_path() in internal
 
 
 def test_only_object_finalized_events_are_accepted():
@@ -48,8 +38,8 @@ def test_other_bodies_are_not_job_results(body):
 
 
 @pytest.mark.parametrize("change", [
-    lambda d: d.update(internal_prefix="internal/media"),          # not a path
-    lambda d: d["transcode_result"].update(path="/transcoded/"),   # trailing slash
+    lambda d: d.update(internal_prefix="/internal/media"),         # routes live in models/endpoints.yml
+    lambda d: d["transcode_result"].update(envelope_keys=[]),      # nowhere to find the payload
     lambda d: d["messages"].update(teapot="I'm a teapot"),         # unknown key
 ])
 def test_bad_rules_are_rejected(change):

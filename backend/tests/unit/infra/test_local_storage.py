@@ -1,6 +1,13 @@
 """The local fake must behave like a GCS resumable session, or the app's uploader isn't really tested."""
 
+from app.generated.api import ENDPOINTS
 from app.infra.local.local_storage import LocalStorage
+
+
+def test_upload_url_is_the_local_upload_endpoint():
+    url = LocalStorage().upload_url("p1", None, "http://api.test/")
+    assert url == "http://api.test" + ENDPOINTS["localUpload"].path.format(product_id="p1")
+    assert ENDPOINTS["localUpload"].mode == "local"
 
 
 def test_chunks_then_complete():
