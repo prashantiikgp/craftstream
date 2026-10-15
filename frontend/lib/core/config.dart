@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/generated/models.dart' show ProductSummary;
+import '../domain/app/env_rules_engine.dart';
+import '../domain/app/env_rules_loader.dart';
 import '../domain/app/navigation_engine.dart';
 import '../domain/app/navigation_loader.dart';
 import '../domain/app/routes_engine.dart';
@@ -41,6 +43,9 @@ import 'env.dart';
 
 class AppConfig {
   final AppEnv env;
+
+  /// app/env_rules.yml: the environment policy and the Android dev host.
+  final EnvRulesEngine envRules;
   final ThemeEngine theme;
   final LayoutEngine layout;
   final StringsEngine strings;
@@ -58,6 +63,7 @@ class AppConfig {
   final ActivityLogEngine activityLog;
   const AppConfig({
     required this.env,
+    required this.envRules,
     required this.theme,
     required this.layout,
     required this.strings,
@@ -85,7 +91,9 @@ class ConfigCrossCheckError implements Exception {
 }
 
 Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
-  final e = env ?? AppEnv.fromCompiledValues();
+  final envRules = EnvRulesEngine(await loadEnvRules(bundle: bundle));
+  // A given env (tests) passes the same policy as the compiled-in one.
+  final e = env == null ? AppEnv.fromCompiledValues(envRules) : env.checkedBy(envRules);
   final theme = ThemeEngine(await loadThemeRules(bundle: bundle));
   final strings = StringsEngine(await loadStringsRules(bundle: bundle));
   final routes = RoutesEngine(await loadRoutesRules(bundle: bundle));
@@ -126,6 +134,7 @@ Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
   }
   return AppConfig(
     env: e,
+    envRules: envRules,
     theme: theme,
     layout: layout,
     strings: strings,

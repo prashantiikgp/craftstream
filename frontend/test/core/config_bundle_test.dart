@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:craftstream/core/config.dart';
 import 'package:craftstream/core/config_bundle.dart';
-import 'package:craftstream/core/env.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -29,8 +28,11 @@ void main() {
   };
 
   test('the whole config loads from the bundle alone', () async {
-    final env = AppEnv.parse(testEnvValues());
-    final bundled = await loadAppConfig(env: env, bundle: ConfigBundle(files, fallback: _NoAssets()));
+    final env = testEnv();
+    final bundled = await loadAppConfig(
+      env: env,
+      bundle: ConfigBundle(files, fallback: _NoAssets()),
+    );
     final separate = await loadAppConfig(env: env);
     expect(bundled.screens.names, separate.screens.names);
     expect(bundled.strings.get('home.buy_title'), separate.strings.get('home.buy_title'));

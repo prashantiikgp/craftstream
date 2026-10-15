@@ -1,7 +1,8 @@
 # Environments
 
 One file per environment, compiled into the app with `--dart-define-from-file=env/<name>.json`
-(`make web ENV=dev`, `make apk ENV=prod`). Read and validated once at startup by `lib/core/env.dart`.
+(`make web ENV=dev`, `make apk ENV=prod`). Read and validated once at startup by `lib/core/env.dart`;
+the per-environment rules in the table are `assets/config/app/env_rules.yml`.
 
 **Everything here ends up inside the shipped app and can be read by anyone who downloads it.**
 So these files hold public settings only. API keys, tokens, passwords and service-account data never

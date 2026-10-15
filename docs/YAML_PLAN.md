@@ -221,8 +221,8 @@ per size class.
   - extension → MIME map, picker `accept`, metadata timeout (15 s);
   - the tag split, normalise and dedupe rules;
   - the price parsing rule.
-- [ ] `app/env_rules.yml`: env policy (https outside dev; no DEV_TOOLS, MOCK_DATA or debug logging in prod),
-      the Android dev host.
+- [x] `app/env_rules.yml`: env policy (https outside dev; no DEV_TOOLS, MOCK_DATA or debug logging in prod),
+      the Android dev host. Debug-run defaults too; the values stay in env/*.json.
 - [ ] `dev/mock.yml`: mock latency, chunk delay, processing time and the sample product fixtures (they move
       out of `mock_products.dart`).
 

@@ -1,0 +1,38 @@
+# The rules every environment must pass at startup. The values themselves come from env/<name>.json
+# (--dart-define-from-file) and ship inside the app, so they are public settings only; lib/core/env.dart reads
+# them and holds them to these rules. Read by env_rules_engine.
+
+# A debug run without an env file (plain `flutter run`) uses these. Release builds must name APP_ENV.
+# Keys are the env file keys.
+debug_defaults:
+  APP_ENV: dev
+  API_HOST: http://localhost:8000
+  THEME_MODE: system
+  DEV_TOOLS: true
+  MOCK_DATA: true
+  LOG_LEVEL: debug
+
+# What each environment may do.
+#   require_https     API_HOST must be https://
+#   allow_dev_tools   DEV_TOOLS may be true (design catalog, the "simulate a drop" button)
+#   allow_mock_data   MOCK_DATA may be true (in-app fake data, no API calls)
+#   allow_debug_logs  LOG_LEVEL may be debug
+#   android_hosts     API_HOST host names the Android emulator reaches under another name
+environments:
+  dev:
+    require_https: false
+    allow_dev_tools: true
+    allow_mock_data: true
+    allow_debug_logs: true
+    # The emulator reaches the host machine's localhost at 10.0.2.2, so one dev env file serves Chrome and Android.
+    android_hosts: { localhost: 10.0.2.2 }
+  staging:
+    require_https: true
+    allow_dev_tools: true
+    allow_mock_data: true
+    allow_debug_logs: true
+  prod:
+    require_https: true
+    allow_dev_tools: false
+    allow_mock_data: false
+    allow_debug_logs: false
