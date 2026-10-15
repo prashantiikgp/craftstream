@@ -6,17 +6,15 @@ The app factory picks one set based on CRAFTSTREAM_MODE; this service never chec
 
 from __future__ import annotations
 
-import logging
 from typing import Protocol
 
 from app.core.errors import UnreadableVideo
 from app.db.repositories.product_repo import ProductRepo
 from app.domain.media import storage_layout_engine, upload_policy_engine
 from app.domain.media import video_lifecycle_engine as lifecycle
+from app.domain.platform.activity_log_service import ActivityLogService
 from app.generated.models import Product, UploadPolicy, UploadTicket
 from app.schemas.media.video_lifecycle_schema import Event
-
-log = logging.getLogger(__name__)
 
 
 class Storage(Protocol):
@@ -35,8 +33,10 @@ class Transcoder(Protocol):
 
 
 class MediaService:
-    def __init__(self, products: ProductRepo, storage: Storage, transcoder: Transcoder) -> None:
+    def __init__(self, products: ProductRepo, storage: Storage, transcoder: Transcoder,
+                 activity: ActivityLogService) -> None:
         self._products, self._storage, self._transcoder = products, storage, transcoder
+        self._activity = activity
 
     def upload_ticket(self, product: Product, origin: str | None, api_base_url: str) -> UploadTicket:
         return UploadTicket(
@@ -62,19 +62,24 @@ class MediaService:
         """The raw video landed in storage. Safe to call twice (events can be redelivered)."""
         product = self._products.get(product_id)
         if product is None or lifecycle.next_state(product.video_status, "transcode_started") is None:
-            log.info("upload event ignored", extra={"product_id": product_id})
+            self._activity.record("video_event_ignored", product_id=product_id, event="transcode_started",
+                                  state=product.video_status if product else None)
             return
+        self._activity.record("upload_received", product_id=product_id)
         try:
             duration = self._storage.duration_seconds(product_id)
         except UnreadableVideo as e:
-            self._move(product_id, product.video_status, "upload_unreadable")
-            log.warning("upload is not a readable video", extra={"product_id": product_id, "reason": str(e)})
+            if self._move(product_id, product.video_status, "upload_unreadable"):
+                self._activity.record("upload_unreadable", product_id=product_id, reason=str(e))
             return
-        job = self._transcoder.submit(product_id, upload_policy_engine.transcode_cap(duration))
-        state = self._move(product_id, product.video_status, "transcode_started")
-        log.info("transcode submitted", extra={"product_id": product_id, "job": job})
+        cap = upload_policy_engine.transcode_cap(duration)
+        job = self._transcoder.submit(product_id, cap)
+        state = self._move(product_id, product.video_status, "transcode_started", job)
+        if state:
+            self._activity.record("transcode_submitted", product_id=product_id, seconds=duration,
+                                  cut_at_seconds=cap, job=job)
         if self._transcoder.completes_immediately and state:
-            self._move(product_id, state, "transcode_succeeded")
+            self._finish(product_id, state, "transcode_succeeded", job)
 
     def on_transcoded(self, job_name: str, state: str) -> None:
         """A transcode job changed state; only the final ones (video_lifecycle.yml) change the product."""
@@ -84,16 +89,20 @@ class MediaService:
         product_id = self._transcoder.product_id_for_job(job_name)
         product = self._products.get(product_id) if product_id else None
         if product is None:
-            log.warning("transcode result for unknown product", extra={"job": job_name})
+            self._activity.record("video_event_ignored", product_id=product_id, event=event, job=job_name)
             return
-        self._move(product.id, product.video_status, event)
-        log.info("transcode finished", extra={"product_id": product.id, "event": event})
+        self._finish(product.id, product.video_status, event, job_name)
 
-    def _move(self, product_id: str, current: str, event: Event) -> str | None:
+    def _finish(self, product_id: str, current: str, event: Event, job: str) -> None:
+        """A transcode ended: move the video on and log transcode_succeeded / transcode_failed."""
+        if self._move(product_id, current, event, job):
+            self._activity.record(event, product_id=product_id, job=job)
+
+    def _move(self, product_id: str, current: str, event: Event, job: str | None = None) -> str | None:
         """Apply `event` to the product's video; returns the new state, or None if the event doesn't apply."""
         state = lifecycle.next_state(current, event)
         if state is None:
-            log.info("video event ignored", extra={"product_id": product_id, "event": event, "state": current})
+            self._activity.record("video_event_ignored", product_id=product_id, event=event, state=current, job=job)
         elif lifecycle.is_playable(state):
             self._storage.finalize_media(product_id)
             self._products.update_video(product_id, state, self._storage.hls_url(product_id),

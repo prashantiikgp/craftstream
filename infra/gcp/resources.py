@@ -6,6 +6,7 @@
     python3 resources.py cors-json uploads               # the bucket's CORS file (origins from WEB_ORIGINS)
     python3 resources.py lifecycle-json uploads          # the bucket's lifecycle file
     python3 resources.py index-args                      # one Firestore index per line, as --field-config args
+    python3 resources.py ttl-args                        # one Firestore TTL policy per line: <field> --collection-group=<c>
     python3 resources.py --print                         # dry run: every gcloud command setup.sh would run
 
 `${NAME}` in the YAML is filled from the environment, then from config.env (config.env.example if there is
@@ -151,6 +152,11 @@ def index_args(data: dict) -> list[str]:
     return lines
 
 
+def ttl_args(data: dict) -> list[str]:
+    """One line per TTL policy: <field> --collection-group=<c> (gcloud firestore fields ttls update)."""
+    return [f"{t['field']} --collection-group={t['collection']}" for t in data["firestore"].get("ttl", [])]
+
+
 def dry_run(data: dict, env: dict[str, str]) -> list[str]:
     """The gcloud commands the setup scripts run, in order (existence checks left out)."""
     project, region, service = env.get("PROJECT_ID", "?"), env.get("REGION", "?"), env.get("SERVICE", "?")
@@ -171,6 +177,7 @@ def dry_run(data: dict, env: dict[str, str]) -> list[str]:
     out += ["# 03_firestore.sh",
             f"{gc} firestore databases create --location {region} --type {data['firestore']['type']}"]
     out += [f"{gc} firestore indexes composite create {a} --async" for a in index_args(data)]
+    out += [f"{gc} firestore fields ttls update {a} --enable-ttl --async" for a in ttl_args(data)]
     out.append("# 04_iam.sh")
     out += [f"{gc} beta services identity create --service {a['service']}" for a in data["service_agents"].values()]
     out.append(f"{gc} storage service-agent")
@@ -231,6 +238,8 @@ def main(argv: list[str]) -> int:
                 print(lifecycle_json(data, bucket))
             case ["index-args"]:
                 print("\n".join(index_args(data)))
+            case ["ttl-args"]:
+                print("\n".join(ttl_args(data)))
             case _:
                 print(__doc__, file=sys.stderr)
                 return 2

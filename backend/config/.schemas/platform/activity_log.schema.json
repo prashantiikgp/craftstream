@@ -1,0 +1,249 @@
+{
+  "$defs": {
+    "DetailLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "max_per_entry": {
+          "minimum": 1,
+          "title": "Max Per Entry",
+          "type": "integer"
+        },
+        "max_key_length": {
+          "minimum": 1,
+          "title": "Max Key Length",
+          "type": "integer"
+        },
+        "max_value_length": {
+          "minimum": 1,
+          "title": "Max Value Length",
+          "type": "integer"
+        },
+        "float_decimals": {
+          "minimum": 0,
+          "title": "Float Decimals",
+          "type": "integer"
+        },
+        "missing_value": {
+          "minLength": 1,
+          "title": "Missing Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "max_per_entry",
+        "max_key_length",
+        "max_value_length",
+        "float_decimals",
+        "missing_value"
+      ],
+      "title": "DetailLimits",
+      "type": "object"
+    },
+    "ErrorRule": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ErrorRule",
+      "type": "object"
+    },
+    "Errors": {
+      "additionalProperties": false,
+      "properties": {
+        "unknown_event": {
+          "$ref": "#/$defs/ErrorRule"
+        },
+        "not_reportable": {
+          "$ref": "#/$defs/ErrorRule"
+        },
+        "bad_filter": {
+          "$ref": "#/$defs/ErrorRule"
+        }
+      },
+      "required": [
+        "unknown_event",
+        "not_reportable",
+        "bad_filter"
+      ],
+      "title": "Errors",
+      "type": "object"
+    },
+    "EventRule": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "enum": [
+            "api",
+            "app"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "group": {
+          "enum": [
+            "upload",
+            "video",
+            "order",
+            "system"
+          ],
+          "title": "Group",
+          "type": "string"
+        },
+        "level": {
+          "enum": [
+            "info",
+            "warning",
+            "error"
+          ],
+          "title": "Level",
+          "type": "string"
+        },
+        "details": {
+          "items": {
+            "maxLength": 40,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Details",
+          "type": "array"
+        },
+        "message": {
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "group",
+        "level",
+        "message"
+      ],
+      "title": "EventRule",
+      "type": "object"
+    },
+    "PageSize": {
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "type": "integer",
+          "minimum": 1,
+          "title": "Default"
+        },
+        "max": {
+          "minimum": 1,
+          "title": "Max",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "default",
+        "max"
+      ],
+      "title": "PageSize",
+      "type": "object"
+    },
+    "Sources": {
+      "additionalProperties": false,
+      "properties": {
+        "server": {
+          "enum": [
+            "api",
+            "app"
+          ],
+          "title": "Server",
+          "type": "string"
+        },
+        "client": {
+          "enum": [
+            "api",
+            "app"
+          ],
+          "title": "Client",
+          "type": "string"
+        }
+      },
+      "required": [
+        "server",
+        "client"
+      ],
+      "title": "Sources",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "collection": {
+      "title": "Collection",
+      "type": "string"
+    },
+    "expire_field": {
+      "title": "Expire Field",
+      "type": "string"
+    },
+    "keep_days": {
+      "minimum": 1,
+      "title": "Keep Days",
+      "type": "integer"
+    },
+    "write_timeout_seconds": {
+      "exclusiveMinimum": 0,
+      "title": "Write Timeout Seconds",
+      "type": "number"
+    },
+    "page_size": {
+      "$ref": "#/$defs/PageSize"
+    },
+    "details": {
+      "$ref": "#/$defs/DetailLimits"
+    },
+    "mirror_to_stdout": {
+      "title": "Mirror To Stdout",
+      "type": "boolean"
+    },
+    "sources": {
+      "$ref": "#/$defs/Sources"
+    },
+    "errors": {
+      "$ref": "#/$defs/Errors"
+    },
+    "events": {
+      "additionalProperties": {
+        "$ref": "#/$defs/EventRule"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "maxLength": 40
+      },
+      "title": "Events",
+      "type": "object"
+    }
+  },
+  "required": [
+    "collection",
+    "expire_field",
+    "keep_days",
+    "write_timeout_seconds",
+    "page_size",
+    "details",
+    "mirror_to_stdout",
+    "sources",
+    "errors",
+    "events"
+  ],
+  "title": "ActivityLogRules",
+  "type": "object",
+  "$comment": "GENERATED from the Pydantic schema by tools/export_rule_schemas.py for activity_log.yml."
+}

@@ -1,5 +1,6 @@
 """infra/gcp/resources.yml must agree with the backend: object names, callback paths, the Eventarc event type,
-Firestore collections and the indexes the product queries need. Read-only: nothing here calls GCP.
+Firestore collections, the indexes the product and activity log queries need, and the log's TTL policy.
+Read-only: nothing here calls GCP.
 """
 
 from __future__ import annotations
@@ -10,10 +11,12 @@ from pathlib import Path
 
 import pytest
 
+from app.db.repositories import log_repo
 from app.domain.catalog.listing_loader import load_listing_rules
 from app.domain.media.storage_layout_loader import load_storage_layout_rules
+from app.domain.platform.activity_log_loader import load_activity_log_rules
 from app.domain.platform.events_loader import load_events_rules
-from app.generated.models import Product
+from app.generated.models import LogEntry, Product
 
 ROOT = Path(__file__).resolve().parents[3]
 GCP = ROOT / "infra" / "gcp"
@@ -66,17 +69,41 @@ def _queries() -> list[list[str]]:
     return [plain + [order_by], plain + arrays + [order_by]]
 
 
+def _indexes(collection: str) -> list[dict]:
+    return [ix for ix in DATA["firestore"]["indexes"] if ix["collection"] == collection]
+
+
+def test_indexes_are_only_for_our_collections():
+    ours = {load_listing_rules().collections.products, load_activity_log_rules().collection}
+    assert {ix["collection"] for ix in DATA["firestore"]["indexes"]} <= ours
+
+
 def test_every_product_query_has_its_index():
-    indexes = [[f["path"] for f in ix["fields"]] for ix in DATA["firestore"]["indexes"]]
-    assert all(ix["collection"] == load_listing_rules().collections.products for ix in DATA["firestore"]["indexes"])
+    indexes = [[f["path"] for f in ix["fields"]] for ix in _indexes(load_listing_rules().collections.products)]
     for query in _queries():
         assert query in indexes, f"no composite index for {query}"
 
 
 def test_index_fields_exist_on_products():
     known = set(Product.model_fields) | {"keywords"}  # keywords: the search index stored with each product
-    for ix in DATA["firestore"]["indexes"]:
+    for ix in _indexes(load_listing_rules().collections.products):
         assert {f["path"] for f in ix["fields"]} <= known
+
+
+def test_the_activity_log_has_one_index_per_filter_newest_first():
+    """FirestoreLogRepo filters by equality on any mix of log_repo.FILTERS and orders by ORDER_BY desc; Firestore
+    merges these single-filter indexes for combined filters."""
+    indexes = {tuple((f["path"], f.get("order")) for f in ix["fields"])
+               for ix in _indexes(load_activity_log_rules().collection)}
+    assert indexes == {((f, "ascending"), (log_repo.ORDER_BY, "descending")) for f in log_repo.FILTERS}
+    assert set(log_repo.FILTERS) | {log_repo.ORDER_BY} <= set(LogEntry.model_fields)
+
+
+def test_the_activity_log_expires_by_ttl():
+    rules = load_activity_log_rules()
+    assert {"collection": rules.collection, "field": rules.expire_field} in DATA["firestore"]["ttl"]
+    assert f"ttls update {rules.expire_field} --collection-group={rules.collection} --enable-ttl" in \
+        "\n".join(RES.dry_run(DATA, ENV))
 
 
 def test_dry_run_fills_every_value_but_the_project_number():

@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 class ErrorResponse(BaseModel):
     """The body of every error response."""
 
-    code: str = Field(..., description='machine-readable: bad_request, unauthorized, forbidden, not_found, method_not_allowed, conflict, product_not_ready, unsupported_media_type, validation_error, internal_error')
+    code: str = Field(..., description='machine-readable: bad_request, unauthorized, forbidden, log_event_not_reportable, not_found, method_not_allowed, conflict, product_not_ready, unsupported_media_type, validation_error, unknown_log_event, internal_error')
     message: str = Field(..., description='human-readable summary')
     details: list[str] = Field(default_factory=list, description='one entry per problem, e.g. "body.price - Input should be greater than or equal to 0.01"')
 

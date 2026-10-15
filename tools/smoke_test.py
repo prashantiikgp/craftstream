@@ -1,7 +1,7 @@
 """Walk the whole flow against a running API, local or deployed:
 
     health -> upload policy -> create listing -> resumable chunked upload -> wait until ready
-    -> search (keyword + tag) -> product details -> place order
+    -> search (keyword + tag) -> product details -> place order -> activity log has the server steps
 
     backend/.venv/bin/python tools/smoke_test.py http://localhost:8000
     backend/.venv/bin/python tools/smoke_test.py https://craftstream-api-<n>.asia-south1.run.app --video my.mp4
@@ -55,6 +55,24 @@ def upload(url: str, video: Path, chunk: int) -> None:
             else:
                 fail(f"upload chunk at {sent}: HTTP {r.status_code} {r.text[:200]}")
     ok(f"uploaded {total:,} bytes in {chunk:,}-byte chunks")
+
+
+def check_activity_log(api: httpx.Client, pid: str, order_id: str, buyer_name: str) -> None:
+    """The API logged this listing's steps. In gcp mode the transcode entries come from Pub/Sub and may lag, so
+    only the steps written inside our own requests are required."""
+    r = api.get("/logs", params={"product_id": pid})
+    if r.status_code != 200:
+        fail(f"activity log: HTTP {r.status_code} {r.text[:200]}")
+    items = r.json()["items"]
+    events = {e["event"] for e in items}
+    missing = {"listing_created", "upload_received", "order_placed"} - events
+    if missing:
+        fail(f"activity log for {pid} lacks {sorted(missing)}; has {sorted(events)}")
+    if not any(e["event"] == "order_placed" and e["order_id"] == order_id for e in items):
+        fail(f"activity log has no order_placed entry for order {order_id}")
+    if buyer_name in r.text:
+        fail("activity log contains the buyer's name")
+    ok(f"activity log: {len(items)} entries for the listing ({', '.join(e['event'] for e in reversed(items))})")
 
 
 def main() -> None:
@@ -117,6 +135,8 @@ def main() -> None:
     if again != order:
         fail(f"order read back differs: {again}")
     ok("order reads back by id (Your orders after a restart)")
+
+    check_activity_log(api, pid, order["id"], "Smoke Buyer")
     print("PASS")
 
 
