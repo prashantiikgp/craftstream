@@ -8,6 +8,7 @@ import '../repositories/order_repository.dart';
 import '../repositories/upload_repository.dart';
 import '../upload/picked_video.dart';
 import '../upload/video_picker.dart';
+import '../../domain/dev/mock_engine.dart';
 import 'mock_store.dart';
 
 class MockCatalogRepository implements CatalogRepository {
@@ -108,25 +109,15 @@ class MockLogRepository implements LogRepository {
   }
 }
 
-/// Alternates between a clip that fits the 15:00 limit and one that does not, so both paths can be shown.
+/// Returns mock.yml's sample videos in turn (one fits the 15:00 limit, one does not), so both paths can be shown.
 class MockVideoPicker implements VideoPicker {
+  final MockEngine rules;
   int _picks = 0;
-
-  static const samples = [
-    PickedVideo(
-      name: 'clay-mug-process.mp4',
-      sizeBytes: 412 * 1024 * 1024,
-      mimeType: 'video/mp4',
-      duration: Duration(minutes: 12, seconds: 40),
-    ),
-    PickedVideo(
-      name: 'loom-full-day.mov',
-      sizeBytes: 2150 * 1024 * 1024,
-      mimeType: 'video/quicktime',
-      duration: Duration(minutes: 18, seconds: 5),
-    ),
-  ];
+  MockVideoPicker(this.rules);
 
   @override
-  Future<PickedVideo?> pick() async => samples[_picks++ % samples.length];
+  Future<PickedVideo?> pick() async {
+    final v = rules.videos[_picks++ % rules.videos.length];
+    return PickedVideo(name: v.name, sizeBytes: v.sizeBytes, mimeType: v.mimeType, duration: rules.videoLength(v));
+  }
 }

@@ -223,8 +223,9 @@ per size class.
   - the price parsing rule.
 - [x] `app/env_rules.yml`: env policy (https outside dev; no DEV_TOOLS, MOCK_DATA or debug logging in prod),
       the Android dev host. Debug-run defaults too; the values stay in env/*.json.
-- [ ] `dev/mock.yml`: mock latency, chunk delay, processing time and the sample product fixtures (they move
-      out of `mock_products.dart`).
+- [x] `dev/mock.yml`: mock latency, chunk delay, processing time and the sample product fixtures (they move
+      out of `mock_products.dart`, now deleted), plus the sample videos, the event stand-in table and the upload
+      policy stand-in.
 
 ### 1.6 Responsive check
 - [x] Phone, tablet portrait, tablet landscape and desktop for every screen, in light and dark.

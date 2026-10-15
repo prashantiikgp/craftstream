@@ -19,7 +19,7 @@ import 'upload/video_picker.dart';
 bool _mock(Ref ref) => ref.watch(appConfigProvider).env.mockData;
 
 /// Overridden in tests with zero delays.
-final mockStoreProvider = Provider<MockStore>((ref) => MockStore());
+final mockStoreProvider = Provider<MockStore>((ref) => MockStore(ref.watch(appConfigProvider).mock));
 
 final catalogRepositoryProvider = Provider<CatalogRepository>(
   (ref) => _mock(ref)
@@ -42,7 +42,9 @@ final uploadRepositoryProvider = Provider<UploadRepository>(
 );
 
 final videoPickerProvider = Provider<VideoPicker>(
-  (ref) => _mock(ref) ? MockVideoPicker() : DeviceVideoPicker(ref.watch(appConfigProvider).upload),
+  (ref) => _mock(ref)
+      ? MockVideoPicker(ref.watch(appConfigProvider).mock)
+      : DeviceVideoPicker(ref.watch(appConfigProvider).upload),
 );
 
 final logRepositoryProvider = Provider<LogRepository>(

@@ -17,6 +17,8 @@ import '../domain/catalog/filters_engine.dart';
 import '../domain/catalog/filters_loader.dart';
 import '../domain/logs/activity_log_engine.dart';
 import '../domain/logs/activity_log_loader.dart';
+import '../domain/dev/mock_engine.dart';
+import '../domain/dev/mock_loader.dart';
 import '../domain/media/player_engine.dart';
 import '../domain/media/player_loader.dart';
 import '../domain/media/upload_engine.dart';
@@ -61,6 +63,9 @@ class AppConfig {
   final ScreenEngine screens;
   final OrdersEngine orders;
   final ActivityLogEngine activityLog;
+
+  /// dev/mock.yml: the fake backend used when MOCK_DATA=true.
+  final MockEngine mock;
   const AppConfig({
     required this.env,
     required this.envRules,
@@ -79,6 +84,7 @@ class AppConfig {
     required this.screens,
     required this.orders,
     required this.activityLog,
+    required this.mock,
   });
 }
 
@@ -103,6 +109,7 @@ Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
   final art = ArtEngine(await loadArtRules(bundle: bundle));
   final bricks = BricksEngine(await loadBricksRules(bundle: bundle));
   final filters = FiltersEngine(await loadFiltersRules(bundle: bundle));
+  final mock = MockEngine(await loadMockRules(bundle: bundle));
   _crossCheck(
     theme: theme,
     strings: strings,
@@ -111,6 +118,7 @@ Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
     status: status,
     art: art,
     filters: filters,
+    mock: mock,
   );
   final layout = LayoutEngine(await loadLayoutRules(bundle: bundle));
   final refs = brickRefs(
@@ -150,6 +158,7 @@ Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
     screens: screens,
     orders: OrdersEngine(await loadOrdersRules(bundle: bundle)),
     activityLog: ActivityLogEngine(await loadActivityLogRules(bundle: bundle)),
+    mock: mock,
   );
 }
 
@@ -193,6 +202,7 @@ void _crossCheck({
   required StatusEngine status,
   required ArtEngine art,
   required FiltersEngine filters,
+  required MockEngine mock,
 }) {
   final accents = theme.light.accents.keys.toSet(), tones = theme.light.toneNames.toSet();
   final problems = <String>[
@@ -214,6 +224,8 @@ void _crossCheck({
       if (!strings.has(key)) 'filters.yml sort label: "$key" is not in strings.yml',
     for (final field in filters.sortFields.difference(_productSummaryFields))
       'filters.yml sort field: "$field" is not a ProductSummary field (models/product_summary.yml)',
+    for (final s in mock.statuses.difference(status.values('video').toSet()))
+      'mock.yml: product status "$s" is not a video status in status.yml',
   ];
   if (problems.isNotEmpty) throw ConfigCrossCheckError(problems);
 }

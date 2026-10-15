@@ -4,9 +4,11 @@ import 'package:craftstream/data/mock/mock_store.dart';
 import 'package:craftstream/data/upload/picked_video.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/harness.dart';
+
 void main() {
   late MockStore store;
-  setUp(() => store = MockStore(latency: Duration.zero, chunkDelay: Duration.zero, processingTime: Duration.zero));
+  setUp(() => store = quietMockStore());
 
   test('search returns ready products only, every word must match (prefixes count)', () {
     final all = store.search().items;
@@ -42,13 +44,16 @@ void main() {
     final order = store.placeOrder(const OrderCreate(productId: 'p_01', buyerName: 'Asha', quantity: 3));
     expect(order.total, 1350);
     expect(order.status, 'placed');
-    expect(() => store.placeOrder(const OrderCreate(productId: 'p_13', buyerName: 'Asha', quantity: 1)),
-        throwsStateError);
+    expect(
+      () => store.placeOrder(const OrderCreate(productId: 'p_13', buyerName: 'Asha', quantity: 1)),
+      throwsStateError,
+    );
   });
 
   test('an upload goes awaiting_upload -> processing -> ready', () {
-    final ticket = store.createListing(const ProductCreate(
-        title: 'Test pot', description: 'd', price: 10, currency: 'INR', tags: [], artisanName: 'A'));
+    final ticket = store.createListing(
+      const ProductCreate(title: 'Test pot', description: 'd', price: 10, currency: 'INR', tags: [], artisanName: 'A'),
+    );
     const video = PickedVideo(name: 'v.mp4', sizeBytes: 100, mimeType: 'video/mp4');
     expect(store.product(ticket.product.id).videoStatus, 'awaiting_upload');
     store.sendChunk(ticket, video, 0, 60);

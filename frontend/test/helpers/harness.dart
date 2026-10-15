@@ -11,7 +11,9 @@ import 'package:craftstream/data/mock/mock_store.dart';
 import 'package:craftstream/data/orders/order_store.dart';
 import 'package:craftstream/data/providers.dart';
 import 'package:craftstream/domain/app/env_rules_engine.dart';
+import 'package:craftstream/domain/dev/mock_engine.dart';
 import 'package:craftstream/schemas/app/env_rules_schema.dart';
+import 'package:craftstream/schemas/dev/mock_schema.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
@@ -31,6 +33,16 @@ EnvRulesEngine testEnvRules() {
   const path = 'assets/config/app/env_rules.yml';
   return EnvRulesEngine(parseYaml(File(path).readAsStringSync(), path, EnvRulesSchema.fromJson));
 }
+
+/// dev/mock.yml, read straight from the file.
+MockEngine testMockRules() {
+  const path = 'assets/config/dev/mock.yml';
+  return MockEngine(parseYaml(File(path).readAsStringSync(), path, MockSchema.fromJson));
+}
+
+/// The mock backend with mock.yml's data and no delays (tests never wait for loading states to pass).
+MockStore quietMockStore([MockEngine? rules, Duration chunkDelay = Duration.zero]) =>
+    MockStore(rules ?? testMockRules(), latency: Duration.zero, chunkDelay: chunkDelay, processingTime: Duration.zero);
 
 /// [testEnvValues] parsed under env_rules.yml.
 AppEnv testEnv({String mode = 'light', bool devTools = true, bool mockData = true}) => AppEnv.parse(
@@ -60,9 +72,7 @@ Future<ProviderContainer> pumpApp(
       retry: (_, _) => null,
       overrides: [
         appConfigProvider.overrideWithValue(config),
-        mockStoreProvider.overrideWithValue(
-          MockStore(latency: Duration.zero, chunkDelay: chunkDelay, processingTime: Duration.zero),
-        ),
+        mockStoreProvider.overrideWithValue(quietMockStore(config.mock, chunkDelay)),
         orderStoreProvider.overrideWithValue(orderStore ?? MemoryOrderStore()),
         ...overrides,
       ],

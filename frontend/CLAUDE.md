@@ -28,7 +28,8 @@ Upload limits are **not** frontend YAML: read them from `GET /api/v1/upload-poli
 `models/*.yml` as constants in the controllers; `test/features/model_limits_test.dart` keeps them in step.
 
 **Real or mock data:** `lib/data/providers.dart` is the only place that chooses. `MOCK_DATA=true` (dev) uses
-`MockStore` (sample products, the API's search rules, a simulated resumable upload); otherwise the generated
+`MockStore` (the API's search rules, a simulated resumable upload; sample products, delays and API stand-ins come from
+`assets/config/dev/mock.yml`); otherwise the generated
 API client. Screens and controllers only see the repository interfaces.
 
 ## Screens are YAML (V2, docs/YAML_PLAN.md)

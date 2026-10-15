@@ -14,7 +14,6 @@ import '../../data/generated/api_client.dart';
 import '../../data/generated/limits.dart';
 import '../../data/generated/models.dart';
 import '../../data/logs/activity_reporter.dart';
-import '../../data/mock/mock_products.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/upload_repository.dart';
 import '../../data/upload/picked_video.dart';
@@ -151,8 +150,11 @@ class UploadController extends Notifier<UploadState> {
   DateTime? _startedAt;
 
   @override
-  UploadState build() =>
-      UploadState(rules: _rules, artisanName: ref.read(appConfigProvider).env.mockData ? mockArtisanName : '');
+  UploadState build() {
+    final config = ref.read(appConfigProvider);
+    // Mock mode starts with mock.yml's artisan, who owns the sample listings in Your products.
+    return UploadState(rules: _rules, artisanName: config.env.mockData ? config.mock.artisanName : '');
+  }
 
   UploadRepository get _repo => ref.read(uploadRepositoryProvider);
 
