@@ -6,9 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/config.dart';
 import 'api_provider.dart';
+import 'logs/activity_reporter.dart';
 import 'mock/mock_repositories.dart';
 import 'mock/mock_store.dart';
 import 'repositories/catalog_repository.dart';
+import 'repositories/log_repository.dart';
 import 'repositories/order_repository.dart';
 import 'repositories/upload_repository.dart';
 import 'upload/resumable_uploader.dart';
@@ -33,3 +35,11 @@ final uploadRepositoryProvider = Provider<UploadRepository>((ref) => _mock(ref)
 
 final videoPickerProvider =
     Provider<VideoPicker>((ref) => _mock(ref) ? MockVideoPicker() : const DeviceVideoPicker());
+
+final logRepositoryProvider = Provider<LogRepository>((ref) => _mock(ref)
+    ? MockLogRepository(ref.watch(mockStoreProvider))
+    : ApiLogRepository(ref.watch(apiClientProvider)));
+
+/// Reports upload steps to the activity log (logs/activity_log.yml); kept for the whole app session.
+final activityReporterProvider = Provider<ActivityReporter>(
+    (ref) => ActivityReporter(ref.watch(logRepositoryProvider), ref.watch(appConfigProvider).activityLog));

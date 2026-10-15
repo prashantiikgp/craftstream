@@ -21,6 +21,11 @@ routes:
     screen: studio
   - path: /studio/new
     screen: upload
+  - path: /logs
+    screen: logs
+    routes:
+      - path: listing/:product_id
+        screen: logs
   - path: /product/:id
     screen: product
     routes:

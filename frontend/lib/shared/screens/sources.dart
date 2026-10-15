@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/checkout/checkout_source.dart';
 import '../../features/discover/discover_source.dart';
+import '../../features/logs/logs_source.dart';
 import '../../features/orders/orders_source.dart';
 import '../../features/product/product_source.dart';
 import '../../features/studio/studio_source.dart';
@@ -27,6 +28,7 @@ const Map<String, SourceDef> screenSources = {
   'orders': SourceDef(ordersSource),
   'receipt': SourceDef(receiptSource),
   'discover': SourceDef(discoverSource, calls: discoverCalls),
+  'logs': SourceDef(logsSource, calls: logsCalls),
   'product': SourceDef(productSource, calls: productCalls),
   'checkout': SourceDef(checkoutSource, calls: checkoutCalls),
   'studio': SourceDef(studioSource, calls: studioCalls),

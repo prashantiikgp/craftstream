@@ -26,8 +26,15 @@ body:
         body: home.sell_body
         action: { go: /studio }
 
-  - brick: link_row
-    icon: orders
-    label: home.orders
-    count: orders.count
-    action: { go: /orders }
+  - brick: links
+    items:
+      - brick: link_row
+        icon: orders
+        label: home.orders
+        count: orders.count
+        action: { go: /orders }
+      - brick: link_row
+        icon: log
+        label: home.logs
+        tone: info
+        action: { go: /logs }

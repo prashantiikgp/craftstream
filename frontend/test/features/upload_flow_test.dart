@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:craftstream/features/upload/upload_controller.dart';
 import 'package:craftstream/core/config.dart';
+import 'package:craftstream/data/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,7 +21,13 @@ void main() {
   });
 
   testWidgets('new product: validate, upload with a drop, go live', (tester) async {
-    final container = await pumpApp(tester, c, size: const Size(1280, 1400), location: '/studio/new', chunkDelay: chunk);
+    final container = await pumpApp(
+      tester,
+      c,
+      size: const Size(1280, 1400),
+      location: '/studio/new',
+      chunkDelay: chunk,
+    );
 
     // Publishing an empty form shows what is missing.
     await tester.tap(find.text(str(c, 'upload.publish')));
@@ -73,6 +80,26 @@ void main() {
     await settle(tester);
     expect(container.read(uploadControllerProvider).phase, UploadPhase.live);
     expect(find.text(str(c, 'upload.live_title')), findsOneWidget);
+
+    // Every step is in the activity log: the app's own (too long, started, dropped, resumed, finished) and the
+    // server's (listing, video received, transcoding, live), for this listing.
+    final id = container.read(uploadControllerProvider).ticket!.product.id;
+    final log = container.read(mockStoreProvider).logs(limit: 100).items;
+    expect(log.first.event, 'transcode_succeeded');
+    expect(log.where((e) => e.productId == id).map((e) => e.event).toSet(), {
+      'listing_created',
+      'upload_started',
+      'upload_interrupted',
+      'upload_resumed',
+      'upload_finished',
+      'upload_received',
+      'transcode_submitted',
+      'transcode_succeeded',
+    });
+    expect(log.where((e) => e.event == 'upload_too_long'), hasLength(1));
+    final dropped = log.firstWhere((e) => e.event == 'upload_interrupted');
+    expect(dropped.source, 'app');
+    expect(dropped.details.map((d) => d.key), ['sent', 'size', 'reason']);
     expect(tester.takeException(), isNull);
   });
 

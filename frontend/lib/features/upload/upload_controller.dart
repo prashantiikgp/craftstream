@@ -1,6 +1,7 @@
 /// New product: the form, the video check against the server's upload policy, and the resumable upload
 /// loop (send a chunk, the server confirms an offset; after a drop, back off, ask for the confirmed offset
 /// and continue). Then poll until the video is ready. Retry and polling rules come from upload.yml.
+/// Each step only the app sees (started, dropped, resumed, finished…) goes to the activity log.
 ///
 /// Not auto-disposed: the upload keeps going if the artisan switches to another screen.
 /// Form limits come from models/product.yml via the generated ProductLimits.
@@ -12,6 +13,7 @@ import '../../core/config.dart';
 import '../../data/generated/api_client.dart';
 import '../../data/generated/limits.dart';
 import '../../data/generated/models.dart';
+import '../../data/logs/activity_reporter.dart';
 import '../../data/mock/mock_products.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/upload_repository.dart';
@@ -20,8 +22,10 @@ import '../../domain/media/upload_engine.dart';
 import '../studio/studio_controller.dart';
 
 /// Short names for the generated limits, used by the form and its error messages.
-const titleMin = ProductLimits.titleMinLength, titleMax = ProductLimits.titleMaxLength,
-    descriptionMax = ProductLimits.descriptionMaxLength, artisanMax = ProductLimits.artisanNameMaxLength,
+const titleMin = ProductLimits.titleMinLength,
+    titleMax = ProductLimits.titleMaxLength,
+    descriptionMax = ProductLimits.descriptionMaxLength,
+    artisanMax = ProductLimits.artisanNameMaxLength,
     tagsMax = ProductLimits.tagsMaxItems;
 
 enum UploadPhase { editing, creating, uploading, paused, reconnecting, processing, live, failed }
@@ -125,34 +129,38 @@ class UploadState {
     int? retries,
     String? Function()? error,
     bool? pollGaveUp,
-  }) =>
-      UploadState(
-        title: title ?? this.title,
-        description: description ?? this.description,
-        price: price ?? this.price,
-        otherTags: otherTags ?? this.otherTags,
-        artisanName: artisanName ?? this.artisanName,
-        tags: tags ?? this.tags,
-        video: video ?? this.video,
-        showErrors: showErrors ?? this.showErrors,
-        phase: phase ?? this.phase,
-        ticket: ticket ?? this.ticket,
-        sent: sent ?? this.sent,
-        retries: retries ?? this.retries,
-        error: error == null ? this.error : error(),
-        pollGaveUp: pollGaveUp ?? this.pollGaveUp,
-      );
+  }) => UploadState(
+    title: title ?? this.title,
+    description: description ?? this.description,
+    price: price ?? this.price,
+    otherTags: otherTags ?? this.otherTags,
+    artisanName: artisanName ?? this.artisanName,
+    tags: tags ?? this.tags,
+    video: video ?? this.video,
+    showErrors: showErrors ?? this.showErrors,
+    phase: phase ?? this.phase,
+    ticket: ticket ?? this.ticket,
+    sent: sent ?? this.sent,
+    retries: retries ?? this.retries,
+    error: error == null ? this.error : error(),
+    pollGaveUp: pollGaveUp ?? this.pollGaveUp,
+  );
 }
 
 class UploadController extends Notifier<UploadState> {
   bool _running = false;
   bool _dropNext = false;
+  DateTime? _startedAt;
 
   @override
-  UploadState build() =>
-      UploadState(artisanName: ref.read(appConfigProvider).env.mockData ? mockArtisanName : '');
+  UploadState build() => UploadState(artisanName: ref.read(appConfigProvider).env.mockData ? mockArtisanName : '');
 
   UploadRepository get _repo => ref.read(uploadRepositoryProvider);
+
+  /// Reports [step] for the current listing (if any) to the activity log; never waits, never fails.
+  void _report(UploadStep step, [Map<String, Object?> values = const {}]) => ref
+      .read(activityReporterProvider)
+      .step(step, productId: state.ticket?.product.id, values: {'size': state.total, 'sent': state.sent, ...values});
   UploadEngine get _rules => ref.read(appConfigProvider).upload;
 
   void setTitle(String v) => state = state.copyWith(title: v);
@@ -176,23 +184,31 @@ class UploadController extends Notifier<UploadState> {
   Future<bool> publish() async {
     final policy = await ref.read(uploadPolicyProvider.future);
     final video = state.video;
-    final videoOk = video != null && const {VideoCheck.ok, VideoCheck.unknownLength}.contains(checkVideo(video, policy));
+    final videoOk =
+        video != null && const {VideoCheck.ok, VideoCheck.unknownLength}.contains(checkVideo(video, policy));
     if (state.problems.isNotEmpty || !videoOk) {
+      if (video != null && checkVideo(video, policy) == VideoCheck.tooLong) {
+        _report(UploadStep.tooLong, {'seconds': video.duration?.inSeconds, 'max': policy.maxDurationSeconds});
+      }
       state = state.copyWith(showErrors: true);
       return false;
     }
     state = state.copyWith(phase: UploadPhase.creating, error: () => null);
     try {
-      final ticket = await _repo.createListing(ProductCreate(
-        title: state.title.trim(),
-        description: state.description.trim(),
-        price: state.priceValue!,
-        currency: 'INR',
-        tags: state.allTags,
-        artisanName: state.artisanName.trim(),
-      ));
+      final ticket = await _repo.createListing(
+        ProductCreate(
+          title: state.title.trim(),
+          description: state.description.trim(),
+          price: state.priceValue!,
+          currency: 'INR',
+          tags: state.allTags,
+          artisanName: state.artisanName.trim(),
+        ),
+      );
       if (!ref.mounted) return true;
       state = state.copyWith(ticket: ticket, phase: UploadPhase.uploading, sent: 0, retries: 0);
+      _startedAt = DateTime.now();
+      _report(UploadStep.started, {'chunks': (state.total / ticket.chunkSizeBytes).ceil()});
       ref.invalidate(myProductsProvider);
       _run();
       return true;
@@ -219,7 +235,12 @@ class UploadController extends Notifier<UploadState> {
   void simulateDrop() => _dropNext = true;
 
   /// Back to an empty form (the artisan name is kept).
-  void reset() => state = UploadState(artisanName: state.artisanName);
+  void reset() {
+    if (state.ticket != null && state.sent < state.total && state.phase != UploadPhase.failed) {
+      _report(UploadStep.cancelled);
+    }
+    state = UploadState(artisanName: state.artisanName);
+  }
 
   Future<void> _run() async {
     if (_running) return;
@@ -236,10 +257,14 @@ class UploadController extends Notifier<UploadState> {
           final chunk = _rules.nextChunk(offset: state.sent, total: state.total, chunkSize: ticket.chunkSizeBytes);
           final confirmed = await _repo.sendChunk(ticket, video, chunk.start, chunk.length);
           if (!ref.mounted) return;
-          state = state.copyWith(sent: confirmed, retries: 0,
-              phase: state.phase == UploadPhase.paused ? UploadPhase.paused : UploadPhase.uploading);
+          state = state.copyWith(
+            sent: confirmed,
+            retries: 0,
+            phase: state.phase == UploadPhase.paused ? UploadPhase.paused : UploadPhase.uploading,
+          );
         } on UploadInterrupted {
           final attempt = state.retries + 1;
+          if (attempt == 1) _report(UploadStep.interrupted, {'reason': UploadInterrupted});
           if (attempt > _rules.maxRetries) {
             state = state.copyWith(phase: UploadPhase.paused);
             return;
@@ -250,9 +275,12 @@ class UploadController extends Notifier<UploadState> {
           final confirmed = await _repo.confirmedOffset(ticket, video);
           if (!ref.mounted) return;
           state = state.copyWith(sent: confirmed, phase: UploadPhase.uploading);
+          _report(UploadStep.resumed, {'from': confirmed});
         }
       }
       if (!ref.mounted) return;
+      final started = _startedAt;
+      _report(UploadStep.finished, {if (started != null) 'seconds': DateTime.now().difference(started).inSeconds});
       state = state.copyWith(phase: UploadPhase.processing);
       ref.invalidate(myProductsProvider);
       await _poll(ticket.product.id);
@@ -289,6 +317,8 @@ class UploadController extends Notifier<UploadState> {
   void _fail(Object e) {
     if (!ref.mounted) return;
     final message = e is ApiException ? e.error?.message : null;
+    // The server's message or the error's type, never its text: that can hold the upload URL (a credential).
+    _report(UploadStep.failed, {'reason': message ?? e.runtimeType});
     state = state.copyWith(phase: UploadPhase.failed, error: () => message);
   }
 }

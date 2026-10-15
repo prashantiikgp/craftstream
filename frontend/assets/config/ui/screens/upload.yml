@@ -197,6 +197,12 @@ body:
           - { title: upload.step_upload, note: upload.step_upload_note }
           - { title: upload.step_processing, note: upload.step_processing_note }
           - { title: upload.step_live, note: upload.step_live_note }
+      - brick: link_row
+        when: upload.product_id
+        icon: log
+        label: logs.upload_link
+        tone: info
+        action: { go: "/logs/listing/{upload.product_id}" }
       - brick: notice
         when: upload.keep_open
         tone: info

@@ -95,6 +95,13 @@ bricks:
       compact_title: h1
       compact_padding: lg
 
+  links:
+    about: A few link_rows side by side, sharing the width (Your orders · Activity log on Home).
+    props:
+      items: { type: nodes, required: true }
+    style:
+      gap: sm
+
   link_row:
     about: A full-width row that leads somewhere, with an icon and an optional count (Your orders · 3 →).
     props:
@@ -277,7 +284,7 @@ bricks:
   chip_row:
     about: A row of tag chips that scrolls sideways, starting with "All". One can be selected.
     props:
-      bind: { type: bind, required: true }       # list of {value, selected}
+      bind: { type: bind, required: true }       # list of {value, selected, label?}; label is shown when given
       all: { type: text, required: true }
       all_selected: { type: bind, required: true }
       action: { type: action, required: true }   # e.g. {call: toggle_tag, with: item.value}; All passes null
@@ -341,6 +348,59 @@ bricks:
       tag_inset: sm
       skeleton: surface_alt
       skeleton_rows: 2
+
+  log_bar:
+    about: >-
+      Above the activity log: how many entries are shown, or the one listing they belong to with a way back to all,
+      and a refresh button. The log also refreshes by itself while open (logs/activity_log.yml).
+    props:
+      bind: { type: bind, required: true }       # {count, has_more, product_id, refreshing}
+      one: { type: text, required: true }
+      many: { type: text, required: true }       # "{count} entries"
+      more: { type: text, required: true }       # "{count} entries shown, more to see"
+      listing: { type: text, required: true }    # "Listing {id}"
+      clear: { type: text, required: true }      # "Show all"
+      refresh: { type: text, required: true }    # the refresh button's label
+      clear_action: { type: action, required: true }
+      action: { type: action, required: true }   # refresh
+    style:
+      gap: sm
+      count: caption
+      count_color: text_muted
+      listing: mono
+      link: label
+      icon: 18
+      box: 36
+      border: line_strong
+      refresh_icon: retry
+
+  log_row:
+    about: >-
+      One activity log entry: a bar in its level's tone, the message, then when, the event and the listing. Tapping
+      it shows its details (key and value); the listing opens that listing's own log.
+    props:
+      bind: { type: bind, default: item }        # a LogEntry plus tone, level_label, date, time
+      listing: { type: text, required: true }    # "Listing {id}"
+      order: { type: text, required: true }      # "Order {id}"
+      action: { type: action }                   # the listing link, e.g. {go: "/logs/listing/{item.product_id}"}
+    style:
+      padding: md
+      gap: xs
+      bar: 4
+      background: surface
+      border: line
+      level: eyebrow
+      message: body
+      meta: mono
+      meta_color: text_muted
+      link: mono
+      detail_key: mono
+      detail_value: caption
+      detail_color: text_muted
+      detail_gap: sm
+      open_icon: minus
+      closed_icon: plus
+      icon: 16
 
   load_more:
     about: Fetches the next page on request (no auto-loading on slow networks). Keeps the results when it fails.
@@ -613,7 +673,7 @@ bricks:
   tag_picker:
     about: Tags to choose for a product; several can be on. Each passes its value to `action` as item.value.
     props:
-      bind: { type: bind, required: true }       # list of {value, selected}
+      bind: { type: bind, required: true }       # list of {value, selected, label?}; label is shown when given
       role: { type: role, required: true }
       action: { type: action, required: true }
     style:

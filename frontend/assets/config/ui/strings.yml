@@ -36,6 +36,32 @@ strings:
     sell_title: Sell
     sell_body: Upload a process video, up to 15 minutes. Buyers can watch it on any connection.
     orders: Your orders
+    logs: Activity log
+
+  logs:
+    title: Activity log
+    subtitle: Every step of every upload, video and order, newest first. It refreshes by itself.
+    all_groups: All
+    all_levels: All levels
+    group_upload: Uploads
+    group_video: Videos
+    group_order: Orders
+    group_system: System
+    level_info: Info
+    level_warning: Warning
+    level_error: Error
+    count_one: 1 entry
+    count_many: "{count} entries"
+    count_more: "{count} entries shown, more to see"
+    listing: "Listing {id}"
+    order: "Order {id}"
+    show_all: Show all
+    refresh: Refresh
+    load_more: Show older entries
+    load_more_failed: Couldn't load older entries.
+    empty_title: Nothing logged yet
+    empty_message: Uploads, videos and orders show up here as they happen.
+    upload_link: This upload's activity
 
   theme:
     to_light: Switch to the light theme

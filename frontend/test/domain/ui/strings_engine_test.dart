@@ -61,6 +61,7 @@ void main() {
     used.addAll([for (final r in config.navigation.names) config.navigation.role(r).label]);
     used.addAll(config.status.stringKeys);
     used.addAll(config.filters.sortLabels);
+    used.addAll(config.activityLog.stringKeys);
     expect(engine.keys.where((k) => !used.contains(k)), isEmpty, reason: 'keys in strings.yml that nothing uses');
   });
 }

@@ -1,0 +1,30 @@
+# The activity log, app side. The server declares every event with its level, group and message
+# (backend/config/platform/activity_log.yml) and stores the entries. This file says which upload steps the app
+# reports (only the app sees them: the network dropped, the upload resumed) and how the Activity log screen reads.
+
+report: true                 # send the steps below to the API (POST /logs); false keeps the app quiet
+
+# Each upload step the app reports: the server's event name and the values that go with it, in this order.
+steps:
+  too_long:    { event: upload_too_long,    details: [seconds, max] }      # checked on the device, before any upload
+  started:     { event: upload_started,     details: [size, chunks] }
+  interrupted: { event: upload_interrupted, details: [sent, size, reason] }
+  resumed:     { event: upload_resumed,     details: [from, size] }
+  finished:    { event: upload_finished,    details: [size, seconds] }
+  failed:      { event: upload_failed,      details: [reason] }
+  cancelled:   { event: upload_cancelled,   details: [sent, size] }
+
+pending_max: 20              # reports kept while the network is down (oldest dropped); sent before the next one
+
+# The Activity log screen.
+page_size: 30                # entries per page; "Load more" fetches the next
+refresh_seconds: 15          # re-read the newest page this often while the screen is open (0: only on request)
+groups:                      # filter chips, in this order (the group values in models/log_entry.yml): label key
+  upload: logs.group_upload
+  video: logs.group_video
+  order: logs.group_order
+  system: logs.group_system
+levels:                      # each level, in filter order: its tone (ui/theme.yml tones) and label key
+  info: { tone: info, label: logs.level_info }
+  warning: { tone: warning, label: logs.level_warning }
+  error: { tone: danger, label: logs.level_error }

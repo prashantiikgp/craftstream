@@ -12,6 +12,8 @@ import '../domain/app/routes_engine.dart';
 import '../domain/app/routes_loader.dart';
 import '../domain/catalog/filters_engine.dart';
 import '../domain/catalog/filters_loader.dart';
+import '../domain/logs/activity_log_engine.dart';
+import '../domain/logs/activity_log_loader.dart';
 import '../domain/media/player_engine.dart';
 import '../domain/media/player_loader.dart';
 import '../domain/media/upload_engine.dart';
@@ -52,6 +54,7 @@ class AppConfig {
   final BricksEngine bricks;
   final ScreenEngine screens;
   final OrdersEngine orders;
+  final ActivityLogEngine activityLog;
   const AppConfig({
     required this.env,
     required this.theme,
@@ -68,6 +71,7 @@ class AppConfig {
     required this.bricks,
     required this.screens,
     required this.orders,
+    required this.activityLog,
   });
 }
 
@@ -114,6 +118,7 @@ Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
     bricks: bricks,
     screens: screens,
     orders: OrdersEngine(await loadOrdersRules(bundle: bundle)),
+    activityLog: ActivityLogEngine(await loadActivityLogRules(bundle: bundle)),
   );
 }
 

@@ -137,7 +137,7 @@ Widget chipRowBrick(BuildContext context, BrickNode n) {
       chip(say(context, n.need('all')), truthy(scope.lookup(n.need('all_selected'))), const {'value': null}),
       for (final c in chips is List ? chips : const []) ...[
         SizedBox(width: s.space('gap')),
-        chip('${(c as Map)['value']}', c['selected'] == true, c),
+        chip('${(c as Map)['label'] ?? c['value']}', c['selected'] == true, c),
       ],
     ]),
   );

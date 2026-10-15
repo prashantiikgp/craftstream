@@ -1,0 +1,78 @@
+about: >-
+  The activity log: every step of every upload, video and order, newest first, from the API and from the app
+  (the network dropped, the upload resumed). Filter by group and level; /logs/listing/:product_id shows one
+  listing's steps. It re-reads the newest entries while open (logs/activity_log.yml).
+data: logs
+width: wide
+gap: md
+
+top:
+  - brick: top_bar
+    leading: home
+    label: common.home
+    action: { go: / }
+    crumbs:
+      - { brick: crumb, text: common.home, action: { go: / } }
+      - { brick: crumb, text: logs.title, action: { go: /logs }, when: logs.product_id }
+      - { brick: crumb, text: logs.title, unless: logs.product_id }
+      - { brick: crumb, bind: logs.product_id }
+
+body:
+  - brick: text
+    text: logs.subtitle
+    color: text_muted
+
+  - brick: chip_row
+    bind: logs.groups
+    all: logs.all_groups
+    all_selected: logs.all_groups
+    action: { call: set_group, with: item.value }
+
+  - brick: chip_row
+    bind: logs.levels
+    all: logs.all_levels
+    all_selected: logs.all_levels
+    action: { call: set_level, with: item.value }
+
+  - brick: log_bar
+    bind: logs
+    one: logs.count_one
+    many: logs.count_many
+    more: logs.count_more
+    listing: logs.listing
+    clear: logs.show_all
+    refresh: logs.refresh
+    clear_action: { go: /logs }
+    action: { call: refresh }
+
+  - brick: list
+    unless: logs.none
+    bind: logs.items
+    gap: sm
+    item:
+      brick: log_row
+      listing: logs.listing
+      order: logs.order
+      action: { go: "/logs/listing/{item.product_id}" }
+
+  - brick: empty_state
+    when: logs.none
+    icon: log
+    title: logs.empty_title
+    message: logs.empty_message
+
+  - brick: load_more
+    when: logs.more.show
+    bind: logs.more
+    label: logs.load_more
+    retry: common.retry
+    error: logs.load_more_failed
+    action: { call: load_more }
+
+error:
+  - brick: empty_state
+    icon: info
+    title: common.error_title
+    message: common.error_message
+    button: common.retry
+    action: { call: retry }

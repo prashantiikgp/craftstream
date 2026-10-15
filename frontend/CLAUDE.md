@@ -118,6 +118,13 @@ If any YAML fails to load, the app shows an error screen at startup. It never ru
 
 ## Upload rules
 
+- **Activity log:** the upload controller reports the steps only the app sees (too long, started, network dropped,
+  resumed, finished, failed, cancelled) through `data/logs/activity_reporter.dart`: fire and forget, queued while
+  offline. Which steps, as which server event and with which values: `assets/config/logs/activity_log.yml`. The
+  server declares every event (`backend/config/platform/activity_log.yml`). Never report error text (it can hold the
+  upload URL, a credential); report the error's type. The log screen is `ui/screens/logs.yml` (`/logs`,
+  `/logs/listing/:product_id`); it polls only while open.
+
 - Check the video duration on the device against `/upload-policy` before uploading.
 - `resumable_uploader.dart` sends chunks (size from the `UploadTicket`) to the GCS resumable URL. After a drop, it asks GCS for the received offset and resumes from there.
 - On web, use `file_picker` with `withReadStream: true`. Never load the whole file into memory.

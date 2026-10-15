@@ -14,6 +14,7 @@ import 'browse_bricks.dart';
 import 'burst_brick.dart';
 import 'form_bricks.dart';
 import 'kit.dart';
+import 'log_bricks.dart';
 import 'product_bricks.dart';
 import 'sell_bricks.dart';
 
@@ -35,6 +36,7 @@ const brickBuilders = <String, BrickBuilder>{
   'doors': BrickBuilder(_doors, flexes: true),
   'door': BrickBuilder(_door),
   'link_row': BrickBuilder(_linkRow),
+  'links': BrickBuilder(_links),
   'top_bar': BrickBuilder(_topBar),
   'mark': BrickBuilder(_mark),
   'receipt': BrickBuilder(_receipt),
@@ -44,6 +46,8 @@ const brickBuilders = <String, BrickBuilder>{
   'empty_state': BrickBuilder(_emptyState),
   'search_field': BrickBuilder(searchFieldBrick),
   'chip_row': BrickBuilder(chipRowBrick),
+  'log_bar': BrickBuilder(logBarBrick),
+  'log_row': BrickBuilder(logRowBrick),
   'results_bar': BrickBuilder(resultsBarBrick),
   'product_grid': BrickBuilder(productGridBrick),
   'load_more': BrickBuilder(loadMoreBrick),
@@ -284,7 +288,7 @@ Widget _linkRow(BuildContext context, BrickNode n) {
         children: [
           YamlIcon(n.need('icon'), size: s.number('icon'), color: tone.ink),
           SizedBox(width: s.space('gap')),
-          Expanded(child: StyledText(label, style: s.name('label'))),
+          Expanded(child: StyledText(label, style: s.name('label'), maxLines: 1)),
           if (count != null)
             StyledText(
               configOf(context).strings.get('common.count_go', {'count': count}),
@@ -295,6 +299,18 @@ Widget _linkRow(BuildContext context, BrickNode n) {
       ),
     ),
   );
+}
+
+/// link_row bricks side by side, sharing the width (Your orders · Activity log).
+Widget _links(BuildContext context, BrickNode n) {
+  final gap = BrickStyle.of(context, 'links').space('gap');
+  final items = n.need<List<BrickNode>>('items');
+  return Row(children: [
+    for (final (i, item) in items.indexed) ...[
+      if (i > 0) SizedBox(width: gap),
+      Expanded(child: buildBrick(context, item)),
+    ],
+  ]);
 }
 
 Widget _topBar(BuildContext context, BrickNode n) {

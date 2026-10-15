@@ -3,6 +3,7 @@ library;
 
 import '../generated/models.dart';
 import '../repositories/catalog_repository.dart';
+import '../repositories/log_repository.dart';
 import '../repositories/order_repository.dart';
 import '../repositories/upload_repository.dart';
 import '../upload/picked_video.dart';
@@ -90,15 +91,40 @@ class MockUploadRepository implements UploadRepository {
   }
 }
 
+class MockLogRepository implements LogRepository {
+  final MockStore _s;
+  const MockLogRepository(this._s);
+
+  @override
+  Future<LogPage> page({String? group, String? level, String? productId, String? cursor, int? limit}) async {
+    await _s.wait();
+    return _s.logs(group: group, level: level, productId: productId, cursor: cursor, limit: limit);
+  }
+
+  @override
+  Future<LogEntry> report(LogEntryCreate entry) async {
+    await _s.wait();
+    return _s.report(entry);
+  }
+}
+
 /// Alternates between a clip that fits the 15:00 limit and one that does not, so both paths can be shown.
 class MockVideoPicker implements VideoPicker {
   int _picks = 0;
 
   static const samples = [
-    PickedVideo(name: 'clay-mug-process.mp4', sizeBytes: 412 * 1024 * 1024, mimeType: 'video/mp4',
-        duration: Duration(minutes: 12, seconds: 40)),
-    PickedVideo(name: 'loom-full-day.mov', sizeBytes: 2150 * 1024 * 1024, mimeType: 'video/quicktime',
-        duration: Duration(minutes: 18, seconds: 5)),
+    PickedVideo(
+      name: 'clay-mug-process.mp4',
+      sizeBytes: 412 * 1024 * 1024,
+      mimeType: 'video/mp4',
+      duration: Duration(minutes: 12, seconds: 40),
+    ),
+    PickedVideo(
+      name: 'loom-full-day.mov',
+      sizeBytes: 2150 * 1024 * 1024,
+      mimeType: 'video/quicktime',
+      duration: Duration(minutes: 18, seconds: 5),
+    ),
   ];
 
   @override
