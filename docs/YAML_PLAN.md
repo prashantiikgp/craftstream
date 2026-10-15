@@ -104,10 +104,11 @@ Sets up what every later phase needs, so Phases 1 and 2 are mostly "move the lit
   - [x] Literal lint (backend): no status strings, paths or collection names in `app/domain/**/*_service.py`
         and `app/infra/**`. Baseline at the start: 52 literals in 13 files.
   - [x] Every engine has a unit test file (backend check in `test_rule_files.py`, mirrored in Dart).
-- [ ] **Editor support:**
-  - Export JSON Schemas for the frontend YAML too, like `backend/config/.schemas` does.
-  - Add a `# yaml-language-server: $schema=` modeline to every rule file, so VS Code autocompletes and flags
-    typos while you edit.
+- [x] **Editor support:**
+  - [x] Export JSON Schemas for the frontend YAML too, like `backend/config/.schemas` does
+        (`frontend/tool/export_rule_schemas.dart` → `assets/config/.schemas/`; screens share `ui/screen.schema.json`).
+  - [x] Add a `# yaml-language-server: $schema=` modeline to every rule file, so VS Code autocompletes and flags
+        typos while you edit. `test/convention/rule_schemas_test.dart` fails if a schema is stale or a modeline is missing.
 - [x] **Frontend engines** (built as `routes_engine`, `screen_engine` + `bricks_engine`, `navigation_engine`, `icons_engine`,
       `status_engine`, `art_engine`; bricks in `lib/shared/bricks/bricks.dart`):
   - [x] `route_engine`: builds the GoRouter from `app/routes.yml`.

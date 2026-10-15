@@ -4,9 +4,6 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "initial": {
-      "type": "string"
-    },
     "routes": {
       "type": "array",
       "items": {
@@ -15,7 +12,6 @@
     }
   },
   "required": [
-    "initial",
     "routes"
   ],
   "definitions": {

@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../.schemas/ui/screen.schema.json
 about: The end of the buyer flow. Confirms the order, shows the receipt and leads to the buyer's orders.
 data: receipt           # params.order_id -> order (one of the orders placed from this device)
 width: narrow

@@ -874,7 +874,7 @@
             }
           },
           "then": {
-            "description": "The bar at the top of an inner screen: the logo (home) or a back button, then where you are as a trail of crumbs, like a web page (Home / Buy / Hand-thrown clay mug / Order). Every crumb but the last leads back.",
+            "description": "The bar at the top of an inner screen: the logo (home) or a back button, then where you are as a trail of crumbs, like a web page (Home / Buy / Hand-thrown clay mug / Order). Every crumb but the last leads back. The light/dark toggle (the theme_toggle brick's look) sits at the right end; long crumbs shorten first.",
             "additionalProperties": false,
             "properties": {
               "brick": {
@@ -948,6 +948,14 @@
                 ],
                 "description": "enum",
                 "default": "home"
+              },
+              "toggle": {
+                "enum": [
+                  "show",
+                  "hide"
+                ],
+                "description": "enum",
+                "default": "show"
               },
               "action": {
                 "$ref": "#/definitions/action",

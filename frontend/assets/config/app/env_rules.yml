@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/app/env_rules.schema.json
 # The rules every environment must pass at startup. The values themselves come from env/<name>.json
 # (--dart-define-from-file) and ship inside the app, so they are public settings only; lib/core/env.dart reads
 # them and holds them to these rules. Read by env_rules_engine.

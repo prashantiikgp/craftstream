@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../.schemas/ui/screen.schema.json
 about: >-
   New product. The form (title, description, price, tags, name and the process video, checked against the server's
   length limit), then, after Publish, the upload: resumable, pausable, it survives a dropped connection, then waits

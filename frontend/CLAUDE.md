@@ -104,6 +104,8 @@ API client. Screens and controllers only see the repository interfaces.
 3. Write `lib/domain/<domain>/<xyz>_loader.dart`, which calls `loadYamlAsset`, and load it in `core/config.dart::loadAppConfig`.
 4. Write `lib/domain/<domain>/<xyz>_engine.dart`. It takes the schema object in its constructor.
 5. Add `test/domain/<domain>/<xyz>_engine_test.dart`.
+6. `make gen` (or `dart run tool/export_rule_schemas.dart`): writes `assets/config/.schemas/<domain>/<xyz>.schema.json`
+   and the `# yaml-language-server: $schema=...` first line, so VS Code validates the YAML as you type.
 
 If any YAML fails to load, the app shows an error screen at startup. It never runs with half the config.
 

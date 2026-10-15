@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../.schemas/ui/screen.schema.json
 about: >-
   The activity log: every step of every upload, video and order, newest first, from the API and from the app
   (the network dropped, the upload resumed). Filter by group and level; /logs/listing/:product_id shows one

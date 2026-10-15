@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../.schemas/ui/screen.schema.json
 about: Browse. Search by keyword, filter by tag, sort, and open a product. Posters only; one small page at a time.
 data: discover
 width: wide

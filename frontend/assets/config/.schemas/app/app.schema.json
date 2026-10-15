@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/app/app.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "initial_route": {
+      "type": "string"
+    },
+    "theme_mode": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "initial_route",
+    "theme_mode"
+  ]
+}

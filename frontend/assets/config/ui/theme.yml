@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/ui/theme.schema.json
 # CraftStream design tokens: theme B ("two doors"). Sharp corners, Space Grotesk + Space Mono, artistic accents
 # (orange, pink, purple, marigold) on a near-black purple (dark) or #F5F5F5 grey (light) ground.
 # Read by theme_engine; nothing in a brick or screen may hard-code a colour, size, radius or duration.

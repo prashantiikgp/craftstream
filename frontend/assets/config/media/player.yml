@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/media/player.schema.json
 # How the process video plays. Read by player_engine; the F5 player (hls.js on web, ExoPlayer on Android)
 # takes every value from here. Hard rule: the player starts on the lowest rung (<= 50 kbps on the wire).
 

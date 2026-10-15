@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/logs/activity_log.schema.json
 # The activity log, app side. The server declares every event with its level, group and message
 # (backend/config/platform/activity_log.yml) and stores the entries. This file says which upload steps the app
 # reports (only the app sees them: the network dropped, the upload resumed) and how the Activity log screen reads.

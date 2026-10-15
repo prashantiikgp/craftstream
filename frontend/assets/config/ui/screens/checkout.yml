@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../.schemas/ui/screen.schema.json
 about: >-
   Place an order: who is buying and how many. No payment; the artisan contacts the buyer. Placing the order goes to
   its receipt (Order placed).

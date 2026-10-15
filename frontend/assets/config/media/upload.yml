@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/media/upload.schema.json
 # How the app uploads a process video and waits for it. Limits (15:00, file types, chunk size) are NOT here:
 # they come from GET /api/v1/upload-policy and the UploadTicket. Read by upload_engine.
 

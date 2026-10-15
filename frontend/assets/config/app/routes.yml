@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/app/routes.schema.json
 # Every route in the app. Each shows a screen YAML (`screen: home` -> ui/screens/home.yml).
 #
 #   path      absolute at the top level (`/orders`), relative under `routes:` (`buy` -> /product/:id/buy)

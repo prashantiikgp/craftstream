@@ -18,12 +18,115 @@
     },
     "status_poll_timeout_minutes": {
       "type": "integer"
+    },
+    "http_status": {
+      "$ref": "#/definitions/UploadHttpStatusSchema"
+    },
+    "picker": {
+      "$ref": "#/definitions/PickerSchema"
+    },
+    "tags": {
+      "$ref": "#/definitions/TagRulesSchema"
+    },
+    "price": {
+      "$ref": "#/definitions/PriceRulesSchema"
     }
   },
   "required": [
     "retry_backoff_seconds",
     "max_retries",
     "status_poll_seconds",
-    "status_poll_timeout_minutes"
-  ]
+    "status_poll_timeout_minutes",
+    "http_status",
+    "picker",
+    "tags",
+    "price"
+  ],
+  "definitions": {
+    "PickerSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "accept": {
+          "type": "string"
+        },
+        "metadata_timeout_seconds": {
+          "type": "integer"
+        },
+        "mime_types": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "default_mime_type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "accept",
+        "metadata_timeout_seconds",
+        "mime_types",
+        "default_mime_type"
+      ]
+    },
+    "PriceRulesSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ignore": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "currency": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ignore",
+        "currency"
+      ]
+    },
+    "TagRulesSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "separator": {
+          "type": "string"
+        },
+        "lower_case": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "separator",
+        "lower_case"
+      ]
+    },
+    "UploadHttpStatusSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "done": {
+          "type": "array",
+          "items": {}
+        },
+        "continue": {
+          "type": "array",
+          "items": {}
+        },
+        "retry": {
+          "type": "array",
+          "items": {}
+        }
+      },
+      "required": [
+        "done",
+        "continue",
+        "retry"
+      ]
+    }
+  }
 }

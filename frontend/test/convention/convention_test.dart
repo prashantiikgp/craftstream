@@ -24,6 +24,7 @@ List<RuleSet> ruleSets() {
   final sets = <RuleSet>[];
   for (final domain in Directory('assets/config').listSync().whereType<Directory>()) {
     final d = domain.uri.pathSegments.where((s) => s.isNotEmpty).last;
+    if (d.startsWith('.')) continue; // .schemas/: generated JSON Schemas for the editor, not rules
     for (final e in domain.listSync()) {
       final name = e.uri.pathSegments.where((s) => s.isNotEmpty).last;
       if (e is File && name.endsWith('.yml')) {

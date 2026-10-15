@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/ui/icons.schema.json
 # Line icons, drawn from SVG path data on a 24 × 24 grid: the same sharp stroke icons as the design canvas.
 # No icon font is downloaded; screens and bricks name an icon (`icon: orders`), never a glyph.
 #

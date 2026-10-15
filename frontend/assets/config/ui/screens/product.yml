@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../.schemas/ui/screen.schema.json
 about: >-
   One product. The process video (loads only when tapped, starts on the lowest rung), what it is, who made it,
   and Buy. Video beside the details on wide screens, above them on phones; on phones Buy is pinned to the bottom.

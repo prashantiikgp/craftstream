@@ -28,15 +28,15 @@ review column (filled in per decision D10, 2026-10-15): **Y** move to YAML, **C*
 | F7 | Tone and status maps | `ready` / `processing` / `failed` compared in about 13 places; tone maps in video_status_badge, listing_card, upload_progress:94-160, video_pick_card:74-95, notice:92-97 | **Y, done:** `ui/status.yml` (label, tone, orderable, retry) |
 | F8 | Components | app_button heights 36/44/52, overlay 0.08, spinner 18; status dot 6; chip padding `xs+2`; skeleton 1100 ms and 0.55 opacity; card motion curve | **Y/D, done:** v1 components deleted; skeleton and motion in `theme.yml` |
 | F9 | Brand | `brand.dart:42` hard-codes `'Poppins'`; "Craft"/"Stream" text; 30-tag → motif map (:101-114); motif → colour (:129-135) | **D, done:** v1 brand painters deleted; the mark is the stripes brick |
-| F10 | Controllers | currency `'INR'` (upload_controller:190, PriceText:72); price parsing; tag split and dedupe; validation order; sort behaviour in a Dart switch (filters_engine:65-76); orders newest first | **Y:** `media/upload.yml` (price, tags), `catalog/filters.yml` (declarative sorts), `orders.yml` |
-| F11 | Formatting | `shared/format/money.dart` (Indian grouping, symbols, minus sign), `bytes.dart` (1024, GB/MB/KB, h:mm:ss) | **Y:** `ui/format.yml` |
-| F12 | Player | budget `50000` in player_engine:15; hls.js `startLevel 0`, `testBandwidth false`; master fetch timeout 20 s; HLS MIME; web `<video>` attrs; recover-once | **Y:** `media/player.yml`; the 50 kbps budget is checked against `ladder.yml` (backend test) |
-| F13 | Upload and data | uploader status handling (200/201/308/408/429/5xx); extension → MIME map; `accept video/*`; metadata timeout 15 s | **Y:** `media/upload.yml` |
+| F10 | Controllers | currency `'INR'` (upload_controller:190, PriceText:72); price parsing; tag split and dedupe; validation order; sort behaviour in a Dart switch (filters_engine:65-76); orders newest first | **Y, done:** `media/upload.yml` (price, tags), `catalog/filters.yml` (declarative sorts), `orders.yml` |
+| F11 | Formatting | `shared/format/money.dart` (Indian grouping, symbols, minus sign), `bytes.dart` (1024, GB/MB/KB, h:mm:ss) | **Y, done:** `ui/format.yml` |
+| F12 | Player | budget `50000` in player_engine:15; hls.js `startLevel 0`, `testBandwidth false`; master fetch timeout 20 s; HLS MIME; web `<video>` attrs; recover-once | **Y, done:** `media/player.yml`; the 50 kbps budget is checked against `ladder.yml` (backend test) |
+| F13 | Upload and data | uploader status handling (200/201/308/408/429/5xx); extension → MIME map; `accept video/*`; metadata timeout 15 s | **Y, done:** `media/upload.yml` |
 | F14 | Theme engine | ColorScheme and TextTheme slot mapping, component themes (app_theme:73-191); 12 contrast rules in theme_engine:156-169; `THEME_PALETTE` default duplicates `default_palette` | **C, kept:** Material slot mapping stays in `app_theme.dart` (glue); contrast rules moved to `theme.yml` |
 | F15 | Unused YAML | `reduced_motion_factor`, motion `medium` and `slow`, `radius.lg`, `space.section`, player `autoplay_on_product_page` and `min_buffer_to_start_seconds` | **Y, done:** wired up or removed |
 | F16 | Strings outside strings.yml | about 60 in the design catalog screen; `CraftStream` in app.dart and brand.dart; product card semantics label; config error screen (deliberately token-free) | **Y/D, done:** catalog deleted; other text in `strings.yml`; the config error screen stays token-free on purpose (it shows when config fails to load) |
-| F17 | Env | defaults and policy in core/env.dart:42-121 (https outside dev, prod bans, `10.0.2.2`) | **Y:** `app/env_rules.yml`; values stay in `env/*.json` |
-| F18 | Mock data | latency 450 ms, chunk 140 ms, processing 8 s, page size 24 (duplicate), mock policy, sample videos, 14 fixture products | **Y:** `dev/mock.yml` |
+| F17 | Env | defaults and policy in core/env.dart:42-121 (https outside dev, prod bans, `10.0.2.2`) | **Y, done:** `app/env_rules.yml`; values stay in `env/*.json` |
+| F18 | Mock data | latency 450 ms, chunk 140 ms, processing 8 s, page size 24 (duplicate), mock policy, sample videos, 14 fixture products | **Y, done:** `dev/mock.yml` |
 
 **Bricks used by screens today:**
 - **Layout and basics:** PageScroll, sliver grid, SectionHeader, AppCard (flat, elevated, interactive), AppButton,

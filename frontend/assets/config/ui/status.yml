@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/ui/status.schema.json
 # What each status looks like and means on screen. The keys must be exactly the values in models/product.yml
 # (video_status) and models/order.yml (status); status_engine_test checks that.
 #

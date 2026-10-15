@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/ui/format.schema.json
 # How the app writes money, file sizes, video lengths, dates and times. Read by format_engine; bricks and
 # screen sources call it instead of building text by hand.
 #

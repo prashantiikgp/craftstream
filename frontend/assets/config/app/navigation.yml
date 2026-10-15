@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/app/navigation.schema.json
 # The two sides of the app. Doors, top bars and the "01 / BUY" eyebrows read their number, label, accent and
 # home route from here, so each role looks the same everywhere.
 #   accent  an accent name from ui/theme.yml (its fill, ink and glow colour the role)

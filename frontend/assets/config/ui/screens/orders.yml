@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../.schemas/ui/screen.schema.json
 about: Every order placed from this device, newest first. Each opens its receipt.
 data: orders
 width: narrow

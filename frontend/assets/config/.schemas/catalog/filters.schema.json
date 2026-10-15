@@ -19,6 +19,9 @@
     "max_chips": {
       "type": "integer"
     },
+    "tag_retap_clears": {
+      "type": "boolean"
+    },
     "sort_options": {
       "type": "array",
       "items": {
@@ -31,6 +34,7 @@
     "page_size",
     "featured_tags",
     "max_chips",
+    "tag_retap_clears",
     "sort_options"
   ],
   "definitions": {
@@ -59,11 +63,7 @@
       "additionalProperties": false,
       "properties": {
         "id": {
-          "enum": [
-            "newest",
-            "price_low",
-            "price_high"
-          ]
+          "type": "string"
         },
         "label": {
           "type": "string"
@@ -71,6 +71,15 @@
         "default": {
           "type": "boolean",
           "default": false
+        },
+        "field": {
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "asc",
+            "desc"
+          ]
         }
       },
       "required": [

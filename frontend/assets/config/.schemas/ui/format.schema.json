@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/ui/format.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "money": {
+      "$ref": "#/definitions/MoneyFormatSchema"
+    },
+    "bytes": {
+      "$ref": "#/definitions/BytesFormatSchema"
+    },
+    "duration": {
+      "$ref": "#/definitions/DurationFormatSchema"
+    },
+    "date": {
+      "type": "string"
+    },
+    "time": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "money",
+    "bytes",
+    "duration",
+    "date",
+    "time"
+  ],
+  "definitions": {
+    "ByteUnitSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "unit": {
+          "type": "string"
+        },
+        "power": {
+          "type": "integer"
+        },
+        "decimals": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "unit",
+        "power",
+        "decimals"
+      ]
+    },
+    "BytesFormatSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "base": {
+          "type": "integer"
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "units": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ByteUnitSchema"
+          }
+        }
+      },
+      "required": [
+        "base",
+        "pattern",
+        "units"
+      ]
+    },
+    "CurrencyFormatSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "grouping": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      },
+      "required": [
+        "symbol",
+        "grouping"
+      ]
+    },
+    "DurationFormatSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "short": {
+          "type": "string"
+        },
+        "long": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "short",
+        "long"
+      ]
+    },
+    "MoneyFormatSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "minus": {
+          "type": "string"
+        },
+        "thousands": {
+          "type": "string"
+        },
+        "decimal_point": {
+          "type": "string"
+        },
+        "decimals": {
+          "type": "integer"
+        },
+        "hide_zero_fraction": {
+          "type": "boolean"
+        },
+        "currencies": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/CurrencyFormatSchema"
+          }
+        },
+        "other": {
+          "$ref": "#/definitions/CurrencyFormatSchema"
+        }
+      },
+      "required": [
+        "minus",
+        "thousands",
+        "decimal_point",
+        "decimals",
+        "hide_zero_fraction",
+        "currencies",
+        "other"
+      ]
+    }
+  }
+}

@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/ui/strings.schema.json
 # Every user-visible string in the app, grouped by screen. Screens call context.s('group.key', {...}).
 # {name} is filled in by the screen. Keys are snake_case; a test fails if a key used in lib/ is missing here
 # or a key here is never used.

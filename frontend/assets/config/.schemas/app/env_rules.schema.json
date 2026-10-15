@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "assets/config/app/env_rules.yml",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "debug_defaults": {
+      "type": "object",
+      "additionalProperties": {}
+    },
+    "environments": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/EnvironmentRulesSchema"
+      }
+    }
+  },
+  "required": [
+    "debug_defaults",
+    "environments"
+  ],
+  "definitions": {
+    "EnvironmentRulesSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "require_https": {
+          "type": "boolean"
+        },
+        "allow_dev_tools": {
+          "type": "boolean"
+        },
+        "allow_mock_data": {
+          "type": "boolean"
+        },
+        "allow_debug_logs": {
+          "type": "boolean"
+        },
+        "android_hosts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "require_https",
+        "allow_dev_tools",
+        "allow_mock_data",
+        "allow_debug_logs"
+      ]
+    }
+  }
+}

@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/ui/bricks.schema.json
 # The bricks screens are built from. A screen YAML (ui/screens/*.yml) lists bricks by name with their props;
 # the brick's look (sizes, spacing, text styles, colours) lives here under `style`, so every screen that uses a
 # brick looks the same. The Dart side (lib/shared/bricks/) only draws what this file describes.

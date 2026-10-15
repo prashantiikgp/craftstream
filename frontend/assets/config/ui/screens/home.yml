@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../.schemas/ui/screen.schema.json
 about: The front door. The company name, then one door to buy and one to sell, then the buyer's orders.
 data: home
 width: auto              # phones: one column; wide screens: the doors side by side at full width

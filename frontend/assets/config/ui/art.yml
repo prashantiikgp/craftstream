@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../.schemas/ui/art.schema.json
 # Abstract artwork in the accent colours: background shapes behind screens, the shapes inside the doors, and the
 # product posters. Drawn in code, so it costs nothing on a 50 kbps link and follows light and dark.
 #
