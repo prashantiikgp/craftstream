@@ -30,10 +30,6 @@
     "TranscodeResult": {
       "additionalProperties": false,
       "properties": {
-        "path": {
-          "title": "Path",
-          "type": "string"
-        },
         "envelope_keys": {
           "items": {
             "type": "string"
@@ -59,7 +55,6 @@
         }
       },
       "required": [
-        "path",
         "envelope_keys",
         "job_key",
         "job_name_key",
@@ -71,10 +66,6 @@
     "UploadFinalized": {
       "additionalProperties": false,
       "properties": {
-        "path": {
-          "title": "Path",
-          "type": "string"
-        },
         "event_type_header": {
           "minLength": 1,
           "title": "Event Type Header",
@@ -95,7 +86,6 @@
         }
       },
       "required": [
-        "path",
         "event_type_header",
         "accepted_event_types",
         "object_name_key"
@@ -106,10 +96,6 @@
   },
   "additionalProperties": false,
   "properties": {
-    "internal_prefix": {
-      "title": "Internal Prefix",
-      "type": "string"
-    },
     "upload_finalized": {
       "$ref": "#/$defs/UploadFinalized"
     },
@@ -121,7 +107,6 @@
     }
   },
   "required": [
-    "internal_prefix",
     "upload_finalized",
     "transcode_result",
     "messages"

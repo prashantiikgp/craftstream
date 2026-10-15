@@ -71,14 +71,5 @@ def job_label(rules: StorageLayoutRules | None = None) -> str:
     return _rules(rules).job_label
 
 
-def local_upload_path(product_id: str, rules: StorageLayoutRules | None = None) -> str:
-    return _rules(rules).local.upload_path.format(product_id=product_id)
-
-
-def local_upload_route(rules: StorageLayoutRules | None = None) -> str:
-    """The route the API serves the fake upload target on (the path template itself)."""
-    return _rules(rules).local.upload_path
-
-
 def local_sample_stream(rules: StorageLayoutRules | None = None) -> str:
     return _rules(rules).local.sample_stream

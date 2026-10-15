@@ -31,11 +31,6 @@ def test_urls_use_the_templates():
     assert "max-age" in sl.hls_cache_control()
 
 
-def test_local_upload_path_names_the_product():
-    assert sl.local_upload_path("p1").startswith("/") and sl.local_upload_path("p1").endswith("p1")
-    assert sl.local_upload_route().startswith("/")
-
-
 def test_custom_rules_are_used():
     rules = load_storage_layout_rules().model_copy(update={"manifest": "master.m3u8"})
     assert sl.manifest_object("p", rules).endswith("/master.m3u8")

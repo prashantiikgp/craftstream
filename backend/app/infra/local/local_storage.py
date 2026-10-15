@@ -13,6 +13,7 @@ import re
 from dataclasses import dataclass
 
 from app.domain.media import storage_layout_engine as layout
+from app.generated.api import ENDPOINTS
 
 _CONTENT_RANGE = re.compile(r"bytes (?:(?P<start>\d+)-(?P<end>\d+)|\*)/(?P<total>\d+|\*)")
 
@@ -32,7 +33,8 @@ class LocalStorage:
         self._received: dict[str, int] = {}
 
     def upload_url(self, product_id: str, origin: str | None, api_base_url: str) -> str:
-        return api_base_url.rstrip("/") + layout.local_upload_path(product_id)
+        # the API's own fake target, served only in local mode (localUpload in models/endpoints.yml)
+        return api_base_url.rstrip("/") + ENDPOINTS["localUpload"].path.format(product_id=product_id)
 
     def duration_seconds(self, product_id: str) -> float | None:
         return None  # bytes are counted, not kept, so the length is unknown

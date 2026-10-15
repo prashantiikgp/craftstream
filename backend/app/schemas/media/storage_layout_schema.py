@@ -19,15 +19,7 @@ class ThumbnailName(BaseModel):
 class LocalLayout(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    upload_path: str
     sample_stream: str
-
-    @field_validator("upload_path")
-    @classmethod
-    def _names_the_product(cls, v: str) -> str:
-        if not v.startswith("/") or PRODUCT_ID not in v:
-            raise ValueError(f"must start with / and contain {PRODUCT_ID}")
-        return v
 
 
 class StorageLayoutRules(BaseModel):
