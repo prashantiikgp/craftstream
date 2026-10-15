@@ -149,8 +149,9 @@ and the convention tests run and fail on today's literals. The failing list *is*
       `reduced_motion_factor`.
 - [x] Move the contrast rules from `theme_engine.dart` into a `contrast:` block in theme.yml. The test checks
       every pair in both modes.
-- [ ] **Theme mode:** `app/app.yml` sets the default (`system`; THEME_MODE left the env files, so prod no longer
-      starts in light). Left: the toggle in every top bar. The user's choice lasts for the session (not stored).
+- [x] **Theme mode:** `app/app.yml` sets the default (`system`; THEME_MODE left the env files, so prod no longer
+      starts in light). Every top bar ends with the light/dark toggle (`top_bar` `toggle: show`, the default); long
+      crumbs shorten first. The user's choice lasts for the session (not stored).
 - [x] ~~Rebuild `/catalog` (dev only) from YAML~~ **Dropped 2026-10-15:** the v1 `/catalog` page, the v1 widgets
       (`lib/shared/widgets/`), the v1 brand painters and the `legacy:` token block were deleted instead; the
       render test draws every real screen at four sizes in both modes, and the literal baseline is now empty.

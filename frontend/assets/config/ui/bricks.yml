@@ -124,8 +124,10 @@ bricks:
     about: >-
       The bar at the top of an inner screen: the logo (home) or a back button, then where you are as a trail of
       crumbs, like a web page (Home / Buy / Hand-thrown clay mug / Order). Every crumb but the last leads back.
+      The light/dark toggle (the theme_toggle brick's look) sits at the right end; long crumbs shorten first.
     props:
       leading: { type: enum, options: [home, back], default: home }
+      toggle: { type: enum, options: [show, hide], default: show }   # the light/dark toggle at the right end
       action: { type: action, required: true }
       label: { type: text }              # what the leading control says to screen readers (Home, Back)
       role: { type: role }               # colours the crumbs that lead somewhere

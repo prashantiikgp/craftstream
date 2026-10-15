@@ -141,28 +141,31 @@ Widget _wordmark(BuildContext context, BrickNode n) {
   );
 }
 
-Widget _themeToggle(BuildContext context, BrickNode n) {
+Widget _themeToggle(BuildContext context, BrickNode n) => Align(
+      alignment: n.need<String>('align') == 'start' ? Alignment.centerLeft : Alignment.centerRight,
+      child: _themeToggleButton(context),
+    );
+
+/// The light/dark switch (theme_toggle's look), on its own (Home) or at the end of a top bar.
+Widget _themeToggleButton(BuildContext context) {
   final s = BrickStyle.of(context, 'theme_toggle');
   final t = context.tokens;
   final brand = t.tone('brand');
   final strings = configOf(context).strings;
-  return Align(
-    alignment: n.need<String>('align') == 'start' ? Alignment.centerLeft : Alignment.centerRight,
-    child: Pressable(
-      accent: brand.fill,
-      semanticLabel: strings.get(t.isDark ? 'theme.to_light' : 'theme.to_dark'),
-      onTap: () => BrickScope.of(context).act(context, const ToggleThemeAction()),
-      builder: (context, active) => Container(
-        width: s.number('box'),
-        height: s.number('box'),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: s.color('background'),
-          border: Border.all(color: active ? brand.line : s.color('border')),
-          borderRadius: BorderRadius.circular(s.radius('radius')),
-        ),
-        child: YamlIcon(s.name(t.isDark ? 'icon_in_dark' : 'icon_in_light'), size: s.number('icon'), color: t.text),
+  return Pressable(
+    accent: brand.fill,
+    semanticLabel: strings.get(t.isDark ? 'theme.to_light' : 'theme.to_dark'),
+    onTap: () => BrickScope.of(context).act(context, const ToggleThemeAction()),
+    builder: (context, active) => Container(
+      width: s.number('box'),
+      height: s.number('box'),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: s.color('background'),
+        border: Border.all(color: active ? brand.line : s.color('border')),
+        borderRadius: BorderRadius.circular(s.radius('radius')),
       ),
+      child: YamlIcon(s.name(t.isDark ? 'icon_in_dark' : 'icon_in_light'), size: s.number('icon'), color: t.text),
     ),
   );
 }
@@ -346,6 +349,10 @@ Widget _topBar(BuildContext context, BrickNode n) {
             child: _crumbs(context, s, n.prop<List<BrickNode>>('crumbs') ?? const [], role),
           ),
         ),
+        if (n.need<String>('toggle') == 'show') ...[
+          SizedBox(width: s.space('padding')),
+          _themeToggleButton(context),
+        ],
       ],
     ),
   );
