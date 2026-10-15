@@ -7,6 +7,7 @@ messages come from api/http.yml (http_engine); this is the only place that appli
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -52,7 +53,9 @@ def _response(status: int, code: str, message: str, details: list[str] | None = 
     return JSONResponse(status_code=status, content=body.model_dump())
 
 
-def install_error_handlers(app: FastAPI) -> None:
+def install_error_handlers(app: FastAPI, on_unhandled: Callable[[str, Exception], None] | None = None) -> None:
+    """`on_unhandled(path, exc)` is told about every unexpected exception (main.py records it in the activity
+    log); it must not raise, and if it does, the error is logged and the response is still sent."""
     @app.exception_handler(DomainError)
     async def _domain(_: Request, exc: DomainError) -> JSONResponse:
         status = http_engine.status_for(exc.code, type(exc).code)
@@ -71,5 +74,10 @@ def install_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(Exception)
     async def _unexpected(request: Request, exc: Exception) -> JSONResponse:
         log.exception("unhandled error", extra={"path": request.url.path})
+        if on_unhandled is not None:
+            try:
+                on_unhandled(request.url.path, exc)
+            except Exception:
+                log.exception("unhandled error not recorded", extra={"path": request.url.path})
         err = http_engine.internal_error()
         return _response(http_engine.status_for(err.code), err.code, err.message)

@@ -3,7 +3,6 @@ which video state is listed comes from the media video_lifecycle_engine."""
 
 from __future__ import annotations
 
-import logging
 from collections import Counter
 
 from app.core.errors import NotFound
@@ -11,9 +10,8 @@ from app.core.ids import new_id, now
 from app.db.repositories.product_repo import ProductRepo
 from app.domain.catalog import listing_engine, search_engine
 from app.domain.media import video_lifecycle_engine as lifecycle
+from app.domain.platform.activity_log_service import ActivityLogService
 from app.generated.models import Product, ProductCreate, ProductPage, ProductSummary, TagList
-
-log = logging.getLogger(__name__)
 
 _SUMMARY_FIELDS = set(ProductSummary.model_fields)
 
@@ -23,15 +21,15 @@ def _keywords(p: Product) -> list[str]:
 
 
 class CatalogService:
-    def __init__(self, products: ProductRepo) -> None:
-        self._products = products
+    def __init__(self, products: ProductRepo, activity: ActivityLogService) -> None:
+        self._products, self._activity = products, activity
 
     def create_listing(self, body: ProductCreate) -> Product:
         data = body.model_dump()
         data["tags"] = listing_engine.clean_tags(data["tags"])
         product = Product(id=new_id(), created_at=now(), video_status=lifecycle.initial_state(), **data)
         self._products.save(product, keywords=_keywords(product))
-        log.info("listing created", extra={"product_id": product.id})
+        self._activity.record("listing_created", product_id=product.id)
         return product
 
     def get(self, product_id: str) -> Product:

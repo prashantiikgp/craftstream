@@ -178,3 +178,40 @@ def test_a_redelivered_result_after_ready_changes_nothing(gcp_like):
     _notify(gcp_like, f"jobs/{pid}", "SUCCEEDED")
     assert _notify(gcp_like, f"jobs/{pid}", "FAILED").status_code == 204
     assert _status(gcp_like, pid)["video_status"] == "ready"
+
+
+def _log(client: TestClient, pid: str) -> list[tuple[str, dict]]:
+    items = client.get(f"{API}/logs", params={"product_id": pid}).json()["items"]
+    return [(e["event"], {d["key"]: d["value"] for d in e["details"]}) for e in reversed(items)]  # oldest first
+
+
+def test_the_video_steps_are_logged(gcp_like):
+    pid = _create(gcp_like)
+    gcp_like.post("/internal/media/uploaded", json={"bucket": "b", "name": f"raw/{pid}/source"})
+    gcp_like.post("/internal/media/uploaded", json={"bucket": "b", "name": f"raw/{pid}/source"})  # redelivered
+    _notify(gcp_like, f"jobs/{pid}", "RUNNING")                                                   # not logged
+    _notify(gcp_like, f"jobs/{pid}", "FAILED")
+    steps = _log(gcp_like, pid)
+    assert sorted(e for e, _ in steps) == sorted(["listing_created", "upload_received", "transcode_submitted",
+                                                  "video_event_ignored", "transcode_failed"])
+    details = dict(steps)
+    assert details["transcode_submitted"] == {"seconds": "12", "job": f"jobs/{pid}"}
+    assert details["video_event_ignored"] == {"event": "transcode_started", "state": "processing"}
+    assert details["transcode_failed"] == {"job": f"jobs/{pid}"}
+
+
+def test_an_unreadable_upload_is_logged(settings: Settings, container: Container):
+    storage = CdnStorage()
+    storage.duration = UnreadableVideo
+    client = TestClient(create_app(settings, Container(settings=settings, products=container.products,
+                                                       orders=container.orders, storage=storage,
+                                                       transcoder=AsyncTranscoder(), callers=AllowAllCallers())))
+    pid = _create(client)
+    client.post("/internal/media/uploaded", json={"bucket": "b", "name": f"raw/{pid}/source"})
+    assert ("upload_unreadable", {"reason": "not a video"}) in _log(client, pid)
+
+
+def test_a_result_for_an_unknown_job_is_logged(gcp_like):
+    _notify(gcp_like, "jobs/unknown", "SUCCEEDED")
+    (entry,) = gcp_like.get(f"{API}/logs", params={"group": "video"}).json()["items"]
+    assert entry["event"] == "video_event_ignored" and entry["level"] == "warning"

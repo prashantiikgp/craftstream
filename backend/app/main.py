@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
 from app.api.deps import Container, build_container
-from app.api.routers import health, internal, orders, products, uploads
+from app.api.routers import health, internal, logs, orders, products, uploads
 from app.core.errors import install_error_handlers
 from app.core.logging import configure_logging
 from app.core.settings import Settings, get_settings
@@ -37,9 +37,10 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         expose_headers=list(cors.expose_headers),
     )
     app.add_middleware(GZipMiddleware, minimum_size=http_engine.gzip_minimum_bytes())
-    install_error_handlers(app)
+    install_error_handlers(app, on_unhandled=lambda path, exc: app.state.container.activity.record(
+        "unhandled_error", path=path, error=type(exc).__name__))  # the type only: messages may carry data
 
-    for router in (products.router, orders.router, uploads.router):
+    for router in (products.router, orders.router, uploads.router, logs.router):
         app.include_router(router, prefix=API)
     app.include_router(internal.router)
     app.include_router(health.router)
