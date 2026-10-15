@@ -1,23 +1,23 @@
-"""Upload endpoints: the policy the app checks first, and (local mode only) the fake upload target."""
+"""Upload endpoints: the policy the app checks first, and (local mode only) the fake upload target.
+Routes, and which mode serves the fake target, come from models/endpoints.yml."""
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request, Response
+from fastapi import Request, Response
 
 from app.api.deps import CatalogDep, ContainerDep, MediaDep
-from app.domain.media import storage_layout_engine
+from app.api.endpoints import EndpointHandlers
 from app.generated.models import UploadPolicy
 
-router = APIRouter()
-local_router = APIRouter(include_in_schema=False)
+endpoints = EndpointHandlers()
 
 
-@router.get("/upload-policy", response_model=UploadPolicy, status_code=200)
+@endpoints.handler("getUploadPolicy")
 def get_upload_policy(media: MediaDep) -> UploadPolicy:
     return media.upload_policy()
 
 
-@local_router.put(storage_layout_engine.local_upload_route(), status_code=200)
+@endpoints.handler("localUpload")
 async def local_upload(product_id: str, request: Request, c: ContainerDep, catalog: CatalogDep,
                        media: MediaDep) -> Response:
     """Fake GCS resumable target (see infra/local/local_storage.py). Only mounted in local mode."""

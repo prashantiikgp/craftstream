@@ -1,14 +1,13 @@
-"""Liveness for Cloud Run."""
+"""Liveness for Cloud Run. Route: models/endpoints.yml (internal, so not in /docs)."""
 
 from __future__ import annotations
 
-from fastapi import APIRouter
-
 from app.api.deps import ContainerDep
+from app.api.endpoints import EndpointHandlers
 
-router = APIRouter(include_in_schema=False)
+endpoints = EndpointHandlers()
 
 
-@router.get("/health", status_code=200)
+@endpoints.handler("health")
 def health(c: ContainerDep) -> dict:
     return {"ok": True, "mode": c.settings.mode}

@@ -242,9 +242,11 @@ and the light and dark theme B match the canvas.
       the settings each mode requires (GCP: project, buckets, OIDC, topic). API title and version and the GZip
       minimum size were already in `api/http.yml`. Env vars still override every default; per-environment values
       (project, buckets, origins, OIDC, topic) come only from the environment.
-- [ ] `models/endpoints.yml` becomes the single source for routes:
-  - the API **mounts routes from it** (handlers by name), instead of hand-written decorators;
-  - query params gain constraints (`max_length`, `minimum`);
+- [x] `models/endpoints.yml` becomes the single source for routes:
+  - the API **mounts routes from it** (handlers by name), instead of hand-written decorators. *(Done: `make gen`
+    writes an endpoint table to `app/generated/api.py`; routers register `@endpoints.handler("<name>")` and
+    `app/api/endpoints.py` mounts them with the YAML's method, path, status, mode and docs visibility.)*
+  - query params gain constraints (`max_length`, `minimum`); *(done: the handlers' `Query(...)` limits moved here)*
   - `base_path` is read from it; `/api/v1` disappears from code. *(Done: `make gen` writes it to
     `app/generated/api.py`, since `models/` is not in the server image.)*
 - [x] `config/api/http.yml`:
@@ -253,8 +255,9 @@ and the light and dark theme B match the canvas.
   - Add `product_not_ready` to `models/error_response.yml`.
 - [x] `GET /orders/{order_id}` (needed by 1.4's Your orders): handler, Firestore read, API test, smoke test step.
       (Code done; the Cloud Run deploy waits for the user's OK.)
-- [ ] Keep `/docs` (OpenAPI) correct when routes are mounted from `endpoints.yml`: the handlers keep their typed
-      signatures, and the YAML maps path and method to a handler name.
+- [x] Keep `/docs` (OpenAPI) correct when routes are mounted from `endpoints.yml`: the handlers keep their typed
+      signatures, and the YAML maps path and method to a handler name. The OpenAPI document is unchanged except
+      that operationId is the endpoint name and the summary is the YAML's; `tests/api/test_api.py` checks it.
 
 ### 2.2 Domain rules
 - [x] `config/media/video_lifecycle.yml`:

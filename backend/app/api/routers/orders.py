@@ -1,20 +1,20 @@
-"""Order endpoints. The buyer flow ends at placing one; a device reads its orders back by id."""
+"""Order endpoints. The buyer flow ends at placing one; a device reads its orders back by id.
+Routes: models/endpoints.yml."""
 
 from __future__ import annotations
 
-from fastapi import APIRouter
-
 from app.api.deps import OrdersDep
+from app.api.endpoints import EndpointHandlers
 from app.generated.models import Order, OrderCreate
 
-router = APIRouter()
+endpoints = EndpointHandlers()
 
 
-@router.post("/orders", response_model=Order, status_code=201)
+@endpoints.handler("createOrder")
 def create_order(body: OrderCreate, orders: OrdersDep) -> Order:
     return orders.place(body)
 
 
-@router.get("/orders/{order_id}", response_model=Order, status_code=200)
+@endpoints.handler("getOrder")
 def get_order(order_id: str, orders: OrdersDep) -> Order:
     return orders.get(order_id)

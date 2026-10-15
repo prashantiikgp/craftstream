@@ -3,7 +3,7 @@
     models/*.yml + models/endpoints.yml
         -> models/build/schema.json                     (JSON Schema)
         -> backend/app/generated/models.py              (Pydantic models for FastAPI)
-        -> backend/app/generated/api.py                 (the API base path; models/ is not in the server image)
+        -> backend/app/generated/api.py                 (base path + every endpoint: the API mounts routes from it)
         -> frontend/lib/data/generated/models.dart      (Dart models for Flutter)
         -> frontend/lib/data/generated/api_client.dart  (Dart HTTP client, public endpoints only)
         -> frontend/lib/data/generated/limits.dart      (field limits as Dart constants, for form checks)
@@ -32,6 +32,8 @@ FIELD_KEYS = {"type", "items", "required", "readonly", "nullable", "values", "de
               "min_length", "max_length", "minimum", "maximum", "max_items", "description"}
 ENDPOINT_KEYS = {"name", "method", "path", "query", "body", "returns", "status", "summary", "mode"}
 QUERY_TYPES = {"string", "integer"}
+QUERY_KEYS = {"string": {"type", "max_length"}, "integer": {"type", "minimum", "maximum"}}
+MODES = {"local", "gcp"}
 
 
 class SpecError(ValueError):
@@ -66,15 +68,37 @@ def load_api(models: dict) -> dict:
     api = yaml.safe_load(ENDPOINTS.read_text())
     _check_keys(api, {"base_path", "endpoints", "internal"}, ENDPOINTS.name)
     known = set(models) | {f"{m}Create" for m, s in models.items() if s.get("create")}
-    for ep in api["endpoints"] + api.get("internal", []):
-        _check_keys(ep, ENDPOINT_KEYS, ep.get("name", "?"))
+    seen: set[str] = set()
+    routes: set[tuple[str, str]] = set()
+    for public, ep in [(True, e) for e in api["endpoints"]] + [(False, e) for e in api.get("internal", [])]:
+        name = ep.get("name", "?")
+        _check_keys(ep, ENDPOINT_KEYS, name)
+        missing = {"name", "method", "path", "status"} - set(ep)
+        if missing:
+            raise SpecError(f"{name}: missing {sorted(missing)}")
+        if name in seen:
+            raise SpecError(f"{name}: endpoint name used twice")
+        seen.add(name)
+        route = (ep["method"], (api["base_path"] if public else "") + ep["path"])
+        if route in routes:
+            raise SpecError(f"{name}: {' '.join(route)} is declared twice")
+        routes.add(route)
+        if ep.get("mode", "local") not in MODES:
+            raise SpecError(f"{name}: unknown mode {ep['mode']!r}")
         for key in ("body", "returns"):
             if key in ep and ep[key] not in known:
-                raise SpecError(f"{ep['name']}: unknown {key} type {ep[key]!r}")
-        for q, t in ep.get("query", {}).items():
-            if t not in QUERY_TYPES:
-                raise SpecError(f"{ep['name']}: query param {q!r} has unsupported type {t!r}")
+                raise SpecError(f"{name}: unknown {key} type {ep[key]!r}")
+        ep["query"] = {q: _query_param(f"{name}.query.{q}", spec) for q, spec in ep.get("query", {}).items()}
     return api
+
+
+def _query_param(where: str, spec: str | dict) -> dict:
+    """`q: string` or `q: {type: string, max_length: 200}`, normalised to the dict form."""
+    spec = {"type": spec} if isinstance(spec, str) else dict(spec)
+    if spec.get("type") not in QUERY_TYPES:
+        raise SpecError(f"{where}: unsupported type {spec.get('type')!r}")
+    _check_keys(spec, QUERY_KEYS[spec["type"]], where)
+    return spec
 
 
 def _check_keys(d: dict, allowed: set[str], where: str) -> None:
@@ -219,11 +243,59 @@ def build_python(models: dict) -> str:
     return "\n".join(out).rstrip() + "\n"
 
 
+PY_API_PRELUDE = '''
+What the backend needs from models/endpoints.yml at run time (models/ is not in the server image): the base path
+and every endpoint. app/api/endpoints.py mounts each router's handlers from ENDPOINTS by name.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+
+@dataclass(frozen=True)
+class QueryParam:
+    type: str                   # string | integer
+    max_length: int | None = None
+    minimum: int | None = None
+    maximum: int | None = None
+
+
+@dataclass(frozen=True)
+class Endpoint:
+    name: str
+    method: str
+    path: str                   # full path: public endpoints include BASE_PATH
+    status: int                 # success status
+    public: bool                # in the Dart client and /docs; internal endpoints are not
+    summary: str = ""
+    body: str | None = None     # request model (app/generated/models.py)
+    returns: str | None = None  # response model
+    mode: str | None = None     # mounted only in this CRAFTSTREAM_MODE; None = always
+    query: dict[str, QueryParam] = field(default_factory=dict)
+'''
+
+
+def _py_endpoint(ep: dict, public: bool, base_path: str) -> list[str]:
+    args = [f"name={ep['name']!r}", f"method={ep['method']!r}",
+            f"path={(base_path if public else '') + ep['path']!r}", f"status={ep['status']!r}", f"public={public!r}",
+            f"summary={ep.get('summary', '')!r}"]
+    args += [f"{k}={ep[k]!r}" for k in ("body", "returns", "mode") if k in ep]
+    if ep["query"]:
+        params = ", ".join(f"{q!r}: QueryParam({', '.join(f'{k}={v!r}' for k, v in spec.items())})"
+                           for q, spec in ep["query"].items())
+        args.append(f"query={{{params}}}")
+    return [f"    {ep['name']!r}: Endpoint(", *[f"        {a}," for a in args], "    ),"]
+
+
 def build_python_api(api: dict) -> str:
-    return "\n".join([
-        f'"""{HEADER}', "",
-        "What the backend needs from models/endpoints.yml at run time (models/ is not in the server image).",
-        '"""', "", f"BASE_PATH = {api['base_path']!r}", ""])
+    out = [f'"""{HEADER}', PY_API_PRELUDE.rstrip("\n"), "", "", f"BASE_PATH = {api['base_path']!r}", "",
+           "ENDPOINTS: dict[str, Endpoint] = {"]
+    for public, eps in ((True, api["endpoints"]), (False, api.get("internal", []))):
+        for ep in eps:
+            out += _py_endpoint(ep, public, api["base_path"])
+    out.append("}")
+    return "\n".join(out) + "\n"
 
 
 # ---------------------------------------------------------------- Dart
@@ -374,7 +446,7 @@ def build_dart_client(api: dict, models: dict) -> str:
         if "body" in ep:
             args.append(f"{ep['body']} body")
         query = ep.get("query", {})
-        named = [f"{'int' if t == 'integer' else 'String'}? {camel(q)}" for q, t in query.items()]
+        named = [f"{'int' if t['type'] == 'integer' else 'String'}? {camel(q)}" for q, t in query.items()]
         sig = ", ".join(args)
         if named:
             sig += (", " if sig else "") + "{" + ", ".join(named) + "}"
@@ -385,7 +457,7 @@ def build_dart_client(api: dict, models: dict) -> str:
         out.append(f"  /// {ep.get('summary', '')}")
         out.append(f"  Future<{ret}> {ep['name']}({sig}) async {{")
         if query:
-            values = {q: f"{camel(q)}.toString()" if t == "integer" else camel(q) for q, t in query.items()}
+            values = {q: f"{camel(q)}.toString()" if t["type"] == "integer" else camel(q) for q, t in query.items()}
             qmap = ", ".join(f"if ({camel(q)} != null) '{q}': {v}" for q, v in values.items())
             out.append(f"    final uri = Uri.parse('$baseUrl{dart_path}').replace(queryParameters: {{{qmap}}});")
         else:
