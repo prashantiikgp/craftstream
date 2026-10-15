@@ -12,7 +12,7 @@ Android tablets and Chrome; the backend runs entirely on Google Cloud. Built for
 | **Web app** | https://craftstream-qi0tvg.web.app |
 | **API** | https://craftstream-api-424435123536.asia-south1.run.app (liveness: [`/health`](https://craftstream-api-424435123536.asia-south1.run.app/health)) |
 | **GCP project** | `craftstream-qi0tvg`, everything in `asia-south1` |
-| **Android** | `make apk ENV=prod` builds a release APK against the same backend |
+| **Android app** | [craftstream.apk](https://github.com/prashantiikgp/craftstream/releases/latest/download/craftstream.apk) (phone and tablet; [release notes](https://github.com/prashantiikgp/craftstream/releases/tag/v2.0)). `make apk ENV=prod` builds the same APK |
 
 Home has two doors that stand in for login: **Sell** is the artisan (upload), **Buy** is the buyer (search, watch,
 order). **Activity log** (next to Your orders) shows every step of every upload, video and order, newest first.
