@@ -15,11 +15,9 @@ class RoutesRulesError implements Exception {
 /// what it shows.
 class RouteEntry {
   final String path, parent;
-  final String? screen, legacy;
-  final bool devOnly;
+  final String screen;
   final List<String> params;
-  const RouteEntry(this.path,
-      {this.parent = '', this.screen, this.legacy, this.devOnly = false, this.params = const []});
+  const RouteEntry(this.path, {this.parent = '', required this.screen, this.params = const []});
 
   /// [path] relative to [parent], as GoRouter wants nested routes.
   String get relativePath => parent.isEmpty ? path : path.substring(parent.length + 1);
@@ -31,7 +29,7 @@ class RoutesEngine {
   final RoutesSchema rules;
   final List<RouteEntry> entries = [];
 
-  /// Validates: each route shows exactly one thing, paths are well formed and unique, the initial route exists.
+  /// Validates: paths are well formed and unique, the initial route exists.
   RoutesEngine(this.rules) {
     void walk(List<RouteSchema> routes, String parent) {
       for (final r in routes) {
@@ -40,9 +38,6 @@ class RoutesEngine {
           throw RoutesRulesError('"${r.path}": top-level paths start with "/", nested paths do not');
         }
         final full = top ? r.path : '$parent/${r.path}';
-        if ((r.screen == null) == (r.legacy == null)) {
-          throw RoutesRulesError('"$full" needs exactly one of screen or legacy');
-        }
         final segments = full.split('/').where((s) => s.isNotEmpty).toList();
         for (final s in segments) {
           if (!_segment.hasMatch(s)) throw RoutesRulesError('"$full": "$s" is not a valid path segment');
@@ -52,8 +47,6 @@ class RoutesEngine {
           full,
           parent: parent,
           screen: r.screen,
-          legacy: r.legacy,
-          devOnly: r.devOnly,
           params: [for (final s in segments) if (s.startsWith(':')) s.substring(1)],
         ));
         walk(r.routes, full == '/' ? '' : full);
@@ -68,9 +61,7 @@ class RoutesEngine {
 
   String get initial => rules.initial;
 
-  Set<String> get screenNames => {for (final e in entries) if (e.screen != null) e.screen!};
-
-  Set<String> get legacyNames => {for (final e in entries) if (e.legacy != null) e.legacy!};
+  Set<String> get screenNames => {for (final e in entries) e.screen};
 
   /// The route a concrete location (`/placed/abc123`) lands on, or null. Query strings are ignored.
   RouteEntry? match(String location) {

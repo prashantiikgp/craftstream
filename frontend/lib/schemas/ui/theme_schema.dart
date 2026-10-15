@@ -18,7 +18,6 @@ class ThemeSchema {
   final MotionSchema motion;
   final FocusSchema focus;
   final ContrastSchema contrast;
-  final LegacySchema legacy;
 
   const ThemeSchema({
     required this.colors,
@@ -32,7 +31,6 @@ class ThemeSchema {
     required this.motion,
     required this.focus,
     required this.contrast,
-    required this.legacy,
   });
 
   factory ThemeSchema.fromJson(Map<String, dynamic> json) => _$ThemeSchemaFromJson(json);
@@ -306,15 +304,4 @@ class ContrastPairSchema {
   const ContrastPairSchema({required this.fg, required this.bg, required this.min, required this.why});
 
   factory ContrastPairSchema.fromJson(Map<String, dynamic> json) => _$ContrastPairSchemaFromJson(json);
-}
-
-/// v1 token names -> theme B references (`ground`, `orange.ink` …). Temporary; see theme.yml.
-@JsonSerializable()
-class LegacySchema {
-  final Map<String, String> colors;
-  final Map<String, String> radius;
-
-  const LegacySchema({required this.colors, required this.radius});
-
-  factory LegacySchema.fromJson(Map<String, dynamic> json) => _$LegacySchemaFromJson(json);
 }

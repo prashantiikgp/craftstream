@@ -1,10 +1,7 @@
-# Every route in the app. A route shows either a screen YAML (`screen: home` -> ui/screens/home.yml) or, while it is
-# being migrated, a v1 Dart screen (`legacy: discover`). Delete `legacy` routes as their screens move to YAML
-# (docs/YAML_PLAN.md 1.4).
+# Every route in the app. Each shows a screen YAML (`screen: home` -> ui/screens/home.yml).
 #
 #   path      absolute at the top level (`/orders`), relative under `routes:` (`buy` -> /product/:id/buy)
 #   :name     a path parameter, passed to the screen (`/placed/:order_id` -> params.order_id)
-#   dev_only  hidden unless DEV_TOOLS is on (env/*.json)
 
 initial: /
 
@@ -31,8 +28,3 @@ routes:
     routes:
       - path: buy
         screen: checkout
-
-  # v1 screens, until each becomes a screen YAML
-  - path: /catalog
-    legacy: design_catalog
-    dev_only: true

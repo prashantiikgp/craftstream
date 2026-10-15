@@ -48,14 +48,12 @@ void main() {
     expect(bad.contrastFailures().map((f) => '$f').join('\n'), contains('light: text_muted on ground'));
   });
 
-  test('bad colours, unknown keys, unknown tones and broken legacy names fail at load', () {
+  test('bad colours, unknown keys and unknown tones fail at load', () {
     expect(() => ThemeEngine(rules((y) => y.replaceFirst('ground: "#F5F5F5"', 'ground: "grey"'))),
         throwsA(isA<ThemeRulesError>().having((e) => e.message, 'message', contains('colors.light.ground'))));
     expect(() => rules((y) => y.replaceFirst('ground: "#F5F5F5"', 'ground: "#F5F5F5"\n    glow: "#000000"')),
         throwsA(isA<ConfigError>()));
     expect(() => ThemeEngine(rules((y) => y.replaceFirst('success: marigold', 'success: gold'))),
-        throwsA(isA<ThemeRulesError>()));
-    expect(() => ThemeEngine(rules((y) => y.replaceFirst('brand_ink: orange.ink', 'brand_ink: orange.glow'))),
         throwsA(isA<ThemeRulesError>()));
   });
 
@@ -77,14 +75,11 @@ void main() {
     expect(engine.light.shadowRest, isEmpty);
   });
 
-  test('sharp corners, and v1 names point at theme B values', () {
+  test('sharp corners', () {
     final t = engine.light;
     expect(t.radius.sharp, 2);
     expect(t.radius.card, 4);
-    expect(t.radius.pill, t.radius.sharp);
-    expect(t.brand, t.accent('orange').fill);
-    expect(t.bg, t.ground);
-    expect(t.success.wash, t.tone('success').wash);
+    expect(t.radius.named('none'), 0);
   });
 
   test('contrast maths matches WCAG reference values', () {

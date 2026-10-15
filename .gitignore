@@ -17,6 +17,7 @@ frontend/android/.gradle/
 # Assignment brief (private, not for the public repo)
 docs/Technical_Assignment.pdf
 .claude/settings.local.json
+.claude/worktrees/
 infra/gcp/config.env
 .playwright-mcp/
 frontend/.firebase/

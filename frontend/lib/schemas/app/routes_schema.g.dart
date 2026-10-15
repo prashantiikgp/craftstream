@@ -23,15 +23,10 @@ RoutesSchema _$RoutesSchemaFromJson(Map<String, dynamic> json) =>
 
 RouteSchema _$RouteSchemaFromJson(Map<String, dynamic> json) =>
     $checkedCreate('RouteSchema', json, ($checkedConvert) {
-      $checkKeys(
-        json,
-        allowedKeys: const ['path', 'screen', 'legacy', 'dev_only', 'routes'],
-      );
+      $checkKeys(json, allowedKeys: const ['path', 'screen', 'routes']);
       final val = RouteSchema(
         path: $checkedConvert('path', (v) => v as String),
-        screen: $checkedConvert('screen', (v) => v as String?),
-        legacy: $checkedConvert('legacy', (v) => v as String?),
-        devOnly: $checkedConvert('dev_only', (v) => v as bool? ?? false),
+        screen: $checkedConvert('screen', (v) => v as String),
         routes: $checkedConvert(
           'routes',
           (v) =>
@@ -42,4 +37,4 @@ RouteSchema _$RouteSchemaFromJson(Map<String, dynamic> json) =>
         ),
       );
       return val;
-    }, fieldKeyMap: const {'devOnly': 'dev_only'});
+    });

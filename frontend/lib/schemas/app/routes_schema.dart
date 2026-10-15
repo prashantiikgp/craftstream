@@ -19,21 +19,11 @@ class RoutesSchema {
 class RouteSchema {
   final String path;
 
-  /// A screen YAML in ui/screens/ (exactly one of [screen] and [legacy]).
-  final String? screen;
-
-  /// A v1 Dart screen, registered in core/router.dart, until it moves to YAML.
-  final String? legacy;
-  final bool devOnly;
+  /// The screen YAML in ui/screens/ this route shows.
+  final String screen;
   final List<RouteSchema> routes;
 
-  const RouteSchema({
-    required this.path,
-    this.screen,
-    this.legacy,
-    this.devOnly = false,
-    this.routes = const [],
-  });
+  const RouteSchema({required this.path, required this.screen, this.routes = const []});
 
   factory RouteSchema.fromJson(Map<String, dynamic> json) => _$RouteSchemaFromJson(json);
 }

@@ -44,12 +44,6 @@ class AccentColors {
   Map<String, Color> get parts => {'fill': fill, 'on_fill': onFill, 'ink': ink, 'wash': wash, 'line': line};
 }
 
-/// v1 status quartet, kept for v1 widgets until they are replaced (theme.yml `legacy`).
-class StatusColors {
-  final Color fill, border, ink, wash;
-  const StatusColors({required this.fill, required this.border, required this.ink, required this.wash});
-}
-
 class ShadowSpec {
   final Offset offset;
   final double blur, spread;
@@ -72,20 +66,10 @@ class TextSpec {
   });
 }
 
-/// Corner radii: theme B names plus the v1 names they stand in for.
+/// Corner radii by their theme.yml names.
 class Radii {
   final double none, sharp, card;
-  final double tag, sm, md, lg, pill; // v1
-  const Radii({
-    required this.none,
-    required this.sharp,
-    required this.card,
-    required this.tag,
-    required this.sm,
-    required this.md,
-    required this.lg,
-    required this.pill,
-  });
+  const Radii({required this.none, required this.sharp, required this.card});
 
   double named(String name) =>
       {'none': none, 'sharp': sharp, 'card': card}[name] ?? (throw ThemeRulesError('unknown radius "$name"'));
@@ -109,10 +93,6 @@ class DesignTokens {
   final double reducedMotionFactor, hoverLift, doorHoverLift, pressScale, skeletonMinOpacity;
   final double focusRingWidth, minTarget;
   final String focusRingTone;
-  // v1 names (theme.yml `legacy`)
-  final Color brand, brandD, brandDd, brandInk, brandL, brandLl, brandLine, onBrand;
-  final Color secondary, secondaryInk, secondaryL, onSecondary;
-  final Color bg, card, surfaceSoft, hair, hairSoft, ink, sub, faint;
 
   const DesignTokens({
     required this.brightness,
@@ -147,26 +127,6 @@ class DesignTokens {
     required this.focusRingWidth,
     required this.focusRingTone,
     required this.minTarget,
-    required this.brand,
-    required this.brandD,
-    required this.brandDd,
-    required this.brandInk,
-    required this.brandL,
-    required this.brandLl,
-    required this.brandLine,
-    required this.onBrand,
-    required this.secondary,
-    required this.secondaryInk,
-    required this.secondaryL,
-    required this.onSecondary,
-    required this.bg,
-    required this.card,
-    required this.surfaceSoft,
-    required this.hair,
-    required this.hairSoft,
-    required this.ink,
-    required this.sub,
-    required this.faint,
   })  : _tones = tones,
         _lift = lift;
 
@@ -205,19 +165,6 @@ class DesignTokens {
           ),
       ];
 
-  // v1 shadow and status names.
-  List<ShadowSpec> get shadowSm => shadowRest;
-  List<ShadowSpec> get shadowLg => lift(tone('brand').fill);
-  StatusColors _status(String tone) {
-    final a = this.tone(tone);
-    return StatusColors(fill: a.fill, border: a.line, ink: a.ink, wash: a.wash);
-  }
-
-  StatusColors get success => _status('success');
-  StatusColors get danger => _status('danger');
-  StatusColors get info => _status('info');
-  StatusColors get warning => _status('warning');
-
   /// Every colour by the name theme.yml uses for it: `ground`, `text`, `orange.fill`, `pink.ink` …
   Map<String, Color> get namedColors => {
         'ground': ground, 'surface': surface, 'surface_alt': surfaceAlt, 'line': line, 'line_strong': lineStrong,
@@ -253,12 +200,6 @@ class ContrastFailure {
 const requiredStyles = ['display', 'h1', 'h2', 'h3', 'title', 'body', 'body_strong', 'label', 'caption', 'price'];
 
 /// v1 colour names the v1 widgets read (DesignTokens fields above).
-const requiredLegacyColors = [
-  'brand', 'brand_d', 'brand_dd', 'brand_ink', 'brand_l', 'brand_ll', 'brand_line', 'on_brand',
-  'secondary', 'secondary_ink', 'secondary_l', 'on_secondary',
-  'bg', 'card', 'surface_soft', 'hair', 'hair_soft', 'ink', 'sub', 'faint',
-];
-const requiredLegacyRadii = ['tag', 'sm', 'md', 'lg', 'pill'];
 
 class ThemeEngine {
   final ThemeSchema rules;
@@ -286,12 +227,6 @@ class ThemeEngine {
     }
     if (rules.motion.pressScale <= 0 || rules.motion.pressScale > 1) {
       throw const ThemeRulesError('motion.press_scale must be in (0, 1]');
-    }
-    for (final name in requiredLegacyColors) {
-      if (!rules.legacy.colors.containsKey(name)) throw ThemeRulesError('legacy.colors.$name is missing');
-    }
-    for (final name in requiredLegacyRadii) {
-      if (!rules.legacy.radius.containsKey(name)) throw ThemeRulesError('legacy.radius.$name is missing');
     }
     light;
     dark;
@@ -359,20 +294,7 @@ class ThemeEngine {
       'scrim': hex(c.scrim, 'colors.$mode.scrim'),
       'on_scrim': hex(c.onScrim, 'colors.$mode.on_scrim'),
     };
-    Color ref(String r, String where) {
-      if (base.containsKey(r)) return base[r]!;
-      final dot = r.indexOf('.');
-      final part = dot > 0 ? accents[r.substring(0, dot)]?.parts[r.substring(dot + 1)] : null;
-      return part ?? _badRef(where, r);
-    }
-
-    final legacy = {
-      for (final MapEntry(:key, :value) in rules.legacy.colors.entries) key: ref(value, 'legacy.colors.$key'),
-    };
     final radius = rules.radius;
-    double r(String name, String where) =>
-        {'none': radius.none, 'sharp': radius.sharp, 'card': radius.card}[name] ??
-        (throw ThemeRulesError('$where: unknown radius "$name"'));
     List<ShadowSpec> layers(List<ShadowLayerSchema> ls, String level) => [
           for (final (i, l) in ls.indexed)
             ShadowSpec(
@@ -411,16 +333,7 @@ class ThemeEngine {
       tones: _toneMap,
       styles: {for (final MapEntry(:key, :value) in rules.styles.entries) key: text(key, value)},
       space: rules.spacing,
-      radius: Radii(
-        none: radius.none,
-        sharp: radius.sharp,
-        card: radius.card,
-        tag: r(rules.legacy.radius['tag']!, 'legacy.radius.tag'),
-        sm: r(rules.legacy.radius['sm']!, 'legacy.radius.sm'),
-        md: r(rules.legacy.radius['md']!, 'legacy.radius.md'),
-        lg: r(rules.legacy.radius['lg']!, 'legacy.radius.lg'),
-        pill: r(rules.legacy.radius['pill']!, 'legacy.radius.pill'),
-      ),
+      radius: Radii(none: radius.none, sharp: radius.sharp, card: radius.card),
       shadowRest: layers(shadows.rest, 'rest'),
       shadowFloat: layers(shadows.float, 'float'),
       lift: shadows.lift,
@@ -437,30 +350,10 @@ class ThemeEngine {
       focusRingWidth: rules.focus.ringWidth,
       focusRingTone: rules.focus.ringTone,
       minTarget: rules.focus.minTarget,
-      brand: legacy['brand']!,
-      brandD: legacy['brand_d']!,
-      brandDd: legacy['brand_dd']!,
-      brandInk: legacy['brand_ink']!,
-      brandL: legacy['brand_l']!,
-      brandLl: legacy['brand_ll']!,
-      brandLine: legacy['brand_line']!,
-      onBrand: legacy['on_brand']!,
-      secondary: legacy['secondary']!,
-      secondaryInk: legacy['secondary_ink']!,
-      secondaryL: legacy['secondary_l']!,
-      onSecondary: legacy['on_secondary']!,
-      bg: legacy['bg']!,
-      card: legacy['card']!,
-      surfaceSoft: legacy['surface_soft']!,
-      hair: legacy['hair']!,
-      hairSoft: legacy['hair_soft']!,
-      ink: legacy['ink']!,
-      sub: legacy['sub']!,
-      faint: legacy['faint']!,
     );
   }
 
-  /// Number of colour pairs checked per mode (for /catalog).
+  /// Number of colour pairs checked per mode.
   int get contrastCheckCount =>
       rules.contrast.pairs.length + rules.contrast.eachAccent.length * rules.accents.light.length;
 

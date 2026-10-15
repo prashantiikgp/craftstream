@@ -13,7 +13,7 @@ Read with the root `CLAUDE.md`. Full plan: `docs/FRONTEND_PLAN.md`.
 | Data | `lib/data/repositories/`, `lib/data/upload/`, `lib/data/mock/` | call the generated API client and GCS (or the mock) | contain UI or business rules |
 | Generated | `lib/data/generated/` | be imported by repositories | be edited by hand |
 | Features | `lib/features/<feature>/` | screen + widgets + controller (Riverpod) | read YAML or call HTTP directly |
-| Shared | `lib/shared/widgets/` | widgets used by 2+ features | hold feature logic |
+| Shared | `lib/shared/bricks/`, `lib/shared/screens/` | brick builders and the screen host, driven by YAML | hold feature logic |
 
 **Flow:** `screen → controller → engine (rules) or repository (data)`.
 
@@ -35,7 +35,7 @@ API client. Screens and controllers only see the repository interfaces.
 
 | File | Says |
 |---|---|
-| `assets/config/app/routes.yml` | every route; each shows a screen YAML (`screen:`) or, until migrated, a v1 Dart screen (`legacy:`) |
+| `assets/config/app/routes.yml` | every route; each shows a screen YAML (`screen:`) |
 | `assets/config/app/navigation.yml` | the Buy (01, orange) and Sell (02, pink) roles |
 | `assets/config/ui/screens/<name>.yml` | one screen: `data` source, `width`, `fill`, `backdrop`, and `top` / `body` / `bottom` / `empty` / `error` bricks |
 | `assets/config/ui/bricks.yml` | the brick catalogue: each brick's props (what a screen may set) and style (its look, in tokens) |
@@ -78,9 +78,8 @@ API client. Screens and controllers only see the repository interfaces.
   - `t.tone('danger')` gives a meaning's colours;
   - `t.lift(accentFill)` gives the key-card hover shadow;
   - `context.type.named('eyebrow')` gives a text style. Styles with `upper: true` are shown in capitals.
-- **v1 names** (`brand`, `brand_ink`, `card`, `hair`, `sub` …) still work through theme.yml's temporary `legacy:` block
-  until the last v1 screen is replaced. New bricks use the theme B names.
-- `/catalog` (DEV_TOOLS only) shows every token and switches light/dark live. Users switch with the theme toggle.
+- Users switch light and dark with the theme toggle. Material's own widgets (text fields, menus) get theme B tones
+  from `shared/theme/app_theme.dart` (brand → primary, info → secondary, danger → error).
 - Fonts are bundled and subset (`tools/subset_fonts.sh`, ~137 KB). Never add `google_fonts` runtime fetching.
 
 ## Environments (security)
@@ -104,10 +103,9 @@ If any YAML fails to load, the app shows an error screen at startup. It never ru
 
 ## Recipe: add a screen
 
-1. Create `lib/features/<feature>/` with `<feature>_screen.dart`, `<feature>_controller.dart` and `widgets/`.
-2. Add a route in `core/router.dart`.
-3. Put all text in `strings.yml`; build the layout from `layout_engine` size classes (phone / tablet / wide).
-4. Every async screen handles four states: loading, empty, error and data.
+See "Screens are YAML" above: a screen YAML, a route in `routes.yml`, and (if it shows data) a source in
+`lib/features/<feature>/<feature>_source.dart` with its controller, registered in `shared/screens/sources.dart`.
+Every data screen handles four states: loading, empty, error and ready (`ScreenData`).
 
 ## Low-bandwidth rules (< 50 kbps)
 

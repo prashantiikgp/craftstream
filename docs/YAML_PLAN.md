@@ -149,9 +149,11 @@ and the convention tests run and fail on today's literals. The failing list *is*
       every pair in both modes.
 - [ ] **Theme mode:** the toggle works (home); the default still comes from env THEME_MODE (prod: light); move it to `app/app.yml` (system) and add the toggle to every top bar. `app/app.yml` sets the default (system); the user can switch light and dark from the
       header.
-- [ ] Rebuild `/catalog` (dev only) from YAML, so the design system page reads its own text from strings.yml.
-- [ ] Update the **CraftStream Design System** artifact to theme B (tokens, type, components), so the canvas,
-      the artifact and `theme.yml` agree.
+- [x] ~~Rebuild `/catalog` (dev only) from YAML~~ **Dropped 2026-10-15:** the v1 `/catalog` page, the v1 widgets
+      (`lib/shared/widgets/`), the v1 brand painters and the `legacy:` token block were deleted instead; the
+      render test draws every real screen at four sizes in both modes, and the literal baseline is now empty.
+- [x] ~~Update the CraftStream Design System artifact~~ **Dropped:** it lives outside the repo; `theme.yml` and
+      `bricks.yml` are the design system.
 - [ ] **Accessibility tokens:** focus ring (colour, width), minimum touch target 44 px, and semantics label
       templates for cards and icon buttons, all in YAML. Reduced motion turns off lift and scale.
 

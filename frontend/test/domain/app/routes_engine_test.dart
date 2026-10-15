@@ -34,12 +34,13 @@ void main() {
   test('broken routes fail at load', () {
     expect(() => RoutesEngine(rules((y) => y.replaceFirst('initial: /', 'initial: /start'))),
         throwsA(isA<RoutesRulesError>()));
-    expect(() => RoutesEngine(rules((y) => y.replaceFirst('    screen: home', '    screen: home\n    legacy: x'))),
-        throwsA(isA<RoutesRulesError>()));
     expect(() => RoutesEngine(rules((y) => y.replaceFirst('- path: buy', '- path: /buy'))),
         throwsA(isA<RoutesRulesError>()));
     expect(() => RoutesEngine(rules((y) => y.replaceFirst('path: /orders', 'path: /'))),
         throwsA(isA<RoutesRulesError>()));
-    expect(() => rules((y) => y.replaceFirst('dev_only: true', 'devonly: true')), throwsA(isA<ConfigError>()));
+    // Unknown keys (the old `legacy` / `dev_only`) and a route without a screen fail at load.
+    expect(() => rules((y) => y.replaceFirst('    screen: home', '    screen: home\n    legacy: x')),
+        throwsA(isA<ConfigError>()));
+    expect(() => rules((y) => y.replaceFirst('    screen: orders', '')), throwsA(isA<ConfigError>()));
   });
 }

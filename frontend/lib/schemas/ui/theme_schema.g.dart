@@ -24,7 +24,6 @@ ThemeSchema _$ThemeSchemaFromJson(Map<String, dynamic> json) => $checkedCreate(
         'motion',
         'focus',
         'contrast',
-        'legacy',
       ],
     );
     final val = ThemeSchema(
@@ -86,10 +85,6 @@ ThemeSchema _$ThemeSchemaFromJson(Map<String, dynamic> json) => $checkedCreate(
       contrast: $checkedConvert(
         'contrast',
         (v) => ContrastSchema.fromJson(v as Map<String, dynamic>),
-      ),
-      legacy: $checkedConvert(
-        'legacy',
-        (v) => LegacySchema.fromJson(v as Map<String, dynamic>),
       ),
     );
     return val;
@@ -460,22 +455,6 @@ ContrastPairSchema _$ContrastPairSchemaFromJson(Map<String, dynamic> json) =>
         bg: $checkedConvert('bg', (v) => v as String),
         min: $checkedConvert('min', (v) => (v as num).toDouble()),
         why: $checkedConvert('why', (v) => v as String),
-      );
-      return val;
-    });
-
-LegacySchema _$LegacySchemaFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('LegacySchema', json, ($checkedConvert) {
-      $checkKeys(json, allowedKeys: const ['colors', 'radius']);
-      final val = LegacySchema(
-        colors: $checkedConvert(
-          'colors',
-          (v) => Map<String, String>.from(v as Map),
-        ),
-        radius: $checkedConvert(
-          'radius',
-          (v) => Map<String, String>.from(v as Map),
-        ),
       );
       return val;
     });
