@@ -53,7 +53,7 @@ models/          shared data models + endpoints (YAML) → codegen input
 backend/         FastAPI service           → see backend/CLAUDE.md
 frontend/        Flutter app               → see frontend/CLAUDE.md
 infra/gcp/       idempotent gcloud scripts, CORS, Eventarc/Pub/Sub wiring
-tools/           codegen.py, local_hls.py (FFmpeg ladder for local testing)
+tools/           codegen.py, local_hls.py (FFmpeg ladder for local testing); defaults in tools.yml
 docs/            INTENT, PLAN, BACKEND_PLAN, FRONTEND_PLAN, ARCHITECTURE
 ```
 

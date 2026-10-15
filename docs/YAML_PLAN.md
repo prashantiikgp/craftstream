@@ -289,7 +289,8 @@ and the light and dark theme B match the canvas.
       *(The printer is done: `make infra-print`. The comparison with the live project and the user's OK are
       still to do; the rewritten scripts have not been run.)*
 - [x] A test cross-checks `resources.yml` against `storage_layout.yml` and the Firestore queries.
-- [ ] `tools/tools.yml`: smoke test, throttle proxy and local_hls defaults.
+- [x] `tools/tools.yml`: smoke test, throttle proxy and local_hls defaults (read by `tools/tools_loader.py`, which
+      rejects unknown and missing keys; the smoke test takes its routes from `models/endpoints.yml`).
 
 ### 2.4 Activity log (backend)
 - [x] Contract: `models/log_entry.yml`, `log_detail.yml`, `log_page.yml`; `GET /logs` and `POST /logs`.

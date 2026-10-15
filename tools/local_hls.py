@@ -4,7 +4,8 @@
     backend/.venv/bin/python tools/local_hls.py my_video.mp4 out/ --only ultra_low   # one rung
     backend/.venv/bin/python tools/local_hls.py --sample out/sample.mp4              # make a test clip
 
-Encoder settings come from backend ladder_engine (the same rules as the GCP Transcoder job).
+Encoder settings come from backend ladder_engine (the same rules as the GCP Transcoder job); the sample clip and
+the per-request header allowance from tools/tools.yml.
 Open out/manifest.m3u8 in VLC, or serve the folder and play it in the app.
 
 "On the wire" for a rung = master playlist + rung playlist + init segment + every media segment,
@@ -22,13 +23,17 @@ from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from tools_loader import load_tools_config
 
 from app.domain.media.ladder_engine import ffmpeg_args, master_playlist, sorted_rungs
 from app.domain.media.ladder_loader import load_ladder_rules
 from app.domain.media.storage_layout_engine import manifest_name
 from app.domain.media.upload_policy_engine import max_duration_seconds
 
-HTTP_HEADER_BYTES = 400  # typical GCS response headers per request (status line, cache, CORS, content-type)
+CFG = load_tools_config().local_hls
+HTTP_HEADER_BYTES = CFG.http_header_bytes  # typical GCS response headers per request (status, cache, CORS, type)
 
 
 @dataclass(frozen=True)
@@ -58,15 +63,16 @@ def has_fdk_aac() -> bool:
     return "libfdk_aac" in res.stdout
 
 
-def make_sample(dst: Path, seconds: int = 60, noisy: bool = False) -> Path:
-    """A 1080p30 clip with motion (and optional film grain, which is much harder to compress) plus a tone."""
-    vf = "noise=alls=25:allf=t+u" if noisy else "null"
+def make_sample(dst: Path, seconds: int | None = None, noisy: bool = False) -> Path:
+    """A clip with motion (and optional film grain, which is much harder to compress) plus a tone."""
+    s = CFG.sample
+    vf = f"noise=alls={s.grain}:allf=t+u" if noisy else "null"
     subprocess.run([
         "ffmpeg", "-y", "-loglevel", "error",
-        "-f", "lavfi", "-i", "testsrc2=size=1920x1080:rate=30",
-        "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000",
-        "-t", str(seconds), "-vf", vf, "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
-        "-c:a", "aac", "-b:a", "128k", str(dst),
+        "-f", "lavfi", "-i", f"testsrc2=size={s.size}:rate={s.fps}",
+        "-f", "lavfi", "-i", f"sine=frequency={s.tone_hz}:sample_rate={s.sample_rate}",
+        "-t", str(seconds or s.seconds), "-vf", vf, "-c:v", "libx264", "-preset", s.preset, "-crf", str(s.crf),
+        "-c:a", "aac", "-b:a", f"{s.audio_kbps}k", str(dst),
     ], check=True)
     return dst
 
@@ -121,7 +127,8 @@ if __name__ == "__main__":
     ap.add_argument("src", type=Path, nargs="?")
     ap.add_argument("out", type=Path, nargs="?")
     ap.add_argument("--only", help="encode just this rung")
-    ap.add_argument("--sample", type=Path, help="write a 60 s 1080p test clip here and exit")
+    ap.add_argument("--sample", type=Path,
+                    help=f"write a {CFG.sample.seconds} s {CFG.sample.size} test clip here and exit")
     ap.add_argument("--noisy", action="store_true", help="with --sample: add film grain (worst case)")
     a = ap.parse_args()
     if not has_ffmpeg():

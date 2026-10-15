@@ -1,0 +1,52 @@
+# Defaults for the developer tools in tools/: the smoke test, the throttle proxy and the local HLS ladder.
+# Read by tools/tools_loader.py, which rejects unknown and missing keys. A command-line flag, where a tool has
+# one, overrides the value here. Routes come from models/endpoints.yml and the ladder from
+# backend/config/media/ladder.yml, not from this file.
+
+smoke_test:                 # tools/smoke_test.py: the whole flow against a running API
+  request_timeout_s: 30     # each API call
+  upload_timeout_s: 120     # each upload chunk
+  transcode_timeout_s: 1800 # --timeout: how long to wait for the video to be ready
+  poll_every_s: 10          # how often to ask while it processes
+  error_text_chars: 200     # how much of an unexpected response body to print
+  tag_prefix: smoke         # + 6 random hex digits: a tag only this run's listing has
+  listing:                  # the listing it creates (its tags also get the run's own tag)
+    title: Smoke test bowl
+    description: Turned on a lathe, oiled by hand.
+    price: 499.5
+    tags: [woodwork]
+    artisan_name: Smoke Bot
+  search: lathe bowl        # keywords that must find the listing (with the run's tag)
+  order:
+    buyer_name: Smoke Buyer # must never appear in the activity log
+    quantity: 2
+  log_events: [listing_created, upload_received, order_placed]   # written inside our own requests, so never late
+  clip:                     # the test clip FFmpeg makes when no --video is given
+    seconds: 12
+    size: 640x360
+    fps: 24
+    tone_hz: 440
+    preset: veryfast
+
+throttle_proxy:             # tools/throttle_proxy.py: a bandwidth-capped HTTP proxy for the 45 kbps demo
+  kbps: 45                  # --kbps: cap per direction
+  rtt_ms: 300               # --rtt-ms: extra delay per new connection
+  host: 127.0.0.1           # --host
+  port: 8045                # --port
+  chunk_bytes: 512          # bytes per relay step: small enough that one connection cannot hog the budget
+  burst_ms: 100             # the largest burst, as this much time at the cap
+  report_every_s: 10        # how often it prints the measured throughput
+  top_talkers: 3            # connections listed per report with -v
+
+local_hls:                  # tools/local_hls.py: build the ladder with FFmpeg and measure it
+  http_header_bytes: 400    # response headers per request (status line, cache, CORS, type), counted on the wire
+  sample:                   # --sample: a test clip with motion and a tone
+    seconds: 60
+    size: 1920x1080
+    fps: 30
+    tone_hz: 440
+    sample_rate: 48000
+    preset: veryfast
+    crf: 18
+    audio_kbps: 128
+    grain: 25               # --noisy: film grain strength (much harder to compress)
