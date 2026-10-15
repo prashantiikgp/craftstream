@@ -72,6 +72,11 @@ YAML gotcha: bare `on`, `off`, `yes`, `no` are booleans. Quote them in string li
 - Upload bucket: private, CORS `PUT` from the web origin. Media bucket: public read, CORS `GET`, `Cache-Control` on HLS objects.
 - The 15:00 cap is a Transcoder `editList` end offset taken from `upload_policy.yml`.
 - Logs are structured JSON (`core/logging.py`) so Cloud Logging can filter them.
+- **Activity log** (`GET`/`POST /logs`, Firestore `activity_log`, TTL on `expire_at`): every event, its level, group,
+  source and message template is declared in `config/platform/activity_log.yml`. Services call
+  `activity.record("<event>", product_id=..., **details)`, which never raises and also writes to stdout. The app may
+  only post `source: app` events. Details hold ids, sizes, durations, states and reasons: **never** a buyer's name,
+  an upload URL (a bearer credential), a token or a request body.
 
 ## Style
 

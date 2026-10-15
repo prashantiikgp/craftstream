@@ -283,6 +283,20 @@ and the light and dark theme B match the canvas.
 - [x] A test cross-checks `resources.yml` against `storage_layout.yml` and the Firestore queries.
 - [ ] `tools/tools.yml`: smoke test, throttle proxy and local_hls defaults.
 
+### 2.4 Activity log (backend)
+- [x] Contract: `models/log_entry.yml`, `log_detail.yml`, `log_page.yml`; `GET /logs` and `POST /logs`.
+- [x] `config/platform/activity_log.yml` + schema, loader, engine and tests: collection, `keep_days` / `expire_at`,
+      page sizes, detail limits, the event catalogue (source, group, level, message template checked at startup).
+- [x] New error codes `unknown_log_event` (422) and `log_event_not_reportable` (403) in `api/http.yml` and
+      `models/error_response.yml`.
+- [x] `LogRepo` (InMemory + Firestore), `ActivityLogService` (`record` never raises, mirrors to stdout), the
+      `logs` router, and `record` calls in the catalog, media and order services, the internal-call check and the
+      unhandled-error handler. No buyer names, upload URLs or tokens in any entry.
+- [x] `infra/gcp/resources.yml`: three `activity_log` composite indexes and the `expire_at` TTL policy;
+      `resources.py --print` and `03_firestore.sh` create them; the infra test checks them.
+- [ ] Apply the indexes and the TTL policy to the GCP project and deploy (waits for the user's OK).
+- [x] `tools/smoke_test.py` checks the listing's log entries (listing_created, upload_received, order_placed).
+
 **Done when:** the backend literal lint passes, routes come from `endpoints.yml`, and the inventory's duplicates
 are gone.
 
