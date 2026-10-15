@@ -23,7 +23,6 @@ class EnvError implements Exception {
 class AppEnv {
   final AppEnvName name;
   final Uri apiHost;
-  final String themeMode; // light | dark | system
   final bool devTools;
   final bool mockData; // true = in-app fake data, no API calls (lib/data/mock/)
   final LogLevel logLevel;
@@ -31,7 +30,6 @@ class AppEnv {
   const AppEnv({
     required this.name,
     required this.apiHost,
-    required this.themeMode,
     required this.devTools,
     required this.mockData,
     required this.logLevel,
@@ -40,13 +38,12 @@ class AppEnv {
   bool get isProd => name == AppEnvName.prod;
 
   /// The env file keys.
-  static const keys = ['APP_ENV', 'API_HOST', 'THEME_MODE', 'DEV_TOOLS', 'MOCK_DATA', 'LOG_LEVEL'];
+  static const keys = ['APP_ENV', 'API_HOST', 'DEV_TOOLS', 'MOCK_DATA', 'LOG_LEVEL'];
 
   /// Values compiled in with --dart-define-from-file, and whether each was given at all.
   static const _compiled = <String, (bool, Object)>{
     'APP_ENV': (bool.hasEnvironment('APP_ENV'), String.fromEnvironment('APP_ENV')),
     'API_HOST': (bool.hasEnvironment('API_HOST'), String.fromEnvironment('API_HOST')),
-    'THEME_MODE': (bool.hasEnvironment('THEME_MODE'), String.fromEnvironment('THEME_MODE')),
     'DEV_TOOLS': (bool.hasEnvironment('DEV_TOOLS'), bool.fromEnvironment('DEV_TOOLS')),
     'MOCK_DATA': (bool.hasEnvironment('MOCK_DATA'), bool.fromEnvironment('MOCK_DATA')),
     'LOG_LEVEL': (bool.hasEnvironment('LOG_LEVEL'), String.fromEnvironment('LOG_LEVEL')),
@@ -90,9 +87,6 @@ class AppEnv {
       }
     }
 
-    final mode = (raw['THEME_MODE'] as String?) ?? '';
-    if (!const {'light', 'dark', 'system'}.contains(mode)) problems.add('THEME_MODE must be light, dark or system');
-
     final devTools = raw['DEV_TOOLS'];
     if (devTools is! bool) problems.add('DEV_TOOLS must be true or false');
 
@@ -118,7 +112,6 @@ class AppEnv {
     return AppEnv(
       name: name!,
       apiHost: host!.replace(path: ''),
-      themeMode: mode,
       devTools: devTools as bool,
       mockData: mockData as bool,
       logLevel: level!,

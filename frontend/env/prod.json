@@ -1,7 +1,6 @@
 {
   "APP_ENV": "prod",
   "API_HOST": "https://craftstream-api-424435123536.asia-south1.run.app",
-  "THEME_MODE": "light",
   "DEV_TOOLS": false,
   "MOCK_DATA": false,
   "LOG_LEVEL": "warn"

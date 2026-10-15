@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/generated/models.dart' show ProductSummary;
+import '../domain/app/app_engine.dart';
+import '../domain/app/app_loader.dart';
 import '../domain/app/env_rules_engine.dart';
 import '../domain/app/env_rules_loader.dart';
 import '../domain/app/navigation_engine.dart';
@@ -48,6 +50,9 @@ import 'env.dart';
 class AppConfig {
   final AppEnv env;
 
+  /// app/app.yml: the app's name, first route and starting theme.
+  final AppEngine app;
+
   /// app/env_rules.yml: the environment policy and the Android dev host.
   final EnvRulesEngine envRules;
   final ThemeEngine theme;
@@ -73,6 +78,7 @@ class AppConfig {
   final MockEngine mock;
   const AppConfig({
     required this.env,
+    required this.app,
     required this.envRules,
     required this.theme,
     required this.layout,
@@ -102,13 +108,18 @@ class ConfigCrossCheckError implements Exception {
   String toString() => 'Rule files disagree:\n- ${problems.join('\n- ')}';
 }
 
-Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
+/// [themeMode] replaces app.yml's starting theme (tests draw every screen in light and in dark).
+Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle, String? themeMode}) async {
   final envRules = EnvRulesEngine(await loadEnvRules(bundle: bundle));
   // A given env (tests) passes the same policy as the compiled-in one.
   final e = env == null ? AppEnv.fromCompiledValues(envRules) : env.checkedBy(envRules);
   final theme = ThemeEngine(await loadThemeRules(bundle: bundle));
   final strings = StringsEngine(await loadStringsRules(bundle: bundle));
   final routes = RoutesEngine(await loadRoutesRules(bundle: bundle));
+  final app = AppEngine(await loadAppRules(bundle: bundle), themeMode: themeMode);
+  if (routes.match(app.initialRoute) == null) {
+    throw ConfigCrossCheckError(['app.yml initial_route: "${app.initialRoute}" is not a route in routes.yml']);
+  }
   final navigation = NavigationEngine(await loadNavigationRules(bundle: bundle));
   final icons = IconsEngine(await loadIconsRules(bundle: bundle));
   final status = StatusEngine(await loadStatusRules(bundle: bundle));
@@ -148,6 +159,7 @@ Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
   }
   return AppConfig(
     env: e,
+    app: app,
     envRules: envRules,
     theme: theme,
     layout: layout,
@@ -250,12 +262,13 @@ final _productSummaryFields = const ProductSummary(
 /// Overridden in main.dart with the loaded config.
 final appConfigProvider = Provider<AppConfig>((ref) => throw StateError('appConfigProvider not initialised'));
 
-/// Light or dark. Starts from the environment (`system` follows the device); the theme toggle switches it.
+/// Light or dark. Starts from app.yml's theme_mode (`system` follows the device); the theme toggle switches it for
+/// the session (the choice is not stored, so a restart starts from app.yml again).
 class ThemeChoiceController extends Notifier<ThemeMode> {
   @override
   ThemeMode build() {
-    final env = ref.watch(appConfigProvider).env;
-    return ThemeMode.values.firstWhere((m) => m.name == env.themeMode, orElse: () => ThemeMode.system);
+    final app = ref.watch(appConfigProvider).app;
+    return ThemeMode.values.firstWhere((m) => m.name == app.themeMode, orElse: () => ThemeMode.system);
   }
 
   void setMode(ThemeMode mode) => state = mode;

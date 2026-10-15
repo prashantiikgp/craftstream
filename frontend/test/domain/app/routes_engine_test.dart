@@ -15,7 +15,6 @@ void main() {
   final engine = RoutesEngine(rules());
 
   test('routes.yml loads; nested paths are joined and their parameters listed', () {
-    expect(engine.initial, '/');
     final buy = engine.entries.firstWhere((e) => e.path == '/product/:id/buy');
     expect(buy.screen, 'checkout');
     expect(buy.params, ['id']);
@@ -32,8 +31,6 @@ void main() {
   });
 
   test('broken routes fail at load', () {
-    expect(() => RoutesEngine(rules((y) => y.replaceFirst('initial: /', 'initial: /start'))),
-        throwsA(isA<RoutesRulesError>()));
     expect(() => RoutesEngine(rules((y) => y.replaceFirst('- path: buy', '- path: /buy'))),
         throwsA(isA<RoutesRulesError>()));
     expect(() => RoutesEngine(rules((y) => y.replaceFirst('path: /orders', 'path: /'))),

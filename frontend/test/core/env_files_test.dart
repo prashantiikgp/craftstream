@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/harness.dart';
 
-const allowedKeys = {'APP_ENV', 'API_HOST', 'THEME_MODE', 'DEV_TOOLS', 'MOCK_DATA', 'LOG_LEVEL'};
+const allowedKeys = {'APP_ENV', 'API_HOST', 'DEV_TOOLS', 'MOCK_DATA', 'LOG_LEVEL'};
 final secretLooking = RegExp(r'KEY|SECRET|TOKEN|PASSWORD|PASSWD|CREDENTIAL|PRIVATE', caseSensitive: false);
 
 void main() {

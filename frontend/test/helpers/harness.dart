@@ -19,10 +19,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
-Map<String, Object?> testEnvValues({String mode = 'light', bool devTools = true, bool mockData = true}) => {
+Map<String, Object?> testEnvValues({bool devTools = true, bool mockData = true}) => {
   'APP_ENV': 'dev',
   'API_HOST': 'http://localhost:8000',
-  'THEME_MODE': mode,
   'DEV_TOOLS': devTools,
   'MOCK_DATA': mockData,
   'LOG_LEVEL': 'debug',
@@ -45,13 +44,15 @@ MockStore quietMockStore([MockEngine? rules, Duration chunkDelay = Duration.zero
     MockStore(rules ?? testMockRules(), latency: Duration.zero, chunkDelay: chunkDelay, processingTime: Duration.zero);
 
 /// [testEnvValues] parsed under env_rules.yml.
-AppEnv testEnv({String mode = 'light', bool devTools = true, bool mockData = true}) => AppEnv.parse(
-  testEnvValues(mode: mode, devTools: devTools, mockData: mockData),
+AppEnv testEnv({bool devTools = true, bool mockData = true}) => AppEnv.parse(
+  testEnvValues(devTools: devTools, mockData: mockData),
   rules: testEnvRules(),
 );
 
+/// The real config; [mode] is the theme the app starts in (light, dark or system).
 Future<AppConfig> testConfig({String mode = 'light', bool devTools = true, bool mockData = true}) => loadAppConfig(
-  env: testEnv(mode: mode, devTools: devTools, mockData: mockData),
+  env: testEnv(devTools: devTools, mockData: mockData),
+  themeMode: mode,
 );
 
 /// Pumps the whole app at [size] and opens [location]. Returns the provider container.

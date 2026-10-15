@@ -12,7 +12,6 @@ go in the app; they stay on the backend (Cloud Run env vars / Secret Manager).
 |---|---|---|
 | `APP_ENV` | `dev` · `staging` · `prod` | required in release builds |
 | `API_HOST` | base URL of the API | `https://` outside dev; no user:password, path, query or fragment |
-| `THEME_MODE` | `light` · `dark` · `system` | |
 | `DEV_TOOLS` | `true` · `false` | must be `false` in prod (design catalog, debug overlays) |
 | `MOCK_DATA` | `true` · `false` | must be `false` in prod (`true` = in-app fake data, no API calls) |
 | `LOG_LEVEL` | `debug` · `info` · `warn` · `error` | `debug` not allowed in prod |

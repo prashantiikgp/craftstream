@@ -38,6 +38,7 @@ API client. Screens and controllers only see the repository interfaces.
 
 | File | Says |
 |---|---|
+| `assets/config/app/app.yml` | the app name (tab title), the first route and the starting theme (`system`) |
 | `assets/config/app/routes.yml` | every route; each shows a screen YAML (`screen:`) |
 | `assets/config/app/navigation.yml` | the Buy (01, orange) and Sell (02, pink) roles |
 | `assets/config/ui/screens/<name>.yml` | one screen: `data` source, `width`, `fill`, `backdrop`, and `top` / `body` / `bottom` / `empty` / `error` bricks |

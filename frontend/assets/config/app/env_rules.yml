@@ -7,7 +7,6 @@
 debug_defaults:
   APP_ENV: dev
   API_HOST: http://localhost:8000
-  THEME_MODE: system
   DEV_TOOLS: true
   MOCK_DATA: true
   LOG_LEVEL: debug

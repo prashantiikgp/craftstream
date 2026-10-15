@@ -149,8 +149,8 @@ and the convention tests run and fail on today's literals. The failing list *is*
       `reduced_motion_factor`.
 - [x] Move the contrast rules from `theme_engine.dart` into a `contrast:` block in theme.yml. The test checks
       every pair in both modes.
-- [ ] **Theme mode:** the toggle works (home); the default still comes from env THEME_MODE (prod: light); move it to `app/app.yml` (system) and add the toggle to every top bar. `app/app.yml` sets the default (system); the user can switch light and dark from the
-      header.
+- [ ] **Theme mode:** `app/app.yml` sets the default (`system`; THEME_MODE left the env files, so prod no longer
+      starts in light). Left: the toggle in every top bar. The user's choice lasts for the session (not stored).
 - [x] ~~Rebuild `/catalog` (dev only) from YAML~~ **Dropped 2026-10-15:** the v1 `/catalog` page, the v1 widgets
       (`lib/shared/widgets/`), the v1 brand painters and the `legacy:` token block were deleted instead; the
       render test draws every real screen at four sizes in both modes, and the literal baseline is now empty.
@@ -160,7 +160,8 @@ and the convention tests run and fail on today's literals. The failing list *is*
       templates for cards and icon buttons, all in YAML. Reduced motion turns off lift and scale.
 
 ### 1.2 App, routes and navigation
-- [ ] `app/app.yml`: app name, initial route, default theme mode, dev-only routes.
+- [x] `app/app.yml`: app name, initial route (routes.yml no longer has `initial:`), default theme mode. (Dev-only
+      routes went with /catalog.)
 - [x] `app/routes.yml`: every route (path, screen file, kind `tab` / `page`, shell, guard `dev_only`) and
       redirects.
 - [x] `app/navigation.yml`: the two roles (Buy `01`, Sell `02`) with their accent, entry route and nav items

@@ -2,8 +2,8 @@
 #
 #   path      absolute at the top level (`/orders`), relative under `routes:` (`buy` -> /product/:id/buy)
 #   :name     a path parameter, passed to the screen (`/placed/:order_id` -> params.order_id)
-
-initial: /
+#
+# Where the app opens is app.yml's initial_route.
 
 routes:
   - path: /

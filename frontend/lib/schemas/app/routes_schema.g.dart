@@ -8,9 +8,8 @@ part of 'routes_schema.dart';
 
 RoutesSchema _$RoutesSchemaFromJson(Map<String, dynamic> json) =>
     $checkedCreate('RoutesSchema', json, ($checkedConvert) {
-      $checkKeys(json, allowedKeys: const ['initial', 'routes']);
+      $checkKeys(json, allowedKeys: const ['routes']);
       final val = RoutesSchema(
-        initial: $checkedConvert('initial', (v) => v as String),
         routes: $checkedConvert(
           'routes',
           (v) => (v as List<dynamic>)

@@ -8,7 +8,6 @@ final rules = testEnvRules();
 Map<String, Object?> base([Map<String, Object?> changes = const {}]) => {
   'APP_ENV': 'prod',
   'API_HOST': 'https://api.example.com',
-  'THEME_MODE': 'light',
   'DEV_TOOLS': false,
   'MOCK_DATA': false,
   'LOG_LEVEL': 'warn',
@@ -56,7 +55,7 @@ void main() {
 
   test('every problem is reported at once', () {
     try {
-      AppEnv.parse(base({'API_HOST': 'http://x.com', 'DEV_TOOLS': true, 'THEME_MODE': 'neon'}), rules: rules);
+      AppEnv.parse(base({'API_HOST': 'http://x.com', 'DEV_TOOLS': true, 'LOG_LEVEL': 'loud'}), rules: rules);
       fail('should throw');
     } on EnvError catch (e) {
       expect(e.problems.length, greaterThanOrEqualTo(3));
@@ -80,7 +79,6 @@ void main() {
     final prodWithDebug = AppEnv(
       name: AppEnvName.prod,
       apiHost: Uri.parse('https://api.example.com'),
-      themeMode: 'light',
       devTools: false,
       mockData: false,
       logLevel: LogLevel.debug,
