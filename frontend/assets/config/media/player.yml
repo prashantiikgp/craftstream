@@ -3,12 +3,17 @@
 
 start_on_lowest_rung: true      # must stay true; the engine rejects false
 
+# The budget for the lowest rung on the wire (hard rule 2, R5). It must equal the backend's
+# backend/config/media/ladder.yml `max_lowest_rung_total_kbps`; player_engine_test checks they agree.
+# initial_bandwidth_bps may not exceed it.
+lowest_rung_budget_kbps: 50
+
 # First bandwidth guess before any segment is measured. Keep it under the lowest rung's bitrate so the
 # player never tries a bigger rung first on a slow connection.
 initial_bandwidth_bps: 40000
 
 # Buffering
-min_buffer_to_start_seconds: 4   # Android starts playback once this much is buffered   # start playback once this much is buffered
+min_buffer_to_start_seconds: 4   # start playback once this much is buffered
 max_buffer_seconds: 30           # never fetch further ahead than this (saves data on mobile)
 
 # Switching up: only move to a bigger rung once the measured bandwidth beats its bitrate by this factor.
@@ -20,6 +25,24 @@ upswitch_safety_factor: 1.4
 # buffered ahead, reached within the first seconds of playback. A slow link never gets that far, so it never swaps.
 native_upswitch_when_buffered_seconds: 20
 native_upswitch_within_seconds: 60
+
+# Android reads the master playlist itself (to hand ExoPlayer the lowest rung only, and to label rungs).
+# Past this it gives up and plays the stream as is.
+master_fetch_timeout_seconds: 20
+
+# The HLS playlist type: the `data:` copy of the master on Android, and asking a browser without hls.js
+# (Safari) whether it plays HLS itself.
+hls_mime_type: application/vnd.apple.mpegurl
+
+# Chrome: the <video> element hls.js plays into.
+web_video:
+  object_fit: contain     # letterbox; never crop the maker's hands
+  plays_inline: true
+  controls: false         # our own overlay controls the video
+  preload: none           # nothing loads until the buyer taps play
+
+# hls.js: how many fatal media (decode) errors to recover from before showing the error state.
+media_error_recoveries: 1
 
 poster:
   show_until_first_frame: true   # keep the poster on screen until the first frame is decoded

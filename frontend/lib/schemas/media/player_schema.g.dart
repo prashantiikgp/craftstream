@@ -26,12 +26,34 @@ PlayerSchema _$PlayerSchemaFromJson(
         'autoplay_in_grids',
         'autoplay_on_product_page',
         'sample_stream_url',
+        'lowest_rung_budget_kbps',
+        'master_fetch_timeout_seconds',
+        'hls_mime_type',
+        'web_video',
+        'media_error_recoveries',
       ],
     );
     final val = PlayerSchema(
       startOnLowestRung: $checkedConvert(
         'start_on_lowest_rung',
         (v) => v as bool,
+      ),
+      lowestRungBudgetKbps: $checkedConvert(
+        'lowest_rung_budget_kbps',
+        (v) => (v as num).toInt(),
+      ),
+      masterFetchTimeoutSeconds: $checkedConvert(
+        'master_fetch_timeout_seconds',
+        (v) => (v as num).toDouble(),
+      ),
+      hlsMimeType: $checkedConvert('hls_mime_type', (v) => v as String),
+      webVideo: $checkedConvert(
+        'web_video',
+        (v) => WebVideoSchema.fromJson(v as Map<String, dynamic>),
+      ),
+      mediaErrorRecoveries: $checkedConvert(
+        'media_error_recoveries',
+        (v) => (v as num).toInt(),
       ),
       initialBandwidthBps: $checkedConvert(
         'initial_bandwidth_bps',
@@ -72,6 +94,11 @@ PlayerSchema _$PlayerSchemaFromJson(
   },
   fieldKeyMap: const {
     'startOnLowestRung': 'start_on_lowest_rung',
+    'lowestRungBudgetKbps': 'lowest_rung_budget_kbps',
+    'masterFetchTimeoutSeconds': 'master_fetch_timeout_seconds',
+    'hlsMimeType': 'hls_mime_type',
+    'webVideo': 'web_video',
+    'mediaErrorRecoveries': 'media_error_recoveries',
     'initialBandwidthBps': 'initial_bandwidth_bps',
     'minBufferToStartSeconds': 'min_buffer_to_start_seconds',
     'maxBufferSeconds': 'max_buffer_seconds',
@@ -114,3 +141,24 @@ PosterSchema _$PosterSchemaFromJson(Map<String, dynamic> json) =>
         'bufferingIndicatorAfterMs': 'buffering_indicator_after_ms',
       },
     );
+
+WebVideoSchema _$WebVideoSchemaFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  'WebVideoSchema',
+  json,
+  ($checkedConvert) {
+    $checkKeys(
+      json,
+      allowedKeys: const ['object_fit', 'plays_inline', 'controls', 'preload'],
+    );
+    final val = WebVideoSchema(
+      objectFit: $checkedConvert('object_fit', (v) => v as String),
+      playsInline: $checkedConvert('plays_inline', (v) => v as bool),
+      controls: $checkedConvert('controls', (v) => v as bool),
+      preload: $checkedConvert('preload', (v) => v as String),
+    );
+    return val;
+  },
+  fieldKeyMap: const {'objectFit': 'object_fit', 'playsInline': 'plays_inline'},
+);

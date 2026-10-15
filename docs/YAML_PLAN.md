@@ -213,8 +213,9 @@ per size class.
 ### 1.5 Behaviour still in Dart → YAML
 - [x] `catalog/filters.yml`: sorts become declarative (`field`, `direction`), so adding a sort needs no Dart.
       Re-tapping a tag clears it (`tag_retap_clears`). A sort field must be a ProductSummary field (startup check).
-- [ ] `media/player.yml`: master fetch timeout (20 s), HLS MIME type, web `<video>` settings, the
-      media-error recovery count. The 50 kbps budget is checked against `ladder.yml`, not a Dart constant.
+- [x] `media/player.yml`: master fetch timeout (20 s), HLS MIME type, web `<video>` settings, the
+      media-error recovery count. The 50 kbps budget is checked against `ladder.yml`, not a Dart constant
+      (`lowest_rung_budget_kbps`; `player_engine_test` holds it to ladder.yml's `max_lowest_rung_total_kbps`).
 - [ ] `media/upload.yml`:
   - HTTP status handling (done / continue / retry / reject);
   - extension → MIME map, picker `accept`, metadata timeout (15 s);
