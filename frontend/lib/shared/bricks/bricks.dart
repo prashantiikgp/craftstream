@@ -156,16 +156,18 @@ Widget _themeToggleButton(BuildContext context) {
     accent: brand.fill,
     semanticLabel: strings.get(t.isDark ? 'theme.to_light' : 'theme.to_dark'),
     onTap: () => BrickScope.of(context).act(context, const ToggleThemeAction()),
-    builder: (context, active) => Container(
-      width: s.number('box'),
-      height: s.number('box'),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: s.color('background'),
-        border: Border.all(color: active ? brand.line : s.color('border')),
-        borderRadius: BorderRadius.circular(s.radius('radius')),
+    builder: (context, active) => TapTarget(
+      child: Container(
+        width: s.number('box'),
+        height: s.number('box'),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: s.color('background'),
+          border: Border.all(color: active ? brand.line : s.color('border')),
+          borderRadius: BorderRadius.circular(s.radius('radius')),
+        ),
+        child: YamlIcon(s.name(t.isDark ? 'icon_in_dark' : 'icon_in_light'), size: s.number('icon'), color: t.text),
       ),
-      child: YamlIcon(s.name(t.isDark ? 'icon_in_dark' : 'icon_in_light'), size: s.number('icon'), color: t.text),
     ),
   );
 }
@@ -211,7 +213,7 @@ Widget _door(BuildContext context, BrickNode n) {
   return Pressable(
     accent: accent.fill,
     lift: t.doorHoverLift,
-    semanticLabel: body == null ? title : '$title. ${say(context, body)}',
+    semanticLabel: body == null ? title : config.strings.get('a11y.door', {'title': title, 'body': say(context, body)}),
     onTap: () => _act(context, n),
     builder: (context, active) => Container(
       constraints: BoxConstraints(minHeight: s.number('min_height')),
@@ -277,7 +279,8 @@ Widget _linkRow(BuildContext context, BrickNode n) {
   final count = countPath == null ? null : BrickScope.of(context).lookup(countPath);
   return Pressable(
     accent: tone.fill,
-    semanticLabel: count == null ? label : '$label, $count',
+    semanticLabel:
+        count == null ? label : configOf(context).strings.get('a11y.link_count', {'label': label, 'count': '$count'}),
     onTap: () => _act(context, n),
     builder: (context, active) => Container(
       height: s.number('height'),
@@ -332,15 +335,17 @@ Widget _topBar(BuildContext context, BrickNode n) {
           accent: brand.fill,
           semanticLabel: label == null ? config.strings.get('common.back') : say(context, label),
           onTap: () => _act(context, n),
-          builder: (context, active) => home
-              ? Stripes(size: s.number('mark'), accents: s.names('stripes'))
-              : Container(
-                  width: s.number('box'),
-                  height: s.number('box'),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(border: Border.all(color: active ? brand.line : s.color('border'))),
-                  child: YamlIcon(s.name('back_icon'), size: s.number('icon'), color: t.text),
-                ),
+          builder: (context, active) => TapTarget(
+            child: home
+                ? Stripes(size: s.number('mark'), accents: s.names('stripes'))
+                : Container(
+                    width: s.number('box'),
+                    height: s.number('box'),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(border: Border.all(color: active ? brand.line : s.color('border'))),
+                    child: YamlIcon(s.name('back_icon'), size: s.number('icon'), color: t.text),
+                  ),
+          ),
         ),
         SizedBox(width: s.space('padding')),
         Expanded(
@@ -593,7 +598,7 @@ Widget _orderCard(BuildContext context, BrickNode n) {
   final total = configOf(context).format.money(o['total'] as num? ?? 0, '${o['currency']}');
   return Pressable(
     accent: brand.fill,
-    semanticLabel: '$title, $total',
+    semanticLabel: configOf(context).strings.get('a11y.order_card', {'title': title, 'total': total}),
     onTap: n.prop<ActionSpec>('action') == null ? null : () => _act(context, n),
     builder: (context, active) => Container(
       decoration: BoxDecoration(

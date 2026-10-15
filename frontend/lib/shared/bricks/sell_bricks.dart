@@ -23,7 +23,7 @@ Widget listingCardBrick(BuildContext context, BrickNode n) {
   final orderable = config.status.orderable('${p['video_status']}');
   return Pressable(
     accent: role.fill,
-    semanticLabel: '$title, ${config.strings.get(look.label)}',
+    semanticLabel: config.strings.get('a11y.listing_card', {'title': title, 'status': config.strings.get(look.label)}),
     onTap: orderable ? () => scope.act(context, n.prop<ActionSpec>('open')) : null,
     builder: (context, active) => Container(
       decoration: BoxDecoration(

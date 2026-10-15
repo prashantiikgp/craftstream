@@ -157,8 +157,10 @@ and the convention tests run and fail on today's literals. The failing list *is*
       render test draws every real screen at four sizes in both modes, and the literal baseline is now empty.
 - [x] ~~Update the CraftStream Design System artifact~~ **Dropped:** it lives outside the repo; `theme.yml` and
       `bricks.yml` are the design system.
-- [ ] **Accessibility tokens:** focus ring (colour, width), minimum touch target 44 px, and semantics label
-      templates for cards and icon buttons, all in YAML. Reduced motion turns off lift and scale.
+- [x] **Accessibility tokens:** focus ring (colour, width), minimum touch target 44 px, and semantics label
+      templates for cards and icon buttons, all in YAML. Reduced motion turns off lift and scale. (Focus ring and
+      reduced motion were already applied in `Pressable`; `TapTarget` grows icon buttons to `focus.min_target`, which
+      fixed the 36 px refresh button and the 28 px home mark; card and link labels are `strings.yml` `a11y.*`.)
 
 ### 1.2 App, routes and navigation
 - [x] `app/app.yml`: app name, initial route (routes.yml no longer has `initial:`), default theme mode. (Dev-only

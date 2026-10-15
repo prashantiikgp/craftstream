@@ -209,6 +209,22 @@ class _PressableState extends State<Pressable> {
   }
 }
 
+/// Grows a small control's tap area to theme.yml `focus.min_target` (44) without changing how it looks: the
+/// control stays its own size, centred in the bigger area. Use it inside a [Pressable]'s builder.
+class TapTarget extends StatelessWidget {
+  final Widget child;
+  const TapTarget({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final min = context.tokens.minTarget;
+    return ConstrainedBox(
+      constraints: BoxConstraints(minWidth: min, minHeight: min),
+      child: Center(widthFactor: 1, heightFactor: 1, child: child),
+    );
+  }
+}
+
 /// Shapes from art.yml (a backdrop or door art), placed in pixels from the box edges.
 class ArtShapes extends StatelessWidget {
   final List<ShapeSchema> shapes;

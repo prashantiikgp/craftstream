@@ -67,6 +67,14 @@ strings:
     to_light: Switch to the light theme
     to_dark: Switch to the dark theme
 
+  # What screen readers say for a card or a link that shows several things at once.
+  a11y:
+    product_card: "{title}, {artisan}, {price}"
+    order_card: "{title}, {total}"
+    listing_card: "{title}, {status}"
+    door: "{title}. {body}"
+    link_count: "{label}, {count}"
+
   discover:
     search_hint: Search pottery, ikat, brass…
     clear_search: Clear search

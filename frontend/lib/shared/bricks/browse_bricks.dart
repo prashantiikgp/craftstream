@@ -292,10 +292,11 @@ Widget _card(BuildContext context, BrickNode n, BrickStyle s, double aspect) {
   if (p is! Map) return const SizedBox.shrink();
   final brand = t.tone('brand');
   final title = '${p['title'] ?? ''}', artisan = '${p['artisan_name'] ?? ''}';
-  final price = configOf(context).format.money(p['price'] as num? ?? 0, '${p['currency']}');
+  final config = configOf(context);
+  final price = config.format.money(p['price'] as num? ?? 0, '${p['currency']}');
   return Pressable(
     accent: brand.fill,
-    semanticLabel: '$title, $artisan, $price',
+    semanticLabel: config.strings.get('a11y.product_card', {'title': title, 'artisan': artisan, 'price': price}),
     onTap: () => scope.act(context, n.prop<ActionSpec>('action')),
     builder: (context, active) => Container(
       decoration: BoxDecoration(
