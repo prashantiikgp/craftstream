@@ -6,8 +6,6 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/config.dart';
-import '../../shared/format/bytes.dart';
-import '../../shared/format/money.dart';
 import '../../shared/screens/screen_scope.dart';
 import 'upload_controller.dart';
 
@@ -68,7 +66,7 @@ ScreenData uploadSource(WidgetRef ref, Map<String, String> params) {
   final s = ref.watch(uploadControllerProvider);
   final c = ref.read(uploadControllerProvider.notifier);
   final policy = ref.watch(uploadPolicyProvider).value;
-  final max = policy == null ? null : formatDuration(Duration(seconds: policy.maxDurationSeconds));
+  final max = policy == null ? null : config.format.duration(Duration(seconds: policy.maxDurationSeconds));
   final video = s.video;
   final check = video == null || policy == null ? null : checkVideo(video, policy);
   final arrived = s.total > 0 && s.sent >= s.total;
@@ -95,7 +93,10 @@ ScreenData uploadSource(WidgetRef ref, Map<String, String> params) {
           'name': video?.name,
           'details': video == null
               ? null
-              : [formatBytes(video.sizeBytes), if (video.duration != null) formatDuration(video.duration!)].join(' · '),
+              : [
+                  config.format.bytes(video.sizeBytes),
+                  if (video.duration != null) config.format.duration(video.duration!),
+                ].join(' · '),
           'max': max,
         },
         'check': {
@@ -103,21 +104,21 @@ ScreenData uploadSource(WidgetRef ref, Map<String, String> params) {
           'too_long': check == VideoCheck.tooLong,
           'unknown': check == VideoCheck.unknownLength,
           'bad_type': check == VideoCheck.badType,
-          'duration': video?.duration == null ? null : formatDuration(video!.duration!),
+          'duration': video?.duration == null ? null : config.format.duration(video!.duration!),
           'max': max,
         },
         'show_fix': s.showErrors && s.problems.isNotEmpty,
         // After Publish
-        'summary_price': formatMoney(s.priceValue ?? 0, s.rules.currency),
+        'summary_price': config.format.money(s.priceValue ?? 0, s.rules.currency),
         'file': video?.name,
         'creating': phase == UploadPhase.creating,
         'sending': s.busy && !arrived && phase != UploadPhase.creating,
         'arrived': s.busy && arrived,
         'fraction': s.fraction,
-        'sent': formatBytes(s.sent),
-        'total': formatBytes(s.total),
+        'sent': config.format.bytes(s.sent),
+        'total': config.format.bytes(s.total),
         'percent': (s.fraction * 100).floor(),
-        'chunk': s.ticket == null ? null : formatBytes(s.ticket!.chunkSizeBytes),
+        'chunk': s.ticket == null ? null : config.format.bytes(s.ticket!.chunkSizeBytes),
         'transferring': const {UploadPhase.uploading, UploadPhase.reconnecting, UploadPhase.paused}.contains(phase),
         'uploading': phase == UploadPhase.uploading,
         'paused': phase == UploadPhase.paused,

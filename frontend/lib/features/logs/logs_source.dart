@@ -25,13 +25,12 @@ ScreenData logsSource(WidgetRef ref, Map<String, String> params) {
 
   Map<String, Object?> row(LogEntry e) {
     final at = e.at.toLocal();
-    String two(int v) => v.toString().padLeft(2, '0');
     return {
       ...e.toJson(),
       'tone': rules.toneOf(e.level),
       'level_label': _label(config, rules.levelLabel(e.level), e.level),
-      'date': '${at.year}-${two(at.month)}-${two(at.day)}',
-      'time': '${two(at.hour)}:${two(at.minute)}:${two(at.second)}',
+      'date': config.format.date(at),
+      'time': config.format.time(at),
     };
   }
 

@@ -22,7 +22,9 @@ Read with the root `CLAUDE.md`. Full plan: `docs/FRONTEND_PLAN.md`.
   (`strings_engine_test` fails on a missing or unused key);
 - colours and spacing come from `theme_engine`;
 - breakpoints and columns come from `layout_engine`;
-- player settings come from `player_engine`.
+- player settings come from `player_engine`;
+- money, file sizes, video lengths, dates and times are written by `format_engine` (`ui/format.yml`):
+  `configOf(context).format.money(...)` in bricks, `config.format` in sources.
 
 Upload limits are **not** frontend YAML: read them from `GET /api/v1/upload-policy`. Form limits mirror
 `models/*.yml` as constants in the controllers; `test/features/model_limits_test.dart` keeps them in step.

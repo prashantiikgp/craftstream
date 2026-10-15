@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 import '../../domain/ui/bricks_engine.dart';
 import '../../schemas/app/navigation_schema.dart';
-import '../format/money.dart';
 import '../screens/screen_scope.dart';
 import '../theme/app_theme.dart';
 import 'browse_bricks.dart';
@@ -476,7 +475,7 @@ Widget _receipt(BuildContext context, BrickNode n) {
               line(
                 _say(context, n, 'total'),
                 StyledText(
-                  formatMoney(record['total'] as num? ?? 0, '${record['currency']}'),
+                  configOf(context).format.money(record['total'] as num? ?? 0, '${record['currency']}'),
                   style: s.name('total_value'),
                 ),
               ),
@@ -584,7 +583,7 @@ Widget _orderCard(BuildContext context, BrickNode n) {
   final brand = t.tone('brand');
   final highlight = s.flag('highlight_first') && scope.index == 0;
   final title = '${o['product_title'] ?? ''}';
-  final total = formatMoney(o['total'] as num? ?? 0, '${o['currency']}');
+  final total = configOf(context).format.money(o['total'] as num? ?? 0, '${o['currency']}');
   return Pressable(
     accent: brand.fill,
     semanticLabel: '$title, $total',

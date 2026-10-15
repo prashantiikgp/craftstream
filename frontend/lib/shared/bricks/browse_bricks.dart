@@ -6,7 +6,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../domain/ui/bricks_engine.dart';
-import '../format/money.dart';
 import '../screens/screen_scope.dart';
 import '../theme/app_theme.dart';
 import 'kit.dart';
@@ -250,7 +249,7 @@ Widget _card(BuildContext context, BrickNode n, BrickStyle s, double aspect) {
   if (p is! Map) return const SizedBox.shrink();
   final brand = t.tone('brand');
   final title = '${p['title'] ?? ''}', artisan = '${p['artisan_name'] ?? ''}';
-  final price = formatMoney(p['price'] as num? ?? 0, '${p['currency']}');
+  final price = configOf(context).format.money(p['price'] as num? ?? 0, '${p['currency']}');
   return Pressable(
     accent: brand.fill,
     semanticLabel: '$title, $artisan, $price',

@@ -29,6 +29,8 @@ import '../domain/ui/art_engine.dart';
 import '../domain/ui/art_loader.dart';
 import '../domain/ui/bricks_engine.dart';
 import '../domain/ui/bricks_loader.dart';
+import '../domain/ui/format_engine.dart';
+import '../domain/ui/format_loader.dart';
 import '../domain/ui/icons_engine.dart';
 import '../domain/ui/icons_loader.dart';
 import '../domain/ui/layout_engine.dart';
@@ -64,6 +66,9 @@ class AppConfig {
   final OrdersEngine orders;
   final ActivityLogEngine activityLog;
 
+  /// ui/format.yml: money, file sizes, video lengths, dates and times.
+  final FormatEngine format;
+
   /// dev/mock.yml: the fake backend used when MOCK_DATA=true.
   final MockEngine mock;
   const AppConfig({
@@ -84,6 +89,7 @@ class AppConfig {
     required this.screens,
     required this.orders,
     required this.activityLog,
+    required this.format,
     required this.mock,
   });
 }
@@ -158,6 +164,7 @@ Future<AppConfig> loadAppConfig({AppEnv? env, AssetBundle? bundle}) async {
     screens: screens,
     orders: OrdersEngine(await loadOrdersRules(bundle: bundle)),
     activityLog: ActivityLogEngine(await loadActivityLogRules(bundle: bundle)),
+    format: FormatEngine(await loadFormatRules(bundle: bundle)),
     mock: mock,
   );
 }

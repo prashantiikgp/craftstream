@@ -1,0 +1,38 @@
+# How the app writes money, file sizes, video lengths, dates and times. Read by format_engine; bricks and
+# screen sources call it instead of building text by hand.
+#
+# Patterns use {placeholders}:
+#   dates and times  {yyyy} year, {MM} month, {dd} day, {HH} hour (24 h), {mm} minute, {ss} second (all padded)
+#   durations        {h} hours, {m} minutes, {mm} minutes padded, {ss} seconds padded (minutes and seconds wrap at 60)
+
+money:
+  minus: "−"                 # U+2212 (a real minus sign, not a hyphen)
+  thousands: ","
+  decimal_point: "."
+  decimals: 2
+  hide_zero_fraction: true   # ₹450, not ₹450.00; paise and cents only when they are not zero
+  # grouping: digit group sizes from the right; the last one repeats. Indian [3, 2]: 1,23,45,678.
+  currencies:
+    INR: { symbol: "₹", grouping: [3, 2] }
+    USD: { symbol: "$", grouping: [3] }
+  # A currency not listed: its code, then a space ("EUR 12").
+  other: { symbol: "{code} ", grouping: [3] }
+
+# File sizes, biggest unit first: the first unit the size reaches is used.
+bytes:
+  base: 1024
+  pattern: "{value} {unit}"
+  units:
+    - { unit: GB, power: 3, decimals: 1 }
+    - { unit: MB, power: 2, decimals: 0 }
+    - { unit: KB, power: 1, decimals: 0 }
+    - { unit: B, power: 0, decimals: 0 }
+
+# Video lengths: 12:40, 1:02:05.
+duration:
+  short: "{m}:{ss}"          # under an hour
+  long: "{h}:{mm}:{ss}"
+
+# Activity log rows (local time).
+date: "{yyyy}-{MM}-{dd}"
+time: "{HH}:{mm}:{ss}"

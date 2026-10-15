@@ -182,8 +182,8 @@ Every reusable widget becomes a brick, with variants, sizes and states in YAML.
       names an icon.
 - [x] `ui/status.yml`: each video and order status gets a label key, accent, dot and hint. This replaces about
       15 Dart switches.
-- [ ] `ui/format.yml`: currency symbols and grouping (INR ₹, Indian grouping), the minus sign, bytes and
-      duration formats.
+- [x] `ui/format.yml`: currency symbols and grouping (INR ₹, Indian grouping), the minus sign, bytes and
+      duration formats, and the activity log's date and time. `lib/shared/format/` is gone.
 - [ ] Skeleton timing (1100 ms) and opacity move into theme motion.
 
 ### 1.4 Screens (`screens/*.yml`)
