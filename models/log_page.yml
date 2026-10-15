@@ -1,0 +1,14 @@
+# LogPage: one page of the activity log, newest first.
+
+model: LogPage
+description: One page of the activity log, newest first.
+
+fields:
+  items:
+    type: array
+    items: LogEntry
+    default: []
+  next_cursor:
+    type: string
+    nullable: true
+    description: opaque; null when there are no more entries

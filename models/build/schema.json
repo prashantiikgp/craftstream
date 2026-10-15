@@ -29,6 +29,193 @@
       ],
       "additionalProperties": false
     },
+    "LogDetail": {
+      "type": "object",
+      "description": "One key and value on an activity log entry.",
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 300
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "LogEntry": {
+      "type": "object",
+      "description": "One step in the activity log (an upload, a video, an order).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "event": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40,
+          "description": "an event name from platform/activity_log.yml (the app may only report its client events)"
+        },
+        "product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "order_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LogDetail"
+          },
+          "maxItems": 10,
+          "default": []
+        },
+        "level": {
+          "type": "string",
+          "enum": [
+            "info",
+            "warning",
+            "error"
+          ],
+          "readOnly": true
+        },
+        "group": {
+          "type": "string",
+          "enum": [
+            "upload",
+            "video",
+            "order",
+            "system"
+          ],
+          "readOnly": true
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "api",
+            "app"
+          ],
+          "readOnly": true
+        },
+        "message": {
+          "type": "string",
+          "description": "filled from the event's template in platform/activity_log.yml",
+          "readOnly": true
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      },
+      "required": [
+        "id",
+        "event",
+        "product_id",
+        "order_id",
+        "details",
+        "level",
+        "group",
+        "source",
+        "message",
+        "at"
+      ],
+      "additionalProperties": false
+    },
+    "LogEntryCreate": {
+      "type": "object",
+      "description": "Request body to create a new LogEntry (server-set fields excluded).",
+      "properties": {
+        "event": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40,
+          "description": "an event name from platform/activity_log.yml (the app may only report its client events)"
+        },
+        "product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "order_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LogDetail"
+          },
+          "maxItems": 10,
+          "default": []
+        }
+      },
+      "required": [
+        "event"
+      ],
+      "additionalProperties": false
+    },
+    "LogPage": {
+      "type": "object",
+      "description": "One page of the activity log, newest first.",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LogEntry"
+          },
+          "default": []
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "opaque; null when there are no more entries"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "next_cursor"
+      ],
+      "additionalProperties": false
+    },
     "Order": {
       "type": "object",
       "description": "A buyer's order for one product.",

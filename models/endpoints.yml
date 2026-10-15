@@ -62,6 +62,27 @@ endpoints:
     status: 200
     summary: One order, so a device can show its orders after a restart (it keeps only their ids).
 
+  - name: listLogs
+    method: GET
+    path: /logs
+    query:
+      group: string        # upload | video | order | system
+      level: string        # info | warning | error
+      product_id: string   # one listing's steps
+      cursor: string       # next_cursor from the previous page
+      limit: integer       # page size (capped by the server)
+    returns: LogPage
+    status: 200
+    summary: The activity log, newest first, optionally narrowed to a group, level or listing.
+
+  - name: createLog
+    method: POST
+    path: /logs
+    body: LogEntryCreate
+    returns: LogEntry
+    status: 201
+    summary: The app reports an upload step only it sees (started, network dropped, resumed, finished, failed).
+
 # Not called by the app, so not in the Dart client. Full paths (no base_path).
 internal:
   - name: health

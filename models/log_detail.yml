@@ -1,0 +1,15 @@
+# LogDetail: one fact on an activity log entry (chunk = 3 of 12, reason = network dropped).
+
+model: LogDetail
+description: One key and value on an activity log entry.
+
+fields:
+  key:
+    type: string
+    required: true
+    min_length: 1
+    max_length: 40
+  value:
+    type: string
+    required: true
+    max_length: 300

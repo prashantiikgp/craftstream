@@ -16,6 +16,44 @@ class ErrorResponse(BaseModel):
     details: list[str] = Field(default_factory=list, description='one entry per problem, e.g. "body.price - Input should be greater than or equal to 0.01"')
 
 
+class LogDetail(BaseModel):
+    """One key and value on an activity log entry."""
+
+    key: str = Field(..., min_length=1, max_length=40)
+    value: str = Field(..., max_length=300)
+
+
+class LogEntry(BaseModel):
+    """One step in the activity log (an upload, a video, an order)."""
+
+    id: str = Field(...)
+    event: str = Field(..., min_length=1, max_length=40, description='an event name from platform/activity_log.yml (the app may only report its client events)')
+    product_id: str | None = Field(default=None)
+    order_id: str | None = Field(default=None)
+    details: list[LogDetail] = Field(default_factory=list, max_length=10)
+    level: Literal['info', 'warning', 'error'] = Field(...)
+    group: Literal['upload', 'video', 'order', 'system'] = Field(...)
+    source: Literal['api', 'app'] = Field(...)
+    message: str = Field(..., description="filled from the event's template in platform/activity_log.yml")
+    at: datetime = Field(...)
+
+
+class LogEntryCreate(BaseModel):
+    """Request body to create a new LogEntry (server-set fields excluded)."""
+
+    event: str = Field(..., min_length=1, max_length=40, description='an event name from platform/activity_log.yml (the app may only report its client events)')
+    product_id: str | None = Field(default=None)
+    order_id: str | None = Field(default=None)
+    details: list[LogDetail] = Field(default_factory=list, max_length=10)
+
+
+class LogPage(BaseModel):
+    """One page of the activity log, newest first."""
+
+    items: list[LogEntry] = Field(default_factory=list)
+    next_cursor: str | None = Field(default=None, description='opaque; null when there are no more entries')
+
+
 class Order(BaseModel):
     """A buyer's order for one product."""
 

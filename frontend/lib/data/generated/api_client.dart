@@ -86,4 +86,18 @@ class ApiClient {
     return Order.fromJson(_decode(r) as Map<String, dynamic>);
   }
 
+  /// The activity log, newest first, optionally narrowed to a group, level or listing.
+  Future<LogPage> listLogs({String? group, String? level, String? productId, String? cursor, int? limit}) async {
+    final uri = Uri.parse('$baseUrl/logs').replace(queryParameters: {if (group != null) 'group': group, if (level != null) 'level': level, if (productId != null) 'product_id': productId, if (cursor != null) 'cursor': cursor, if (limit != null) 'limit': limit.toString()});
+    final r = await _http.get(uri);
+    return LogPage.fromJson(_decode(r) as Map<String, dynamic>);
+  }
+
+  /// The app reports an upload step only it sees (started, network dropped, resumed, finished, failed).
+  Future<LogEntry> createLog(LogEntryCreate body) async {
+    final uri = Uri.parse('$baseUrl/logs');
+    final r = await _http.post(uri, headers: {'Content-Type': 'application/json'}, body: jsonEncode(body.toJson()));
+    return LogEntry.fromJson(_decode(r) as Map<String, dynamic>);
+  }
+
 }

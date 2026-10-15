@@ -1,0 +1,48 @@
+# LogEntry: one step in the activity log. The API writes the steps it sees (listing created, video received,
+# transcode finished, order placed); the app reports the ones only it sees (upload started, network dropped,
+# resumed). Event names, levels, groups, messages and how long entries are kept: backend/config/platform/activity_log.yml.
+
+model: LogEntry
+description: One step in the activity log (an upload, a video, an order).
+create: true            # LogEntryCreate: what the app reports (the fields below that are not readonly)
+
+fields:
+  id:
+    type: string
+    readonly: true
+  event:
+    type: string
+    required: true
+    min_length: 1
+    max_length: 40
+    description: an event name from platform/activity_log.yml (the app may only report its client events)
+  product_id:
+    type: string
+    nullable: true
+  order_id:
+    type: string
+    nullable: true
+  details:
+    type: array
+    items: LogDetail
+    max_items: 10
+    default: []
+  level:
+    type: enum
+    values: [info, warning, error]
+    readonly: true
+  group:
+    type: enum
+    values: [upload, video, order, system]
+    readonly: true
+  source:
+    type: enum
+    values: [api, app]
+    readonly: true
+  message:
+    type: string
+    readonly: true
+    description: filled from the event's template in platform/activity_log.yml
+  at:
+    type: datetime
+    readonly: true

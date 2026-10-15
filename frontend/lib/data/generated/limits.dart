@@ -1,6 +1,20 @@
 // GENERATED FROM models/ BY tools/codegen.py. DO NOT EDIT BY HAND.
 // ignore_for_file: type=lint
 
+/// Field limits of LogDetail (models/), the same ones the API enforces.
+abstract final class LogDetailLimits {
+  static const keyMinLength = 1;
+  static const keyMaxLength = 40;
+  static const valueMaxLength = 300;
+}
+
+/// Field limits of LogEntry (models/), the same ones the API enforces.
+abstract final class LogEntryLimits {
+  static const eventMinLength = 1;
+  static const eventMaxLength = 40;
+  static const detailsMaxItems = 10;
+}
+
 /// Field limits of Order (models/), the same ones the API enforces.
 abstract final class OrderLimits {
   static const buyerNameMinLength = 2;

@@ -26,6 +26,130 @@ class ErrorResponse {
       };
 }
 
+/// One key and value on an activity log entry.
+class LogDetail {
+  final String key;
+  final String value;
+
+  const LogDetail({
+    required this.key,
+    required this.value,
+  });
+
+  factory LogDetail.fromJson(Map<String, dynamic> json) => LogDetail(
+        key: json['key'] as String,
+        value: json['value'] as String,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'key': key,
+        'value': value,
+      };
+}
+
+/// One step in the activity log (an upload, a video, an order).
+class LogEntry {
+  final String id;
+  final String event;
+  final String? productId;
+  final String? orderId;
+  final List<LogDetail> details;
+  final String level;
+  final String group;
+  final String source;
+  final String message;
+  final DateTime at;
+
+  const LogEntry({
+    required this.id,
+    required this.event,
+    this.productId,
+    this.orderId,
+    required this.details,
+    required this.level,
+    required this.group,
+    required this.source,
+    required this.message,
+    required this.at,
+  });
+
+  factory LogEntry.fromJson(Map<String, dynamic> json) => LogEntry(
+        id: json['id'] as String,
+        event: json['event'] as String,
+        productId: json['product_id'] == null ? null : json['product_id'] as String,
+        orderId: json['order_id'] == null ? null : json['order_id'] as String,
+        details: ((json['details'] ?? []) as List).map((e) => LogDetail.fromJson(e as Map<String, dynamic>)).toList(),
+        level: json['level'] as String,
+        group: json['group'] as String,
+        source: json['source'] as String,
+        message: json['message'] as String,
+        at: DateTime.parse(json['at'] as String),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'event': event,
+        'product_id': productId,
+        'order_id': orderId,
+        'details': details.map((e) => e.toJson()).toList(),
+        'level': level,
+        'group': group,
+        'source': source,
+        'message': message,
+        'at': at.toIso8601String(),
+      };
+}
+
+/// Request body to create a new LogEntry (server-set fields excluded).
+class LogEntryCreate {
+  final String event;
+  final String? productId;
+  final String? orderId;
+  final List<LogDetail> details;
+
+  const LogEntryCreate({
+    required this.event,
+    this.productId,
+    this.orderId,
+    required this.details,
+  });
+
+  factory LogEntryCreate.fromJson(Map<String, dynamic> json) => LogEntryCreate(
+        event: json['event'] as String,
+        productId: json['product_id'] == null ? null : json['product_id'] as String,
+        orderId: json['order_id'] == null ? null : json['order_id'] as String,
+        details: ((json['details'] ?? []) as List).map((e) => LogDetail.fromJson(e as Map<String, dynamic>)).toList(),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'event': event,
+        'product_id': productId,
+        'order_id': orderId,
+        'details': details.map((e) => e.toJson()).toList(),
+      };
+}
+
+/// One page of the activity log, newest first.
+class LogPage {
+  final List<LogEntry> items;
+  final String? nextCursor;
+
+  const LogPage({
+    required this.items,
+    this.nextCursor,
+  });
+
+  factory LogPage.fromJson(Map<String, dynamic> json) => LogPage(
+        items: ((json['items'] ?? []) as List).map((e) => LogEntry.fromJson(e as Map<String, dynamic>)).toList(),
+        nextCursor: json['next_cursor'] == null ? null : json['next_cursor'] as String,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'items': items.map((e) => e.toJson()).toList(),
+        'next_cursor': nextCursor,
+      };
+}
+
 /// A buyer's order for one product.
 class Order {
   final String id;
